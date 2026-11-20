@@ -14,11 +14,11 @@ function makePlayer(
 ): PlayerState {
   const fullResources: ResourceCounts = {
     wortel: 0,
-    jagung: 0,
+    paprika: 0,
     tomat: 0,
-    terong: 0,
-    jamur: 0,
-    brokoli: 0,
+    bawang: 0,
+    kubis: 0,
+    selada: 0,
     ...resources,
   };
   return {
@@ -141,7 +141,7 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
       const p1 = makePlayer('p1', 'Alice', { wortel: 4 }, [
         { id: 'c1', resource: 'wortel', scoringId: 'S01' },
       ]);
-      const p2 = makePlayer('p2', 'Bob', { wortel: 4, jagung: 2 }, [
+      const p2 = makePlayer('p2', 'Bob', { wortel: 4, paprika: 2 }, [
         { id: 'c2', resource: 'wortel', scoringId: 'S01' },
       ]);
 
@@ -157,9 +157,9 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
       // P1: 2 jahe, 2 kunyit (total 4 resources)
       // S01 (+3 jahe): 2*3 = 6 pts
       // S02 (+3 kunyit): 2*3 = 6 pts -> total 12 pts (2 unflipped cards)
-      const p1 = makePlayer('p1', 'Alice', { wortel: 2, jagung: 2 }, [
+      const p1 = makePlayer('p1', 'Alice', { wortel: 2, paprika: 2 }, [
         { id: 'c1', resource: 'wortel', scoringId: 'S01' },
-        { id: 'c2', resource: 'jagung', scoringId: 'S02' },
+        { id: 'c2', resource: 'paprika', scoringId: 'S02' },
       ]);
       // P2: 4 jahe (total 4 resources)
       // S01 (+3 jahe): 4*3 = 12 pts (1 unflipped card)

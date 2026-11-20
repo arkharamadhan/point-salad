@@ -10,7 +10,7 @@
 
 Setiap kartu punya **dua sisi**:
 
-- **Sisi Skor**: berisi satu kondisi penghitungan poin (misalnya "+3 poin per Wortel, -1 poin per Brokoli").
+- **Sisi Skor**: berisi satu kondisi penghitungan poin (misalnya "+3 poin per Wortel, -1 poin per Selada").
 - **Sisi Sayur**: berisi satu dari 6 jenis sayur.
 
 Pemain mengumpulkan kartu dari pasar bersama. Kartu bisa dipakai sebagai **kartu skor** (sisi skor menghadap atas) atau sebagai **sayur** (sisi sayur menghadap atas). Di akhir game, setiap kartu skor dihitung berdasarkan sayur yang berhasil dikumpulkan pemain. Poin tertinggi menang.
@@ -18,7 +18,7 @@ Pemain mengumpulkan kartu dari pasar bersama. Kartu bisa dipakai sebagai **kartu
 ## 2. Komponen
 
 - **90 kartu** (lihat `cards.json`): 30 kondisi skor berbeda, masing-masing 3 salinan.
-- **6 jenis sayur**, masing-masing 15 kartu: Wortel, Jagung, Tomat, Terong, Jamur, Brokoli.
+- **6 jenis sayur**, masing-masing 15 kartu: Wortel, Paprika, Tomat, Bawang, Kubis, Selada.
 - Setiap kartu mempunyai tepat satu jenis sayur di sisi sayurnya. Ketiga salinan dari satu kondisi skor selalu punya jenis sayur yang berbeda.
 
 ## 3. Persiapan
@@ -117,9 +117,9 @@ Detail parameter tiap kartu ada di `cards.json` pada `scoringConditions`. Tipe y
 
 ## 7. Contoh Singkat
 
-Pemain punya sayur: Wortel 4, Jagung 2, Tomat 3, Terong 0, Jamur 5, Brokoli 1, dan dua kartu skor:
-- "+3 per Wortel, -1 per Brokoli" → 4x3 - 1x1 = **11**
-- "4 poin per set Wortel + Jagung" → min(4, 2) = 2 set → **8**
+Pemain punya sayur: Wortel 4, Paprika 2, Tomat 3, Bawang 0, Kubis 5, Selada 1, dan dua kartu skor:
+- "+3 per Wortel, -1 per Selada" → 4x3 - 1x1 = **11**
+- "4 poin per set Wortel + Paprika" → min(4, 2) = 2 set → **8**
 
 Skor total = **19**.
 

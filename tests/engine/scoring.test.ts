@@ -43,17 +43,17 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('1. evaluatePerItem handles positive, negative, and zero points', () => {
     const res: ResourceCounts = {
       wortel: 4,
-      jagung: 2,
+      paprika: 2,
       tomat: 0,
-      terong: 0,
-      jamur: 0,
-      brokoli: 1,
+      bawang: 0,
+      kubis: 0,
+      selada: 1,
     };
     // S01: +3 jahe, -1 lada -> 4*3 - 1*1 = 11
     const score = evaluatePerItem(res, {
       items: [
         { resource: 'wortel', points: 3 },
-        { resource: 'brokoli', points: -1 },
+        { resource: 'selada', points: -1 },
       ],
     });
     expect(score).toBe(11);
@@ -62,7 +62,7 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     const scoreNeg = evaluatePerItem(res, {
       items: [
         { resource: 'wortel', points: 1 },
-        { resource: 'brokoli', points: -10 },
+        { resource: 'selada', points: -10 },
       ],
     });
     expect(scoreNeg).toBe(-6);
@@ -71,22 +71,22 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('2. evaluatePerSet computes points based on minimum count in set', () => {
     const res: ResourceCounts = {
       wortel: 4,
-      jagung: 2,
+      paprika: 2,
       tomat: 5,
-      terong: 0,
-      jamur: 0,
-      brokoli: 0,
+      bawang: 0,
+      kubis: 0,
+      selada: 0,
     };
     // S07: 4 pts per set (wortel + kunyit) -> min(4, 2) = 2 -> 8 pts
     const score = evaluatePerSet(res, {
-      set: ['wortel', 'jagung'],
+      set: ['wortel', 'paprika'],
       points: 4,
     });
     expect(score).toBe(8);
 
     // If one ingredient is missing, score is 0
     const scoreMissing = evaluatePerSet(res, {
-      set: ['wortel', 'terong'],
+      set: ['wortel', 'bawang'],
       points: 4,
     });
     expect(scoreMissing).toBe(0);
@@ -96,11 +96,11 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     // 3 different types, 2 pts each
     const res: ResourceCounts = {
       wortel: 4,
-      jagung: 2,
+      paprika: 2,
       tomat: 1,
-      terong: 0,
-      jamur: 0,
-      brokoli: 0,
+      bawang: 0,
+      kubis: 0,
+      selada: 0,
     };
     // Distinct set of size 3:
     // m=1: min(4,1)+min(2,1)+min(1,1) = 3 >= 3*1 -> yes
@@ -112,11 +112,11 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     // Size 6: 1 of each
     const allSix: ResourceCounts = {
       wortel: 2,
-      jagung: 2,
+      paprika: 2,
       tomat: 2,
-      terong: 2,
-      jamur: 2,
-      brokoli: 2,
+      bawang: 2,
+      kubis: 2,
+      selada: 2,
     };
     const scoreSix = evaluatePerDistinctSet(allSix, { size: 6, points: 6 });
     expect(scoreSix).toBe(12); // 2 sets * 6 pts = 12
@@ -141,9 +141,9 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   });
 
   it('5. evaluateMajority handles most, least, ties (split points rounded down), and 0 counts', () => {
-    const p1 = makePlayer('p1', 'Alice', { wortel: 5, terong: 0 });
-    const p2 = makePlayer('p2', 'Bob', { wortel: 5, terong: 0 });
-    const p3 = makePlayer('p3', 'Charlie', { wortel: 2, terong: 3 });
+    const p1 = makePlayer('p1', 'Alice', { wortel: 5, bawang: 0 });
+    const p2 = makePlayer('p2', 'Bob', { wortel: 5, bawang: 0 });
+    const p3 = makePlayer('p3', 'Charlie', { wortel: 2, bawang: 3 });
     const players = [p1, p2, p3];
 
     // Majority most: p1 and p2 tie with 5 jahe. Points = 10 / 2 = 5 each.
@@ -167,7 +167,7 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
     // Majority least: p1 and p2 tie with 0 cengkeh. 0 is valid! Points = 8 / 2 = 4.
     const resP1Least = evaluateMajority(0, players, {
-      resource: 'terong',
+      resource: 'bawang',
       mode: 'least',
       points: 8,
     });
@@ -175,7 +175,7 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     expect(resP1Least.isWinner).toBe(true);
 
     const resP3Least = evaluateMajority(2, players, {
-      resource: 'terong',
+      resource: 'bawang',
       mode: 'least',
       points: 8,
     });
@@ -185,11 +185,11 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('6. evaluatePerTypeAtLeast scores points for each type reaching threshold', () => {
     const res: ResourceCounts = {
       wortel: 3,
-      jagung: 4,
+      paprika: 4,
       tomat: 2,
-      terong: 0,
-      jamur: 5,
-      brokoli: 3,
+      bawang: 0,
+      kubis: 5,
+      selada: 3,
     };
     // Threshold 3: jahe(3), kunyit(4), pala(5), lada(3) -> 4 types * 3 pts = 12
     const score = evaluatePerTypeAtLeast(res, { threshold: 3, points: 3 });
@@ -199,11 +199,11 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('7. evaluatePerMissingType scores points for each type with count 0', () => {
     const res: ResourceCounts = {
       wortel: 3,
-      jagung: 0,
+      paprika: 0,
       tomat: 0,
-      terong: 1,
-      jamur: 0,
-      brokoli: 2,
+      bawang: 1,
+      kubis: 0,
+      selada: 2,
     };
     // Missing types: kunyit, kayu_manis, pala -> 3 types * 6 pts = 18
     const score = evaluatePerMissingType(res, { points: 6 });
@@ -213,11 +213,11 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('8. evaluatePerPairAny sums floor(count / 2) across all 6 types', () => {
     const res: ResourceCounts = {
       wortel: 3, // 1 pair
-      jagung: 4, // 2 pairs
+      paprika: 4, // 2 pairs
       tomat: 1, // 0 pairs
-      terong: 2, // 1 pair
-      jamur: 5, // 2 pairs
-      brokoli: 0, // 0 pairs
+      bawang: 2, // 1 pair
+      kubis: 5, // 2 pairs
+      selada: 0, // 0 pairs
     };
     // Total pairs = 1 + 2 + 0 + 1 + 2 + 0 = 6 pairs * 1 pt = 6
     const score = evaluatePerPairAny(res, { points: 1 });
@@ -227,11 +227,11 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('9. evaluateMaxStack scores pointsPerCard * largest count', () => {
     const res: ResourceCounts = {
       wortel: 1,
-      jagung: 2,
+      paprika: 2,
       tomat: 6,
-      terong: 3,
-      jamur: 4,
-      brokoli: 0,
+      bawang: 3,
+      kubis: 4,
+      selada: 0,
     };
     // Max stack is kayu_manis with 6. 6 * 2 = 12
     const score = evaluateMaxStack(res, { pointsPerCard: 2 });
@@ -242,21 +242,21 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     // Including 0s!
     const resUnbalanced: ResourceCounts = {
       wortel: 3,
-      jagung: 2,
+      paprika: 2,
       tomat: 3,
-      terong: 2,
-      jamur: 3,
-      brokoli: 0, // min is 0! max is 3. diff = 3 > 2 -> 0 pts
+      bawang: 2,
+      kubis: 3,
+      selada: 0, // min is 0! max is 3. diff = 3 > 2 -> 0 pts
     };
     expect(evaluateBalanced(resUnbalanced, { maxDifference: 2, points: 12 })).toBe(0);
 
     const resBalanced: ResourceCounts = {
       wortel: 2,
-      jagung: 2,
+      paprika: 2,
       tomat: 3,
-      terong: 1,
-      jamur: 2,
-      brokoli: 2, // min is 1, max is 3. diff = 2 <= 2 -> 12 pts
+      bawang: 1,
+      kubis: 2,
+      selada: 2, // min is 1, max is 3. diff = 2 <= 2 -> 12 pts
     };
     expect(evaluateBalanced(resBalanced, { maxDifference: 2, points: 12 })).toBe(12);
   });
@@ -266,11 +266,11 @@ describe('Registry & Player Score Evaluation', () => {
   it('correctly evaluates all 30 conditions registered from cards.json', () => {
     const player = makePlayer('p1', 'Player', {
       wortel: 3,
-      jagung: 3,
+      paprika: 3,
       tomat: 3,
-      terong: 3,
-      jamur: 3,
-      brokoli: 3,
+      bawang: 3,
+      kubis: 3,
+      selada: 3,
     });
     const players = [player];
 
@@ -293,15 +293,15 @@ describe('Registry & Player Score Evaluation', () => {
       'TestPlayer',
       {
         wortel: 4,
-        jagung: 2,
+        paprika: 2,
         tomat: 3,
-        terong: 0,
-        jamur: 5,
-        brokoli: 1,
+        bawang: 0,
+        kubis: 5,
+        selada: 1,
       },
       [
         { id: 'c1', resource: 'wortel', scoringId: 'S01' },
-        { id: 'c2', resource: 'jagung', scoringId: 'S07' },
+        { id: 'c2', resource: 'paprika', scoringId: 'S07' },
       ]
     );
 

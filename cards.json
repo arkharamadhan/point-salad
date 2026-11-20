@@ -1,6 +1,6 @@
 {
   "meta": {
-    "workingTitle": "Panen Sayur",
+    "workingTitle": "Point Salad",
     "version": "1.0.0",
     "note": "Seluruh kondisi skor, nama, dan angka di file ini adalah desain orisinal. Angka poin belum diseimbangkan lewat playtest.",
     "totalCards": 90,
@@ -47,10 +47,10 @@
       }
     },
     {
-      "id": "jagung",
+      "id": "paprika",
       "name": {
-        "id": "Jagung",
-        "en": "Corn"
+        "id": "Paprika",
+        "en": "Pepper"
       },
       "icon": {
         "shape": "square",
@@ -69,10 +69,10 @@
       }
     },
     {
-      "id": "terong",
+      "id": "bawang",
       "name": {
-        "id": "Terong",
-        "en": "Eggplant"
+        "id": "Bawang",
+        "en": "Onion"
       },
       "icon": {
         "shape": "diamond",
@@ -80,10 +80,10 @@
       }
     },
     {
-      "id": "jamur",
+      "id": "kubis",
       "name": {
-        "id": "Jamur",
-        "en": "Mushroom"
+        "id": "Kubis",
+        "en": "Cabbage"
       },
       "icon": {
         "shape": "hexagon",
@@ -91,10 +91,10 @@
       }
     },
     {
-      "id": "brokoli",
+      "id": "selada",
       "name": {
-        "id": "Brokoli",
-        "en": "Broccoli"
+        "id": "Selada",
+        "en": "Lettuce"
       },
       "icon": {
         "shape": "star",
@@ -113,14 +113,14 @@
             "points": 3
           },
           {
-            "resource": "brokoli",
+            "resource": "selada",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Wortel, -1 poin per Brokoli.",
-        "en": "+3 points per Carrot, -1 point per Broccoli."
+        "id": "+3 poin per Wortel, -1 poin per Selada.",
+        "en": "+3 points per Carrot, -1 point per Lettuce."
       }
     },
     {
@@ -129,18 +129,18 @@
       "params": {
         "items": [
           {
-            "resource": "jagung",
+            "resource": "paprika",
             "points": 3
           },
           {
-            "resource": "jamur",
+            "resource": "kubis",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Jagung, -1 poin per Jamur.",
-        "en": "+3 points per Corn, -1 point per Mushroom."
+        "id": "+3 poin per Paprika, -1 poin per Kubis.",
+        "en": "+3 points per Pepper, -1 point per Cabbage."
       }
     },
     {
@@ -153,14 +153,14 @@
             "points": 3
           },
           {
-            "resource": "terong",
+            "resource": "bawang",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Tomat, -1 poin per Terong.",
-        "en": "+3 points per Tomato, -1 point per Eggplant."
+        "id": "+3 poin per Tomat, -1 poin per Bawang.",
+        "en": "+3 points per Tomato, -1 point per Onion."
       }
     },
     {
@@ -169,7 +169,7 @@
       "params": {
         "items": [
           {
-            "resource": "terong",
+            "resource": "bawang",
             "points": 3
           },
           {
@@ -179,8 +179,8 @@
         ]
       },
       "text": {
-        "id": "+3 poin per Terong, -1 poin per Wortel.",
-        "en": "+3 points per Eggplant, -1 point per Carrot."
+        "id": "+3 poin per Bawang, -1 poin per Wortel.",
+        "en": "+3 points per Onion, -1 point per Carrot."
       }
     },
     {
@@ -189,7 +189,7 @@
       "params": {
         "items": [
           {
-            "resource": "jamur",
+            "resource": "kubis",
             "points": 3
           },
           {
@@ -199,8 +199,8 @@
         ]
       },
       "text": {
-        "id": "+3 poin per Jamur, -1 poin per Tomat.",
-        "en": "+3 points per Mushroom, -1 point per Tomato."
+        "id": "+3 poin per Kubis, -1 poin per Tomat.",
+        "en": "+3 points per Cabbage, -1 point per Tomato."
       }
     },
     {
@@ -209,18 +209,18 @@
       "params": {
         "items": [
           {
-            "resource": "brokoli",
+            "resource": "selada",
             "points": 3
           },
           {
-            "resource": "jagung",
+            "resource": "paprika",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Brokoli, -1 poin per Jagung.",
-        "en": "+3 points per Broccoli, -1 point per Corn."
+        "id": "+3 poin per Selada, -1 poin per Paprika.",
+        "en": "+3 points per Lettuce, -1 point per Pepper."
       }
     },
     {
@@ -229,13 +229,13 @@
       "params": {
         "set": [
           "wortel",
-          "jagung"
+          "paprika"
         ],
         "points": 4
       },
       "text": {
-        "id": "4 poin per set lengkap Wortel + Jagung.",
-        "en": "4 points per complete set of Carrot + Corn."
+        "id": "4 poin per set lengkap Wortel + Paprika.",
+        "en": "4 points per complete set of Carrot + Pepper."
       }
     },
     {
@@ -244,13 +244,13 @@
       "params": {
         "set": [
           "tomat",
-          "terong"
+          "bawang"
         ],
         "points": 4
       },
       "text": {
-        "id": "4 poin per set lengkap Tomat + Terong.",
-        "en": "4 points per complete set of Tomato + Eggplant."
+        "id": "4 poin per set lengkap Tomat + Bawang.",
+        "en": "4 points per complete set of Tomato + Onion."
       }
     },
     {
@@ -258,14 +258,14 @@
       "type": "perSet",
       "params": {
         "set": [
-          "jamur",
-          "brokoli"
+          "kubis",
+          "selada"
         ],
         "points": 4
       },
       "text": {
-        "id": "4 poin per set lengkap Jamur + Brokoli.",
-        "en": "4 points per complete set of Mushroom + Broccoli."
+        "id": "4 poin per set lengkap Kubis + Selada.",
+        "en": "4 points per complete set of Cabbage + Lettuce."
       }
     },
     {
@@ -275,13 +275,13 @@
         "set": [
           "wortel",
           "tomat",
-          "brokoli"
+          "selada"
         ],
         "points": 7
       },
       "text": {
-        "id": "7 poin per set lengkap Wortel + Tomat + Brokoli.",
-        "en": "7 points per complete set of Carrot + Tomato + Broccoli."
+        "id": "7 poin per set lengkap Wortel + Tomat + Selada.",
+        "en": "7 points per complete set of Carrot + Tomato + Lettuce."
       }
     },
     {
@@ -289,15 +289,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "jagung",
-          "terong",
-          "jamur"
+          "paprika",
+          "bawang",
+          "kubis"
         ],
         "points": 7
       },
       "text": {
-        "id": "7 poin per set lengkap Jagung + Terong + Jamur.",
-        "en": "7 points per complete set of Corn + Eggplant + Mushroom."
+        "id": "7 poin per set lengkap Paprika + Bawang + Kubis.",
+        "en": "7 points per complete set of Pepper + Onion + Cabbage."
       }
     },
     {
@@ -306,14 +306,14 @@
       "params": {
         "set": [
           "wortel",
-          "terong",
-          "brokoli"
+          "bawang",
+          "selada"
         ],
         "points": 7
       },
       "text": {
-        "id": "7 poin per set lengkap Wortel + Terong + Brokoli.",
-        "en": "7 points per complete set of Carrot + Eggplant + Broccoli."
+        "id": "7 poin per set lengkap Wortel + Bawang + Selada.",
+        "en": "7 points per complete set of Carrot + Onion + Lettuce."
       }
     },
     {
@@ -369,26 +369,26 @@
       "id": "S17",
       "type": "parity",
       "params": {
-        "resource": "terong",
+        "resource": "bawang",
         "evenPoints": 3,
         "oddPoints": 7
       },
       "text": {
-        "id": "Terong genap (0 dihitung genap): 3 poin. Terong ganjil: 7 poin.",
-        "en": "Eggplant even (0 counts as even): 3 points. Eggplant odd: 7 points."
+        "id": "Bawang genap (0 dihitung genap): 3 poin. Bawang ganjil: 7 poin.",
+        "en": "Onion even (0 counts as even): 3 points. Onion odd: 7 points."
       }
     },
     {
       "id": "S18",
       "type": "parity",
       "params": {
-        "resource": "brokoli",
+        "resource": "selada",
         "evenPoints": 7,
         "oddPoints": 3
       },
       "text": {
-        "id": "Brokoli genap (0 dihitung genap): 7 poin. Brokoli ganjil: 3 poin.",
-        "en": "Broccoli even (0 counts as even): 7 points. Broccoli odd: 3 points."
+        "id": "Selada genap (0 dihitung genap): 7 poin. Selada ganjil: 3 poin.",
+        "en": "Lettuce even (0 counts as even): 7 points. Lettuce odd: 3 points."
       }
     },
     {
@@ -408,13 +408,13 @@
       "id": "S20",
       "type": "majority",
       "params": {
-        "resource": "jagung",
+        "resource": "paprika",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "Pemain dengan Jagung terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the most Corn scores 10 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Paprika terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the most Pepper scores 10 points. Ties: points split evenly, rounded down."
       }
     },
     {
@@ -434,39 +434,39 @@
       "id": "S22",
       "type": "majority",
       "params": {
-        "resource": "terong",
+        "resource": "bawang",
         "mode": "least",
         "points": 8
       },
       "text": {
-        "id": "Pemain dengan Terong tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the fewest Eggplant scores 8 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Bawang tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the fewest Onion scores 8 points. Ties: points split evenly, rounded down."
       }
     },
     {
       "id": "S23",
       "type": "majority",
       "params": {
-        "resource": "jamur",
+        "resource": "kubis",
         "mode": "least",
         "points": 8
       },
       "text": {
-        "id": "Pemain dengan Jamur tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the fewest Mushroom scores 8 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Kubis tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the fewest Cabbage scores 8 points. Ties: points split evenly, rounded down."
       }
     },
     {
       "id": "S24",
       "type": "majority",
       "params": {
-        "resource": "brokoli",
+        "resource": "selada",
         "mode": "least",
         "points": 8
       },
       "text": {
-        "id": "Pemain dengan Brokoli tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the fewest Broccoli scores 8 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Selada tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the fewest Lettuce scores 8 points. Ties: points split evenly, rounded down."
       }
     },
     {
@@ -552,22 +552,22 @@
     },
     {
       "id": "C003",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S01"
     },
     {
       "id": "C004",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S02"
     },
     {
       "id": "C005",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S02"
     },
     {
       "id": "C006",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S02"
     },
     {
@@ -577,7 +577,7 @@
     },
     {
       "id": "C008",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S03"
     },
     {
@@ -587,22 +587,22 @@
     },
     {
       "id": "C010",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S04"
     },
     {
       "id": "C011",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S04"
     },
     {
       "id": "C012",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S04"
     },
     {
       "id": "C013",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S05"
     },
     {
@@ -617,32 +617,32 @@
     },
     {
       "id": "C016",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S06"
     },
     {
       "id": "C017",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S06"
     },
     {
       "id": "C018",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S06"
     },
     {
       "id": "C019",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S07"
     },
     {
       "id": "C020",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S07"
     },
     {
       "id": "C021",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S07"
     },
     {
@@ -652,7 +652,7 @@
     },
     {
       "id": "C023",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S08"
     },
     {
@@ -662,22 +662,22 @@
     },
     {
       "id": "C025",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S09"
     },
     {
       "id": "C026",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S09"
     },
     {
       "id": "C027",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S09"
     },
     {
       "id": "C028",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S10"
     },
     {
@@ -692,17 +692,17 @@
     },
     {
       "id": "C031",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S11"
     },
     {
       "id": "C032",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S11"
     },
     {
       "id": "C033",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S11"
     },
     {
@@ -717,7 +717,7 @@
     },
     {
       "id": "C036",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S12"
     },
     {
@@ -732,22 +732,22 @@
     },
     {
       "id": "C039",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S13"
     },
     {
       "id": "C040",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S14"
     },
     {
       "id": "C041",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S14"
     },
     {
       "id": "C042",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S14"
     },
     {
@@ -757,7 +757,7 @@
     },
     {
       "id": "C044",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S15"
     },
     {
@@ -767,22 +767,22 @@
     },
     {
       "id": "C046",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S16"
     },
     {
       "id": "C047",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S16"
     },
     {
       "id": "C048",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S16"
     },
     {
       "id": "C049",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S17"
     },
     {
@@ -797,32 +797,32 @@
     },
     {
       "id": "C052",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S18"
     },
     {
       "id": "C053",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S18"
     },
     {
       "id": "C054",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S18"
     },
     {
       "id": "C055",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S19"
     },
     {
       "id": "C056",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S19"
     },
     {
       "id": "C057",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S19"
     },
     {
@@ -832,7 +832,7 @@
     },
     {
       "id": "C059",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S20"
     },
     {
@@ -842,22 +842,22 @@
     },
     {
       "id": "C061",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S21"
     },
     {
       "id": "C062",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S21"
     },
     {
       "id": "C063",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S21"
     },
     {
       "id": "C064",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S22"
     },
     {
@@ -872,17 +872,17 @@
     },
     {
       "id": "C067",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S23"
     },
     {
       "id": "C068",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S23"
     },
     {
       "id": "C069",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S23"
     },
     {
@@ -897,7 +897,7 @@
     },
     {
       "id": "C072",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S24"
     },
     {
@@ -912,22 +912,22 @@
     },
     {
       "id": "C075",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S25"
     },
     {
       "id": "C076",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S26"
     },
     {
       "id": "C077",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S26"
     },
     {
       "id": "C078",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S26"
     },
     {
@@ -937,7 +937,7 @@
     },
     {
       "id": "C080",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S27"
     },
     {
@@ -947,22 +947,22 @@
     },
     {
       "id": "C082",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S28"
     },
     {
       "id": "C083",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S28"
     },
     {
       "id": "C084",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S28"
     },
     {
       "id": "C085",
-      "resource": "jamur",
+      "resource": "kubis",
       "scoring": "S29"
     },
     {
@@ -977,17 +977,17 @@
     },
     {
       "id": "C088",
-      "resource": "brokoli",
+      "resource": "selada",
       "scoring": "S30"
     },
     {
       "id": "C089",
-      "resource": "jagung",
+      "resource": "paprika",
       "scoring": "S30"
     },
     {
       "id": "C090",
-      "resource": "terong",
+      "resource": "bawang",
       "scoring": "S30"
     }
   ]

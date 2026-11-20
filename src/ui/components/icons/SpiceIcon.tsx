@@ -15,68 +15,72 @@ export const VEGGIE_INFO: Record<
     color: string;
     bgColor: string;
     borderColor: string;
-    shape: 'triangle' | 'square' | 'circle' | 'diamond' | 'hexagon' | 'star';
+    badgeBg: string;
+    shape: 'circle' | 'triangle' | 'square' | 'diamond' | 'hexagon' | 'star';
   }
 > = {
-  wortel: {
-    nameId: 'Wortel',
-    nameEn: 'Carrot',
-    color: '#D97706',
-    bgColor: '#FFFBEB',
-    borderColor: '#D97706',
-    shape: 'triangle',
-  },
-  jagung: {
-    nameId: 'Jagung',
-    nameEn: 'Corn',
-    color: '#EAB308',
-    bgColor: '#FEFCE8',
-    borderColor: '#EAB308',
-    shape: 'square',
-  },
   tomat: {
     nameId: 'Tomat',
     nameEn: 'Tomato',
-    color: '#DC2626',
-    bgColor: '#FEF2F2',
-    borderColor: '#DC2626',
+    color: '#E53935',
+    bgColor: '#FFEBEE',
+    borderColor: '#C62828',
+    badgeBg: '#EF5350',
     shape: 'circle',
   },
-  terong: {
-    nameId: 'Terong',
-    nameEn: 'Eggplant',
-    color: '#9333EA',
-    bgColor: '#FAF5FF',
-    borderColor: '#9333EA',
+  wortel: {
+    nameId: 'Wortel',
+    nameEn: 'Carrot',
+    color: '#FB8C00',
+    bgColor: '#FFF3E0',
+    borderColor: '#EF6C00',
+    badgeBg: '#FFA726',
+    shape: 'triangle',
+  },
+  paprika: {
+    nameId: 'Paprika',
+    nameEn: 'Pepper',
+    color: '#FDD835',
+    bgColor: '#FFFDE7',
+    borderColor: '#FBC02D',
+    badgeBg: '#FFEE58',
+    shape: 'square',
+  },
+  selada: {
+    nameId: 'Selada',
+    nameEn: 'Lettuce',
+    color: '#43A047',
+    bgColor: '#E8F5E9',
+    borderColor: '#2E7D32',
+    badgeBg: '#66BB6A',
+    shape: 'star',
+  },
+  bawang: {
+    nameId: 'Bawang',
+    nameEn: 'Onion',
+    color: '#AD1457',
+    bgColor: '#FCE4EC',
+    borderColor: '#880E4F',
+    badgeBg: '#EC407A',
     shape: 'diamond',
   },
-  jamur: {
-    nameId: 'Jamur',
-    nameEn: 'Mushroom',
-    color: '#2563EB',
-    bgColor: '#EFF6FF',
-    borderColor: '#2563EB',
+  kubis: {
+    nameId: 'Kubis',
+    nameEn: 'Cabbage',
+    color: '#6A1B9A',
+    bgColor: '#F3E5F5',
+    borderColor: '#4A148C',
+    badgeBg: '#AB47BC',
     shape: 'hexagon',
-  },
-  brokoli: {
-    nameId: 'Brokoli',
-    nameEn: 'Broccoli',
-    color: '#059669',
-    bgColor: '#ECFDF5',
-    borderColor: '#059669',
-    shape: 'star',
   },
 };
 
-// Backward-compatible alias
 export const SPICE_INFO = VEGGIE_INFO;
 
-export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = '', size = 24 }) => {
-  const info = VEGGIE_INFO[resource];
-
+export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = '', size = 32 }) => {
   switch (resource) {
-    case 'wortel':
-      // Triangle shape with crisp carrot root & green foliage
+    case 'tomat':
+      // Plump Cartoon Tomato with green calyx and specular shine (matching reference image)
       return (
         <svg
           width={size}
@@ -86,72 +90,76 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Background Triangle Container */}
+          {/* Drop shadow */}
+          <ellipse cx="50" cy="85" rx="32" ry="7" fill="#000000" fillOpacity="0.2" />
+          {/* Tomato Body */}
+          <ellipse cx="50" cy="54" rx="35" ry="32" fill="#E53935" stroke="#212121" strokeWidth="4" />
+          {/* Specular curved highlight */}
           <path
-            d="M50 8L92 84C93 86 91 89 88 89H12C9 89 7 86 8 84L50 8Z"
-            fill={info.color}
+            d="M26 44C26 34 35 28 44 26"
+            stroke="#FFFFFF"
+            strokeWidth="5"
+            strokeLinecap="round"
           />
+          {/* Green Calyx / Leaf Top */}
           <path
-            d="M50 20L82 78H18L50 20Z"
+            d="M50 32C46 22 36 20 30 22C36 28 42 32 46 34M50 32C50 18 52 14 56 12C54 20 52 26 52 32M50 32C56 22 66 22 70 24C64 28 58 32 54 34"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="3.5"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+
+    case 'bawang':
+      // Red/Purple Onion (matching reference image)
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 100 100"
+          className={className}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {/* Shadow */}
+          <ellipse cx="50" cy="85" rx="28" ry="6" fill="#000000" fillOpacity="0.2" />
+          {/* Onion Body Bulb */}
+          <path
+            d="M50 18C30 35 24 55 24 66C24 80 36 86 50 86C64 86 76 80 76 66C76 55 70 35 50 18Z"
+            fill="#AD1457"
+            stroke="#212121"
+            strokeWidth="4"
+          />
+          {/* Curved Onion Striations */}
+          <path
+            d="M50 20C40 38 35 52 35 68C35 78 42 84 50 85"
             stroke="#FFFFFF"
             strokeWidth="3"
             strokeOpacity="0.4"
-          />
-          {/* Green Carrot Foliage Top */}
-          <path
-            d="M48 24C46 16 38 12 36 10M50 24C50 14 52 10 54 8M52 24C56 16 64 14 66 12"
-            stroke="#10B981"
-            strokeWidth="4"
             strokeLinecap="round"
           />
-          {/* Carrot Body Texture */}
           <path
-            d="M50 26L36 78C35 82 45 84 50 84C55 84 65 82 64 78L50 26Z"
-            fill="#FFFFFF"
-            fillOpacity="0.9"
+            d="M50 20C60 38 65 52 65 68C65 78 58 84 50 85"
+            stroke="#212121"
+            strokeWidth="3"
+            strokeOpacity="0.3"
+            strokeLinecap="round"
           />
-          {/* Carrot Ridge Lines */}
-          <line x1="42" y1="42" x2="52" y2="42" stroke={info.color} strokeWidth="3" strokeLinecap="round" />
-          <line x1="46" y1="54" x2="58" y2="54" stroke={info.color} strokeWidth="3" strokeLinecap="round" />
-          <line x1="45" y1="66" x2="53" y2="66" stroke={info.color} strokeWidth="3" strokeLinecap="round" />
-        </svg>
-      );
-
-    case 'jagung':
-      // Square shape with golden sweet corn cob & kernels
-      return (
-        <svg
-          width={size}
-          height={size}
-          viewBox="0 0 100 100"
-          className={className}
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect x="8" y="8" width="84" height="84" rx="14" fill={info.color} />
-          <rect x="14" y="14" width="72" height="72" rx="10" stroke="#FFFFFF" strokeWidth="4" strokeOpacity="0.4" />
-          {/* Corn Cob Oval */}
-          <rect x="36" y="24" width="28" height="52" rx="14" fill="#FFFFFF" fillOpacity="0.95" />
-          {/* Golden Kernels Matrix */}
-          <circle cx="43" cy="34" r="3.5" fill={info.color} />
-          <circle cx="57" cy="34" r="3.5" fill={info.color} />
-          <circle cx="43" cy="46" r="3.5" fill={info.color} />
-          <circle cx="57" cy="46" r="3.5" fill={info.color} />
-          <circle cx="43" cy="58" r="3.5" fill={info.color} />
-          <circle cx="57" cy="58" r="3.5" fill={info.color} />
-          <circle cx="50" cy="70" r="3.5" fill={info.color} />
-          {/* Green Husk Wings */}
+          {/* Root tip & Top Sprout */}
+          <path d="M48 86L50 92L52 86" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
           <path
-            d="M36 68C28 62 26 50 30 40M64 68C72 62 74 50 70 40"
-            stroke="#10B981"
-            strokeWidth="4"
+            d="M50 18C48 10 42 6 38 4M50 18C52 10 56 6 60 4"
+            stroke="#43A047"
+            strokeWidth="3.5"
             strokeLinecap="round"
           />
         </svg>
       );
 
-    case 'tomat':
-      // Circle shape with round plump tomato & star calyx
+    case 'kubis':
+      // Purple Cabbage (matching reference image)
       return (
         <svg
           width={size}
@@ -161,24 +169,41 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <circle cx="50" cy="50" r="45" fill={info.color} />
-          <circle cx="50" cy="50" r="38" stroke="#FFFFFF" strokeWidth="4" strokeOpacity="0.4" />
-          {/* Tomato Red Fruit Inner */}
-          <ellipse cx="50" cy="54" rx="28" ry="24" fill="#FFFFFF" fillOpacity="0.95" />
-          {/* Green 5-point Calyx Leaf on top */}
+          {/* Shadow */}
+          <ellipse cx="50" cy="84" rx="30" ry="6" fill="#000000" fillOpacity="0.2" />
+          {/* Cabbage Outer Ball */}
+          <circle cx="50" cy="52" r="32" fill="#6A1B9A" stroke="#212121" strokeWidth="4" />
+          {/* Overlapping Leaf Layers */}
           <path
-            d="M50 28L45 20M50 28L55 20M50 28L38 28M50 28L62 28M50 28V16"
-            stroke="#10B981"
-            strokeWidth="4"
+            d="M24 45C30 32 45 30 55 36C46 44 40 56 42 70C30 68 24 58 24 45Z"
+            fill="#7B1FA2"
+            stroke="#212121"
+            strokeWidth="3.5"
+          />
+          <path
+            d="M76 45C70 32 55 30 45 36C54 44 60 56 58 70C70 68 76 58 76 45Z"
+            fill="#8E24AA"
+            stroke="#212121"
+            strokeWidth="3.5"
+          />
+          {/* Light Veins */}
+          <path
+            d="M48 40C44 50 44 64 48 76"
+            stroke="#E1BEE7"
+            strokeWidth="3"
             strokeLinecap="round"
           />
-          {/* Tomato Shine Accent */}
-          <ellipse cx="42" cy="46" rx="4" ry="7" fill={info.color} opacity="0.8" />
+          <path
+            d="M45 52C38 54 34 52 30 50M46 64C40 66 36 65 32 62"
+            stroke="#E1BEE7"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
         </svg>
       );
 
-    case 'terong':
-      // Diamond shape with deep purple aubergine
+    case 'wortel':
+      // Carrot with lush green foliage
       return (
         <svg
           width={size}
@@ -188,25 +213,43 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M50 5L95 50L50 95L5 50L50 5Z" fill={info.color} />
-          <path d="M50 14L86 50L50 86L14 50L50 14Z" stroke="#FFFFFF" strokeWidth="3" strokeOpacity="0.4" />
-          {/* Eggplant Pear Silhouette */}
+          {/* Shadow */}
+          <ellipse cx="50" cy="88" rx="20" ry="5" fill="#000000" fillOpacity="0.2" />
+          {/* Carrot Body */}
           <path
-            d="M44 34C44 30 56 30 56 34C56 46 68 56 68 68C68 76 60 82 50 82C40 82 32 76 32 68C32 56 44 46 44 34Z"
-            fill="#FFFFFF"
-            fillOpacity="0.95"
+            d="M34 32C34 26 66 26 66 32L53 84C52 87 48 87 47 84L34 32Z"
+            fill="#FB8C00"
+            stroke="#212121"
+            strokeWidth="4"
           />
-          {/* Green Calyx Cap */}
+          {/* Carrot Ridges */}
+          <line x1="38" y1="42" x2="48" y2="42" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
+          <line x1="44" y1="56" x2="58" y2="56" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
+          <line x1="42" y1="70" x2="50" y2="70" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
+          {/* Green Carrot Leafy Tops */}
           <path
-            d="M38 34C42 38 48 34 50 38C52 34 58 38 62 34C60 28 40 28 38 34Z"
-            fill="#10B981"
+            d="M46 26C42 16 32 10 26 8C34 16 42 22 46 26Z"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="3"
           />
-          <line x1="50" y1="28" x2="50" y2="20" stroke="#10B981" strokeWidth="4" strokeLinecap="round" />
+          <path
+            d="M50 26C50 12 52 8 54 4C56 12 54 20 52 26Z"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="3"
+          />
+          <path
+            d="M54 26C58 16 68 10 74 8C66 16 58 22 54 26Z"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="3"
+          />
         </svg>
       );
 
-    case 'jamur':
-      // Hexagon shape with botanical mushroom cap
+    case 'paprika':
+      // Yellow Bell Pepper
       return (
         <svg
           width={size}
@@ -216,25 +259,30 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M50 6L88 28V72L50 94L12 72V28L50 6Z" fill={info.color} />
-          <path d="M50 14L81 32V68L50 86L19 68V32L50 14Z" stroke="#FFFFFF" strokeWidth="3" strokeOpacity="0.4" />
-          {/* Mushroom Stem */}
-          <rect x="44" y="52" width="12" height="26" rx="5" fill="#FFFFFF" fillOpacity="0.95" />
-          {/* Mushroom Cap Dome */}
+          {/* Shadow */}
+          <ellipse cx="50" cy="86" rx="28" ry="6" fill="#000000" fillOpacity="0.2" />
+          {/* Pepper 3 Lobes */}
           <path
-            d="M26 54C26 36 36 26 50 26C64 26 74 36 74 54C74 56 70 56 50 56C30 56 26 56 26 54Z"
-            fill="#FFFFFF"
-            fillOpacity="0.95"
+            d="M26 40C26 30 40 30 40 35C40 30 60 30 60 35C60 30 74 30 74 40C74 58 72 80 64 82C58 84 54 78 50 78C46 78 42 84 36 82C28 80 26 58 26 40Z"
+            fill="#FDD835"
+            stroke="#212121"
+            strokeWidth="4"
           />
-          {/* Mushroom Spots */}
-          <circle cx="40" cy="38" r="3.5" fill={info.color} />
-          <circle cx="58" cy="36" r="4.5" fill={info.color} />
-          <circle cx="50" cy="46" r="3" fill={info.color} />
+          {/* Lobe dividing lines */}
+          <path d="M42 36C40 50 40 68 44 76" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
+          <path d="M58 36C60 50 60 68 56 76" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
+          {/* Green Stem */}
+          <path
+            d="M48 30C46 18 52 14 56 12"
+            stroke="#43A047"
+            strokeWidth="5"
+            strokeLinecap="round"
+          />
         </svg>
       );
 
-    case 'brokoli':
-      // 5-point Star shape with lush green broccoli floret
+    case 'selada':
+      // Crisp Green Lettuce
       return (
         <svg
           width={size}
@@ -244,20 +292,28 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <polygon
-            points="50,5 63,35 95,38 71,60 78,92 50,75 22,92 29,60 5,38 37,35"
-            fill={info.color}
+          {/* Shadow */}
+          <ellipse cx="50" cy="85" rx="30" ry="6" fill="#000000" fillOpacity="0.2" />
+          {/* Lettuce Leaves cluster */}
+          <path
+            d="M32 75C22 65 20 45 28 35C38 25 48 34 50 40C52 34 62 25 72 35C80 45 78 65 68 75C60 84 40 84 32 75Z"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="4"
           />
-          {/* Broccoli Stem */}
-          <path d="M46 56L44 78H56L54 56" fill="#FFFFFF" fillOpacity="0.95" />
-          {/* Fluffy Crown Clouds */}
-          <circle cx="50" cy="38" r="14" fill="#FFFFFF" fillOpacity="0.95" />
-          <circle cx="38" cy="46" r="11" fill="#FFFFFF" fillOpacity="0.95" />
-          <circle cx="62" cy="46" r="11" fill="#FFFFFF" fillOpacity="0.95" />
-          {/* Internal Leaf Speckles */}
-          <circle cx="48" cy="36" r="3" fill={info.color} />
-          <circle cx="56" cy="42" r="2.5" fill={info.color} />
-          <circle cx="40" cy="46" r="2.5" fill={info.color} />
+          <path
+            d="M36 50C42 42 58 42 64 50C62 65 58 74 50 78C42 74 38 65 36 50Z"
+            fill="#66BB6A"
+            stroke="#212121"
+            strokeWidth="3.5"
+          />
+          {/* Leaf Veins */}
+          <path
+            d="M50 78V54M50 64L42 58M50 60L58 54"
+            stroke="#C8E6C9"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
         </svg>
       );
 

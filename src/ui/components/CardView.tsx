@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../../engine/types';
-import { SCORING_CONDITIONS_MAP } from '../../engine/scoring';
-import { SpiceIcon, SPICE_INFO } from './icons/SpiceIcon';
+import { VeggieIcon, VEGGIE_INFO } from './icons/SpiceIcon';
+import { PointBowlRenderer } from './PointBowlRenderer';
 import { Sound } from '../sound/soundEffects';
 import { useGameStore } from '../store/gameStore';
 
@@ -54,71 +54,91 @@ export const CardView: React.FC<CardViewProps> = ({
     }
   };
 
-  // Punggung kartu / Draw Pile Back
+  const cardId = card?.id ?? 'pile';
+
+  // 1. PUNGGUNG KARTU (Draw Pile Back)
   if (side === 'back' || !card) {
     return (
       <motion.div
-        whileHover={isSelectable ? { scale: 1.03, y: -4 } : {}}
-        whileTap={isSelectable ? { scale: 0.97 } : {}}
+        whileHover={isSelectable ? { scale: 1.04, y: -4 } : {}}
+        whileTap={isSelectable ? { scale: 0.96 } : {}}
         onClick={handleClick}
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
-        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all card-shadow ${
-          isSelectable
-            ? 'cursor-pointer hover:ring-2 hover:ring-amber-500'
-            : ''
-        } ${isSelected ? 'card-selected-glow ring-2 ring-emerald-500' : ''} ${className}`}
-        style={{
-          background: 'radial-gradient(circle at 50% 40%, #382419 0%, #20130C 80%, #150A05 100%)',
-          border: '2px solid #5A3A26',
-        }}
+        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-2xl select-none transition-all border-[3.5px] border-black shadow-xl overflow-hidden bg-[#7CB342] flex flex-col justify-between p-1.5 ${
+          isSelectable ? 'cursor-pointer hover:ring-2 hover:ring-white' : ''
+        } ${isSelected ? 'ring-4 ring-emerald-400' : ''} ${className}`}
       >
         {keyboardBadge && (
-          <span className="absolute -top-2 -left-2 z-20 bg-stone-900 border border-stone-700 text-amber-300 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow">
+          <span className="absolute -top-1.5 -left-1.5 z-30 bg-stone-900 border border-stone-700 text-yellow-300 text-[10px] font-mono font-black px-1.5 py-0.5 rounded-md shadow">
             {keyboardBadge}
           </span>
         )}
 
-        <div className="w-full h-full rounded-lg border border-amber-900/60 flex flex-col items-center justify-between p-2 relative overflow-hidden">
-          {/* Subtle geometric mandala pattern */}
-          <div className="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
-            <svg viewBox="0 0 100 100" className="w-28 h-28 text-amber-500 fill-current">
-              <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="2" fill="none" />
-              <polygon points="50,5 62,38 95,50 62,62 50,95 38,62 5,50 38,38" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="50" cy="50" r="22" stroke="currentColor" strokeWidth="1" fill="none" />
-            </svg>
-          </div>
+        {/* Decorative Halftone / Dots pattern */}
+        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_2px,transparent_2px)] [background-size:12px_12px]" />
 
-          <div className="text-[10px] font-semibold text-amber-300/70 tracking-widest uppercase font-cinzel">
-            Tumpukan
-          </div>
+        {/* Top Arched "POINT" */}
+        <div className="w-full h-6 relative z-10">
+          <svg viewBox="0 0 100 24" className="w-full h-full overflow-visible">
+            <path id={`arch-back-top-${cardId}`} d="M 12,22 Q 50,4 88,22" fill="none" />
+            <text
+              fill="#FFFFFF"
+              fontWeight="900"
+              fontSize="12.5"
+              letterSpacing="3"
+              fontFamily="'Fredoka', ui-rounded, sans-serif"
+              style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.6))' }}
+            >
+              <textPath href={`#arch-back-top-${cardId}`} startOffset="50%" textAnchor="middle">
+                POINT
+              </textPath>
+            </text>
+          </svg>
+        </div>
 
-          {/* Central Logo Motif */}
-          <div className="flex flex-col items-center z-10">
-            <div className="w-10 h-10 rounded-full bg-emerald-900/50 border border-emerald-500/40 flex items-center justify-center mb-1">
-              <span className="text-emerald-400 font-bold text-sm font-cinzel">PS</span>
-            </div>
-            <span className="text-[11px] font-bold text-emerald-200/90 font-cinzel tracking-wider text-center">
-              PANEN SAYUR
+        {/* Central Salad Bowl Graphic with Deck Count */}
+        <div className="my-auto flex items-center justify-center z-10">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white border-[3.5px] border-black shadow-inner flex flex-col items-center justify-center relative p-1">
+            <span className="text-2xl sm:text-3xl mb-0.5">🥗</span>
+            <span className="text-[9px] font-black tracking-wider text-stone-800 font-fredoka">
+              POINT SALAD
             </span>
-          </div>
 
-          {/* Card count badge if provided */}
-          {typeof pileCount === 'number' && (
-            <div className="z-10 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-600/50 text-[11px] font-bold text-amber-300">
-              {pileCount} kartu
-            </div>
-          )}
+            {typeof pileCount === 'number' && (
+              <div className="absolute -bottom-2 bg-stone-900 px-2 py-0.5 rounded-full border border-stone-600 text-[10px] font-black text-lime-400 shadow">
+                {pileCount}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Inverted Arched "SALAD" */}
+        <div className="w-full h-6 relative z-10 rotate-180">
+          <svg viewBox="0 0 100 24" className="w-full h-full overflow-visible">
+            <path id={`arch-back-bot-${cardId}`} d="M 12,22 Q 50,4 88,22" fill="none" />
+            <text
+              fill="#FFFFFF"
+              fontWeight="900"
+              fontSize="12.5"
+              letterSpacing="3"
+              fontFamily="'Fredoka', ui-rounded, sans-serif"
+              style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.6))' }}
+            >
+              <textPath href={`#arch-back-bot-${cardId}`} startOffset="50%" textAnchor="middle">
+                SALAD
+              </textPath>
+            </text>
+          </svg>
         </div>
       </motion.div>
     );
   }
 
-  const spiceInfo = SPICE_INFO[card.resource];
-  const condition = SCORING_CONDITIONS_MAP.get(card.scoringId);
-  const conditionText = condition?.text[lang] ?? condition?.text.id ?? '';
+  const veggieInfo = VEGGIE_INFO[card.resource];
+  const veggieName = lang === 'id' ? veggieInfo.nameId.toUpperCase() : veggieInfo.nameEn.toUpperCase();
 
-  // SISI REMPAH (Resource Side)
+  // 2. SISI SAYUR (Veggie Side - Exactly like Reference Image)
   if (side === 'resource') {
     return (
       <motion.div
@@ -127,62 +147,65 @@ export const CardView: React.FC<CardViewProps> = ({
         onClick={handleClick}
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
-        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all card-shadow paper-texture text-stone-900 flex flex-col justify-between border-2 ${
-          isSelected ? 'card-selected-glow ring-2 ring-emerald-500 scale-[1.03]' : ''
-        } ${
-          isSelectable
-            ? 'cursor-pointer hover:border-emerald-600'
-            : ''
-        } ${className}`}
+        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-2xl select-none transition-all border-[3.5px] border-black shadow-xl overflow-hidden flex flex-col justify-between p-2.5 ${
+          isSelected ? 'ring-4 ring-emerald-400 scale-[1.03]' : ''
+        } ${isSelectable ? 'cursor-pointer hover:ring-2 hover:ring-white' : ''} ${className}`}
         style={{
-          borderColor: isSelected ? '#10B981' : spiceInfo.color,
+          backgroundColor: veggieInfo.color,
         }}
       >
         {keyboardBadge && (
-          <span className="absolute -top-2 -left-2 z-20 bg-stone-900 border border-stone-700 text-emerald-400 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow">
+          <span className="absolute -top-1.5 -left-1.5 z-30 bg-stone-900 border border-stone-700 text-yellow-300 text-[10px] font-mono font-black px-1.5 py-0.5 rounded-md shadow">
             {keyboardBadge}
           </span>
         )}
 
-        {/* Top corner: Mini icon + Name */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <SpiceIcon resource={card.resource} size={18} />
-            <span className="text-[11px] font-bold tracking-tight text-stone-800">
-              {lang === 'id' ? spiceInfo.nameId : spiceInfo.nameEn}
-            </span>
+        {/* Halftone dot pattern overlay */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#ffffff_2.5px,transparent_2.5px)] [background-size:10px_10px]" />
+
+        {/* TOP ROW: Name on Left, Mini Veggie in Circle on Right */}
+        <div className="flex items-center justify-between z-10 w-full px-0.5">
+          <span
+            className="font-black text-white text-xs sm:text-sm tracking-wider font-fredoka"
+            style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}
+          >
+            {veggieName}
+          </span>
+          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white border-2 border-black flex items-center justify-center p-0.5 shadow-md flex-shrink-0">
+            <VeggieIcon resource={card.resource} size={18} />
           </div>
-          <span className="text-[9px] font-mono text-stone-400 font-semibold">{card.id}</span>
         </div>
 
-        {/* Center: Large Distinct Graphic */}
-        <div className="flex flex-col items-center justify-center my-auto py-1">
-          <div
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center p-2 shadow-inner"
-            style={{ backgroundColor: spiceInfo.bgColor }}
-          >
-            <SpiceIcon resource={card.resource} size={54} />
+        {/* CENTER: White Double-Circle Plate with Big Cute Veggie */}
+        <div className="my-auto flex items-center justify-center z-10">
+          <div className="w-18 h-18 sm:w-22 sm:h-22 md:w-24 md:h-24 rounded-full bg-white border-[3.5px] border-black shadow-inner flex items-center justify-center relative p-1">
+            {/* Inner concentric ring matching the veggie color */}
+            <div
+              className="w-full h-full rounded-full border-[1.5px] flex items-center justify-center"
+              style={{ borderColor: veggieInfo.color }}
+            >
+              <VeggieIcon resource={card.resource} size={58} />
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM ROW: Mini Veggie in Circle on Left, Rotated Inverted Name on Right */}
+        <div className="flex items-center justify-between z-10 w-full px-0.5">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white border-2 border-black flex items-center justify-center p-0.5 shadow-md flex-shrink-0">
+            <VeggieIcon resource={card.resource} size={18} />
           </div>
           <span
-            className="mt-1.5 text-xs sm:text-sm font-extrabold uppercase tracking-wide font-cinzel"
-            style={{ color: spiceInfo.color }}
+            className="font-black text-white text-xs sm:text-sm tracking-wider font-fredoka rotate-180"
+            style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}
           >
-            {lang === 'id' ? spiceInfo.nameId : spiceInfo.nameEn}
-          </span>
-        </div>
-
-        {/* Bottom Strip: Scoring condition code hint */}
-        <div className="pt-1 border-t border-stone-200/80 flex items-center justify-between text-[10px] text-stone-500 font-medium">
-          <span className="capitalize">{spiceInfo.shape}</span>
-          <span className="font-mono text-[9px] bg-stone-200/60 px-1 rounded text-stone-600">
-            {card.scoringId}
+            {veggieName}
           </span>
         </div>
       </motion.div>
     );
   }
 
-  // SISI SKOR (Scoring Side)
+  // 3. SISI SKOR (Point Side - Exactly like Reference Image)
   return (
     <motion.div
       whileHover={isSelectable ? { scale: 1.04, y: -4 } : {}}
@@ -190,78 +213,120 @@ export const CardView: React.FC<CardViewProps> = ({
       onClick={handleClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all card-shadow paper-texture text-stone-900 flex flex-col justify-between border-2 ${
-        isSelected ? 'card-selected-glow ring-2 ring-emerald-500 scale-[1.03]' : ''
-      } ${
-        isSelectable
-          ? 'cursor-pointer hover:border-amber-600'
-          : ''
-      } ${className}`}
-      style={{
-        borderColor: isSelected ? '#10B981' : '#8C3820',
-      }}
+      className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-2xl select-none transition-all border-[3.5px] border-black shadow-xl overflow-hidden flex flex-col justify-between p-1.5 bg-[#7CB342] ${
+        isSelected ? 'ring-4 ring-emerald-400 scale-[1.03]' : ''
+      } ${isSelectable ? 'cursor-pointer hover:ring-2 hover:ring-white' : ''} ${className}`}
     >
       {keyboardBadge && (
-        <span className="absolute -top-2 -left-2 z-20 bg-stone-900 border border-stone-700 text-amber-300 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow">
+        <span className="absolute -top-1.5 -left-1.5 z-30 bg-stone-900 border border-stone-700 text-yellow-300 text-[10px] font-mono font-black px-1.5 py-0.5 rounded-md shadow">
           {keyboardBadge}
         </span>
       )}
 
-      {/* Top Header Banner */}
-      <div className="flex items-center justify-between pb-1 border-b border-stone-200">
-        <div className="flex items-center gap-1">
-          <span className="bg-[#8C3820] text-white px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider font-cinzel">
-            SKOR
-          </span>
-          <span className="text-[10px] font-mono font-bold text-stone-600">
-            {card.scoringId}
-          </span>
-        </div>
+      {/* Subtle background dots / pattern */}
+      <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_2px,transparent_2px)] [background-size:12px_12px]" />
 
-        {/* Live score badge if calculated */}
-        {typeof liveScore === 'number' && (
-          <div
-            className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-sm ${
-              liveScore > 0
-                ? 'bg-emerald-100 text-emerald-800 border border-emerald-400'
-                : liveScore < 0
-                ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                : 'bg-stone-200 text-stone-700'
-            }`}
-            title={isTentativeMajority ? 'Skor sementara berdasarkan posisi pemain saat ini' : 'Skor kartu saat ini'}
+      {/* TOP-LEFT Corner Triangle Tab (Flip Veggie Color + Mini Emblem) */}
+      <div
+        className="absolute top-0 left-0 w-10 h-10 sm:w-12 sm:h-12 z-20"
+        style={{
+          clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+          backgroundColor: veggieInfo.color,
+        }}
+      >
+        <div className="absolute top-1 left-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border border-black flex items-center justify-center p-0.5 shadow-sm">
+          <VeggieIcon resource={card.resource} size={14} />
+        </div>
+      </div>
+
+      {/* BOTTOM-RIGHT Corner Triangle Tab (Flip Veggie Color + Mini Emblem) */}
+      <div
+        className="absolute bottom-0 right-0 w-10 h-10 sm:w-12 sm:h-12 z-20"
+        style={{
+          clipPath: 'polygon(100% 100%, 0 100%, 100% 0)',
+          backgroundColor: veggieInfo.color,
+        }}
+      >
+        <div className="absolute bottom-1 right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border border-black flex items-center justify-center p-0.5 shadow-sm">
+          <VeggieIcon resource={card.resource} size={14} />
+        </div>
+      </div>
+
+      {/* Arched "POINT" label on top */}
+      <div className="w-full h-5 sm:h-6 relative z-10">
+        <svg viewBox="0 0 100 24" className="w-full h-full overflow-visible">
+          <path id={`arch-top-${cardId}`} d="M 12,22 Q 50,4 88,22" fill="none" />
+          <text
+            fill="#FFFFFF"
+            fontWeight="900"
+            fontSize="12.5"
+            letterSpacing="3"
+            fontFamily="'Fredoka', ui-rounded, sans-serif"
+            style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.6))' }}
           >
-            {liveScore > 0 ? `+${liveScore}` : liveScore} pts
-            {isTentativeMajority && <span className="ml-0.5 text-amber-600 font-bold">*</span>}
+            <textPath href={`#arch-top-${cardId}`} startOffset="50%" textAnchor="middle">
+              POINT
+            </textPath>
+          </text>
+        </svg>
+      </div>
+
+      {/* CENTER: White Salad Bowl with Visual Condition Renderer */}
+      <div className="my-auto flex items-center justify-center z-10">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-white border-[3.5px] border-black shadow-inner flex items-center justify-center p-1 relative overflow-hidden">
+          {/* Inner soft bevel shadow */}
+          <div className="w-full h-full rounded-full border border-stone-200 flex items-center justify-center shadow-inner p-0.5 bg-gradient-to-b from-stone-50 to-stone-100">
+            <PointBowlRenderer scoringId={card.scoringId} />
           </div>
-        )}
-      </div>
-
-      {/* Main Condition Text */}
-      <div className="flex flex-col items-center justify-center my-auto px-1 text-center">
-        <div className="text-xs sm:text-[13px] font-bold text-stone-900 leading-snug">
-          {conditionText}
         </div>
       </div>
 
-      {/* Bottom Footer: Resource Flip Side Info + Flip Button */}
-      <div className="pt-1.5 border-t border-stone-200 flex items-center justify-between">
-        <div className="flex items-center gap-1" title={`Sisi sayur: ${spiceInfo.nameId}`}>
-          <SpiceIcon resource={card.resource} size={16} />
-          <span className="text-[10px] font-semibold text-stone-600">
-            {lang === 'id' ? spiceInfo.nameId : spiceInfo.nameEn}
-          </span>
-        </div>
-
-        {canFlip && onFlip && (
-          <button
-            onClick={handleFlip}
-            className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow transition-colors flex items-center gap-0.5 cursor-pointer"
-            title="Balik kartu ini menjadi Sayur secara permanen"
+      {/* Arched "SALAD" label on bottom (inverted) */}
+      <div className="w-full h-5 sm:h-6 relative z-10 rotate-180">
+        <svg viewBox="0 0 100 24" className="w-full h-full overflow-visible">
+          <path id={`arch-bot-${cardId}`} d="M 12,22 Q 50,4 88,22" fill="none" />
+          <text
+            fill="#FFFFFF"
+            fontWeight="900"
+            fontSize="12.5"
+            letterSpacing="3"
+            fontFamily="'Fredoka', ui-rounded, sans-serif"
+            style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.6))' }}
           >
-            <span>🔄</span> Balik
-          </button>
-        )}
+            <textPath href={`#arch-bot-${cardId}`} startOffset="50%" textAnchor="middle">
+              SALAD
+            </textPath>
+          </text>
+        </svg>
       </div>
+
+      {/* Live Score Preview Tag if active */}
+      {typeof liveScore === 'number' && (
+        <div
+          className={`absolute top-2 right-2 z-20 px-1.5 py-0.5 rounded-full text-[9px] font-black shadow-md border border-white font-fredoka ${
+            liveScore > 0
+              ? 'bg-emerald-600 text-white'
+              : liveScore < 0
+              ? 'bg-rose-600 text-white'
+              : 'bg-stone-800 text-stone-200'
+          }`}
+          title={isTentativeMajority ? 'Skor sementara berdasarkan pemain saat ini' : 'Skor kartu saat ini'}
+        >
+          {liveScore > 0 ? `+${liveScore}` : liveScore}
+          {isTentativeMajority && <span className="text-yellow-300 ml-0.5">*</span>}
+        </div>
+      )}
+
+      {/* Flip Button if player owns it on their turn */}
+      {canFlip && onFlip && (
+        <button
+          onClick={handleFlip}
+          className="absolute bottom-2 left-2 z-30 bg-emerald-700 hover:bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white shadow-lg transition-transform active:scale-95 flex items-center gap-1 cursor-pointer font-fredoka"
+          title="Balik kartu ini menjadi Sayur secara permanen"
+        >
+          <span>🔄</span> Balik
+        </button>
+      )}
     </motion.div>
   );
 };

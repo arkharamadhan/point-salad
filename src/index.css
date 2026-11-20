@@ -10,6 +10,10 @@
   font-family: 'Cinzel', serif;
 }
 
+.font-fredoka {
+  font-family: 'Fredoka', ui-rounded, 'Comic Sans MS', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
@@ -35,7 +39,8 @@
 }
 
 .wood-table {
-  background: radial-gradient(circle at 50% 30%, #2A1D14 0%, #150E08 70%, #0D0805 100%);
+  background: radial-gradient(circle at 50% 20%, #2D5A27 0%, #1C3B18 60%, #122810 100%);
+  background-attachment: fixed;
 }
 
 .card-shadow {

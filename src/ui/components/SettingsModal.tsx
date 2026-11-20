@@ -73,7 +73,7 @@ export const SettingsModal: React.FC = () => {
         <div className="flex items-center justify-between pb-4 mb-5 border-b border-stone-800">
           <div className="flex items-center gap-2">
             <span className="text-xl">⚙️</span>
-            <h2 className="text-xl font-extrabold text-amber-200 font-cinzel">
+            <h2 className="text-xl font-extrabold text-amber-200 font-fredoka">
               PENGATURAN PERMAINAN
             </h2>
           </div>
@@ -88,7 +88,7 @@ export const SettingsModal: React.FC = () => {
         <div className="space-y-5">
           {/* 1. Player Count Selector */}
           <div>
-            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2 font-cinzel">
+            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2 font-fredoka">
               Jumlah Pemain ({playerCount} Pemain)
             </label>
             <div className="grid grid-cols-3 gap-3">
@@ -114,7 +114,7 @@ export const SettingsModal: React.FC = () => {
 
           {/* 2. Players Configuration List */}
           <div>
-            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2 font-cinzel">
+            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2 font-fredoka">
               Konfigurasi Pemain
             </label>
             <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
@@ -185,7 +185,7 @@ export const SettingsModal: React.FC = () => {
           {/* 3. RNG Seed Setting */}
           <div className="bg-stone-950/50 border border-stone-800 rounded-xl p-3 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-stone-400 uppercase tracking-wider font-cinzel">
+              <label className="text-xs font-bold text-stone-400 uppercase tracking-wider font-fredoka">
                 Seed Deterministik (RNG)
               </label>
               <label className="flex items-center gap-1.5 cursor-pointer text-xs text-stone-300">
@@ -276,7 +276,7 @@ export const SettingsModal: React.FC = () => {
           <button
             type="button"
             onClick={handleStartGame}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-bold shadow-lg transition-all transform hover:scale-105 active:scale-95 font-cinzel tracking-wider"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-lime-600 to-lime-700 hover:from-lime-500 hover:to-lime-600 text-white text-xs font-bold shadow-lg transition-all transform hover:scale-105 active:scale-95 font-fredoka tracking-wider cursor-pointer"
           >
             Mulai Permainan Baru
           </button>

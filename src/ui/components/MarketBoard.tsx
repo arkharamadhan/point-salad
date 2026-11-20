@@ -44,8 +44,8 @@ export const MarketBoard: React.FC = () => {
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between pb-4 mb-4 border-b border-stone-800 gap-2">
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-          <h2 className="text-base sm:text-lg font-bold text-amber-100 font-cinzel tracking-wide">
+          <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
+          <h2 className="text-base sm:text-lg font-black text-lime-400 font-fredoka tracking-wide">
             PASAR BERSAMA (MARKET)
           </h2>
         </div>
@@ -91,7 +91,7 @@ export const MarketBoard: React.FC = () => {
               key={pileIndex}
               className="bg-stone-950/60 border border-stone-800/80 rounded-xl p-3 flex flex-col gap-3 shadow-inner"
             >
-              <div className="flex items-center justify-between text-xs font-semibold text-stone-400 px-1 font-cinzel">
+              <div className="flex items-center justify-between text-xs font-black text-stone-300 px-1 font-fredoka">
                 <span>Tumpukan {pileIndex + 1}</span>
                 <span className="text-[11px] text-stone-500 font-mono">
                   {pile.length} kartu tersisa

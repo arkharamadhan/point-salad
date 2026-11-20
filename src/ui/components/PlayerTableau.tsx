@@ -42,7 +42,7 @@ export const PlayerTableau: React.FC = () => {
               key={player.id}
               className={`px-3 py-2 rounded-xl border transition-all duration-200 flex items-center gap-3 ${
                 isActive
-                  ? 'bg-amber-950/80 border-amber-500 shadow-lg ring-2 ring-amber-500/50'
+                  ? 'bg-emerald-950/80 border-emerald-500 shadow-lg ring-2 ring-emerald-500/50'
                   : 'bg-stone-900/60 border-stone-800 text-stone-400'
               }`}
             >
@@ -50,14 +50,14 @@ export const PlayerTableau: React.FC = () => {
                 <div className="flex items-center gap-1.5">
                   <span
                     className={`w-2 h-2 rounded-full ${
-                      isActive ? 'bg-amber-400 animate-ping' : 'bg-stone-600'
+                      isActive ? 'bg-emerald-400 animate-ping' : 'bg-stone-600'
                     }`}
                   />
-                  <span className="text-xs sm:text-sm font-bold text-stone-200 font-cinzel">
+                  <span className="text-xs sm:text-sm font-bold text-stone-200 font-fredoka">
                     {player.name}
                   </span>
                   {isActive && (
-                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 rounded font-semibold">
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-semibold">
                       Giliran
                     </span>
                   )}
@@ -84,12 +84,12 @@ export const PlayerTableau: React.FC = () => {
         {/* Tableau Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between pb-4 mb-4 border-b border-stone-800 gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/60 flex items-center justify-center text-emerald-300 font-bold font-cinzel text-base">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/60 flex items-center justify-center text-emerald-300 font-bold font-fredoka text-base">
               {currentTurnPlayerIndex + 1}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-stone-100 font-cinzel">
+                <h3 className="text-lg font-bold text-stone-100 font-fredoka">
                   Area Milik: {activePlayer.name}
                 </h3>
                 <span className="bg-emerald-900/60 text-emerald-300 border border-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
@@ -116,7 +116,7 @@ export const PlayerTableau: React.FC = () => {
             {hasTakenMainActionThisTurn && !isGameOver && (
               <button
                 onClick={handleEndTurn}
-                className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer"
+                className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer font-fredoka"
               >
                 <span>Selesai Giliran</span>
                 <span>➔</span>
@@ -127,7 +127,7 @@ export const PlayerTableau: React.FC = () => {
 
         {/* Sayur Collection Counters (Bar) */}
         <div className="mb-6">
-          <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 font-cinzel">
+          <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 font-fredoka">
             Koleksi Sayur ({totalResourcesCount} Total)
           </h4>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -161,7 +161,7 @@ export const PlayerTableau: React.FC = () => {
         {/* Active Scoring Cards Grid */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider font-cinzel">
+            <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider font-fredoka">
               Kartu Skor Aktif ({activePlayer.scoringCards.length})
             </h4>
             <span className="text-[11px] text-stone-500 italic">

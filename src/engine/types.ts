@@ -1,12 +1,12 @@
-export type ResourceId = 'wortel' | 'jagung' | 'tomat' | 'terong' | 'jamur' | 'brokoli';
+export type ResourceId = 'tomat' | 'wortel' | 'paprika' | 'selada' | 'bawang' | 'kubis';
 
 export const ALL_RESOURCES: readonly ResourceId[] = [
-  'wortel',
-  'jagung',
   'tomat',
-  'terong',
-  'jamur',
-  'brokoli',
+  'wortel',
+  'paprika',
+  'selada',
+  'bawang',
+  'kubis',
 ] as const;
 
 export type ResourceCounts = Record<ResourceId, number>;

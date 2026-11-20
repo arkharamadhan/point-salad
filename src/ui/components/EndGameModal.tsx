@@ -36,7 +36,7 @@ export const EndGameModal: React.FC = () => {
           <span className="text-4xl sm:text-5xl mb-2 inline-block animate-bounce">
             🏆
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-amber-300 font-cinzel tracking-wider">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-amber-300 font-fredoka tracking-wider">
             {isSharedWin ? 'KEMENANGAN BERSAMA!' : 'PERMAINAN SELESAI!'}
           </h2>
           <p className="text-sm text-stone-300 mt-1">
@@ -69,7 +69,7 @@ export const EndGameModal: React.FC = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold font-cinzel text-sm ${
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold font-fredoka text-sm ${
                         isWinner
                           ? 'bg-amber-500 text-stone-950 shadow'
                           : 'bg-stone-800 text-stone-400'
@@ -96,7 +96,7 @@ export const EndGameModal: React.FC = () => {
 
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <span className="text-xl sm:text-2xl font-black text-amber-400">
+                      <span className="text-xl sm:text-2xl font-black text-amber-400 font-fredoka">
                         {scoreReport.totalScore}
                       </span>
                       <span className="text-xs text-stone-400 block font-medium">poin</span>
@@ -110,7 +110,7 @@ export const EndGameModal: React.FC = () => {
                 {/* Expanded Card Breakdown */}
                 {isExpanded && (
                   <div className="px-4 pb-4 pt-1 border-t border-stone-800/80">
-                    <h5 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 font-cinzel">
+                    <h5 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 font-fredoka">
                       Rincian Poin per Kartu Skor:
                     </h5>
                     {scoreReport.cardScores.length > 0 ? (
@@ -158,7 +158,7 @@ export const EndGameModal: React.FC = () => {
         <div className="flex justify-center">
           <button
             onClick={() => startNewGame()}
-            className="w-full sm:w-auto bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-base px-8 py-3 rounded-2xl shadow-xl transition-all transform hover:scale-105 active:scale-95 font-cinzel"
+            className="w-full sm:w-auto bg-gradient-to-r from-lime-600 to-lime-700 hover:from-lime-500 hover:to-lime-600 text-white font-bold text-base px-8 py-3 rounded-2xl shadow-xl transition-all transform hover:scale-105 active:scale-95 font-fredoka cursor-pointer"
           >
             Main Lagi (New Game)
           </button>

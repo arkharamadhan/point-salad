@@ -82,11 +82,11 @@ describe('Bot AI (Greedy & Easy Bots)', () => {
     // Bot currently has 1 Kunyit, 0 Jahe. Current score = 0.
     // Card 2 in hand: S01 (+3 Jahe, -1 Lada) with resource side = 'wortel'.
     // If Bot flips Card 2 into Jahe, it now has 1 Jahe + 1 Kunyit -> 4 pts!
-    const cardS07: Card = { id: 'c_s07', resource: 'brokoli', scoringId: 'S07' };
+    const cardS07: Card = { id: 'c_s07', resource: 'selada', scoringId: 'S07' };
     const cardFlipTarget: Card = { id: 'c_flip', resource: 'wortel', scoringId: 'S01' };
 
     state.players[botPlayerIdx].scoringCards = [cardS07, cardFlipTarget];
-    state.players[botPlayerIdx].resources.jagung = 1;
+    state.players[botPlayerIdx].resources.paprika = 1;
 
     // Prior to flip: score is 0 (S07 has 0 sets, S01 has 0 jahe)
     const initialScore = evaluatePlayerScore(botPlayerIdx, state.players).totalScore;
