@@ -1,6 +1,8 @@
 import { checkGameEnd, finalizeGame } from './endgame';
 import { refillMarket } from './market';
-import { Card, GameAction, GameState, PlayerState } from './types';
+import { createRNG, shuffle } from './rng';
+import { rollMarketEvent } from './setup';
+import { ALL_RESOURCES, Card, GameAction, GameState, PlayerState } from './types';
 
 function clonePlayer(player: PlayerState): PlayerState {
   return {
@@ -43,17 +45,23 @@ export function gameReducer(
       const indices = action.slotIndices;
       const allPilesEmpty = state.market.piles.every((p) => p.length === 0);
       const availableResourceCount = state.market.resourceSlots.filter((s) => s !== null).length;
+      const extraAllowance = state.extraVeggieAllowance ?? 0;
+      const maxAllowed = Math.min(2 + extraAllowance, availableResourceCount);
 
       if (indices.length === 1) {
         if (!allPilesEmpty || availableResourceCount !== 1) {
           throw new Error('Taking 1 resource card is only permitted when exactly 1 card remains and all draw piles are empty.');
         }
-      } else if (indices.length === 2) {
-        if (indices[0] === indices[1]) {
+      } else if (indices.length === 2 || (indices.length === 3 && extraAllowance >= 1)) {
+        const unique = new Set(indices);
+        if (unique.size !== indices.length) {
           throw new Error('Cannot select the same resource card slot twice.');
         }
+        if (indices.length > maxAllowed) {
+          throw new Error(`Cannot select ${indices.length} resource slots when only ${maxAllowed} allowed.`);
+        }
       } else {
-        throw new Error(`Invalid number of resource slots selected: ${(indices as number[]).length}`);
+        throw new Error(`Invalid number of resource slots selected: ${indices.length}`);
       }
 
       // Verify all selected slots are valid and filled
@@ -72,7 +80,7 @@ export function gameReducer(
         newResourceSlots[idx] = null;
       }
 
-      // Update player resources
+      // Update player resources & check Golden / Rotten veggie event
       const newPlayers = clonePlayers(state.players);
       const newActivePlayer = newPlayers[state.currentTurnPlayerIndex];
 
@@ -82,10 +90,19 @@ export function gameReducer(
           (newActivePlayer.resources[card.resource] ?? 0) + 1;
       }
 
-      const logMsg =
-        takenCards.length === 2
-          ? `${newActivePlayer.name} mengambil 2 kartu sayur (${takenCards[0].resource}, ${takenCards[1].resource}).`
-          : `${newActivePlayer.name} mengambil 1 kartu sayur terakhir (${takenCards[0].resource}).`;
+      let eventSuffix = '';
+      if (state.activeEvent?.type === 'golden_veggie' && indices.includes(state.activeEvent.slotIndex)) {
+        newActivePlayer.goldenBonusPoints =
+          (newActivePlayer.goldenBonusPoints ?? 0) + state.activeEvent.bonusPoints;
+        eventSuffix = ` (+${state.activeEvent.bonusPoints} Bonus Sayur Emas!)`;
+      } else if (state.activeEvent?.type === 'rotten_veggie' && indices.includes(state.activeEvent.slotIndex)) {
+        newActivePlayer.rottenPenaltyPoints =
+          (newActivePlayer.rottenPenaltyPoints ?? 0) + state.activeEvent.penaltyPoints;
+        eventSuffix = ` (${state.activeEvent.penaltyPoints} Penalti Sayur Busuk!)`;
+      }
+
+      const veggieList = takenCards.map((c) => c.resource).join(', ');
+      const logMsg = `${newActivePlayer.name} mengambil ${takenCards.length} kartu sayur (${veggieList})${eventSuffix}.`;
 
       return {
         ...state,
@@ -205,6 +222,304 @@ export function gameReducer(
       };
     }
 
+    case 'USE_SKILL_REFRESH_MARKET': {
+      if (state.gameMode !== 'special') {
+        throw new Error('Skills are only available in Special Mode.');
+      }
+      if (state.hasTakenMainActionThisTurn) {
+        throw new Error('Skills can only be used before taking your main action.');
+      }
+      if (activePlayer.assignedSkill !== 'refresh_market' || activePlayer.skillUsed) {
+        throw new Error('Refresh Market skill is not available for this player.');
+      }
+
+      const rng = createRNG(state.seed + state.turnCount * 97 + 13);
+      const oldMarketCards: Card[] = [];
+      const filledSlotIndices: number[] = [];
+      for (let i = 0; i < 6; i++) {
+        const c = state.market.resourceSlots[i];
+        if (c) {
+          oldMarketCards.push(c);
+          filledSlotIndices.push(i);
+        }
+      }
+      const currentSlotsCount = filledSlotIndices.length;
+
+      // 1. Collect candidate replacement cards from draw piles FIRST (excluding current board cards!)
+      const pileLengths = state.market.piles.map((p) => p.length);
+      const pilePool: Card[] = [];
+      for (const p of state.market.piles) {
+        pilePool.push(...p);
+      }
+      const shuffledPilePool = shuffle(pilePool, rng);
+
+      // Prioritize cards from pilePool whose resource differs from the old slot's resource
+      const remainingPool = [...shuffledPilePool];
+      const newResourceSlots: (Card | null)[] = [null, null, null, null, null, null];
+      const newDiscardedCards = [...state.discardedCards];
+      const unplacedOldCards: Card[] = [];
+
+      for (let idx = 0; idx < filledSlotIndices.length; idx++) {
+        const slotIdx = filledSlotIndices[idx];
+        const oldCard = oldMarketCards[idx];
+
+        // Try to pick a card from remainingPool with a DIFFERENT resource than oldCard
+        let pickedPoolIdx = remainingPool.findIndex((c) => c.resource !== oldCard.resource);
+        if (pickedPoolIdx === -1 && remainingPool.length > 0) {
+          pickedPoolIdx = 0;
+        }
+
+        if (pickedPoolIdx !== -1) {
+          const [replacement] = remainingPool.splice(pickedPoolIdx, 1);
+          newResourceSlots[slotIdx] = replacement;
+          unplacedOldCards.push(oldCard);
+        } else if (newDiscardedCards.length > 0) {
+          // Draw piles are empty! Pull a fresh card from discardedCards (prefer different resource)
+          const shuffledDiscard = shuffle(newDiscardedCards, rng);
+          let discIdx = shuffledDiscard.findIndex((c) => c.resource !== oldCard.resource);
+          if (discIdx === -1) discIdx = 0;
+          const [fromDiscard] = shuffledDiscard.splice(discIdx, 1);
+          newResourceSlots[slotIdx] = fromDiscard;
+          shuffledDiscard.push(oldCard);
+          newDiscardedCards.length = 0;
+          newDiscardedCards.push(...shuffledDiscard);
+        } else {
+          // Both piles and discardedCards are empty (e.g. 108-card endgame):
+          // Mutate this card's vegetable to a guaranteed different vegetable!
+          const otherResources = ALL_RESOURCES.filter((r) => r !== oldCard.resource);
+          const newRes = otherResources[Math.floor(rng() * otherResources.length)];
+          newResourceSlots[slotIdx] = {
+            ...oldCard,
+            resource: newRes,
+          };
+        }
+
+        // Final guarantee: if the chosen card STILL has the exact same resource as oldCard,
+        // shift its resource to a different vegetable so the slot visibly refreshes!
+        const assigned = newResourceSlots[slotIdx];
+        if (assigned && assigned.resource === oldCard.resource) {
+          const otherResources = ALL_RESOURCES.filter((r) => r !== oldCard.resource);
+          const newRes = otherResources[Math.floor(rng() * otherResources.length)];
+          newResourceSlots[slotIdx] = {
+            ...assigned,
+            resource: newRes,
+          };
+        }
+      }
+
+      // Return the old market cards back into the draw piles and shuffle
+      const rebuiltPilePool = shuffle([...remainingPool, ...unplacedOldCards], rng);
+      const newPiles: [Card[], Card[], Card[]] = [[], [], []];
+      let cursor = 0;
+      for (let p = 0; p < 3; p++) {
+        const len = pileLengths[p];
+        newPiles[p] = rebuiltPilePool.slice(cursor, cursor + len);
+        cursor += len;
+      }
+      if (cursor < rebuiltPilePool.length) {
+        newPiles[0].push(...rebuiltPilePool.slice(cursor));
+      }
+
+      const newPlayers = clonePlayers(state.players);
+      newPlayers[state.currentTurnPlayerIndex].skillUsed = true;
+
+      return {
+        ...state,
+        players: newPlayers,
+        discardedCards: newDiscardedCards,
+        market: {
+          ...state.market,
+          piles: newPiles,
+          resourceSlots: newResourceSlots,
+        },
+        log: [
+          ...state.log,
+          `${activePlayer.name} memakai Skill 🔄 Kocok Pasar (${currentSlotsCount} sayur diperbarui)!`,
+        ],
+      };
+    }
+
+    case 'USE_SKILL_GRAB_THREE': {
+      if (state.gameMode !== 'special') {
+        throw new Error('Skills are only available in Special Mode.');
+      }
+      if (state.hasTakenMainActionThisTurn) {
+        throw new Error('Skills can only be used before taking your main action.');
+      }
+      if (activePlayer.assignedSkill !== 'grab_three' || activePlayer.skillUsed) {
+        throw new Error('Grab Three skill is not available for this player.');
+      }
+
+      const newPlayers = clonePlayers(state.players);
+      newPlayers[state.currentTurnPlayerIndex].skillUsed = true;
+
+      return {
+        ...state,
+        players: newPlayers,
+        extraVeggieAllowance: Math.max(1, state.extraVeggieAllowance ?? 0),
+        log: [
+          ...state.log,
+          `${activePlayer.name} memakai Skill 🧲 Ambil 3 Sayur untuk giliran ini!`,
+        ],
+      };
+    }
+
+    case 'USE_SKILL_SWAP_VEGGIE': {
+      if (state.gameMode !== 'special') {
+        throw new Error('Skills are only available in Special Mode.');
+      }
+      if (state.hasTakenMainActionThisTurn) {
+        throw new Error('Skills can only be used before taking your main action.');
+      }
+      if (activePlayer.assignedSkill !== 'swap_veggie' || activePlayer.skillUsed) {
+        throw new Error('Swap Veggie skill is not available for this player.');
+      }
+      const { targetPlayerIndex, myResource, targetResource } = action;
+      if (
+        targetPlayerIndex < 0 ||
+        targetPlayerIndex >= state.players.length ||
+        targetPlayerIndex === state.currentTurnPlayerIndex
+      ) {
+        throw new Error('Invalid target player for Swap Veggie.');
+      }
+
+      const newPlayers = clonePlayers(state.players);
+      const me = newPlayers[state.currentTurnPlayerIndex];
+      const target = newPlayers[targetPlayerIndex];
+
+      if ((me.resources[myResource] ?? 0) < 1) {
+        throw new Error(`You do not have any ${myResource} to swap.`);
+      }
+      if ((target.resources[targetResource] ?? 0) < 1) {
+        throw new Error(`${target.name} does not have any ${targetResource} to swap.`);
+      }
+
+      me.resources[myResource] -= 1;
+      me.resources[targetResource] = (me.resources[targetResource] ?? 0) + 1;
+      target.resources[targetResource] -= 1;
+      target.resources[myResource] = (target.resources[myResource] ?? 0) + 1;
+      me.skillUsed = true;
+
+      return {
+        ...state,
+        players: newPlayers,
+        log: [
+          ...state.log,
+          `${me.name} memakai Skill 🎭 Tukar Sayur: menukar ${myResource} dengan ${targetResource} milik ${target.name}!`,
+        ],
+      };
+    }
+
+    case 'USE_SKILL_GOLDEN_TOUCH': {
+      if (state.gameMode !== 'special') {
+        throw new Error('Skills are only available in Special Mode.');
+      }
+      if (state.hasTakenMainActionThisTurn) {
+        throw new Error('Skills can only be used before taking your main action.');
+      }
+      if (activePlayer.assignedSkill !== 'golden_touch' || activePlayer.skillUsed) {
+        throw new Error('Golden Touch skill is not available for this player.');
+      }
+
+      const filledIndices: number[] = [];
+      for (let i = 0; i < state.market.resourceSlots.length; i++) {
+        if (state.market.resourceSlots[i] !== null) {
+          filledIndices.push(i);
+        }
+      }
+      if (filledIndices.length === 0) {
+        throw new Error('No vegetables available on the board to turn golden.');
+      }
+
+      const rng = createRNG(state.seed + state.turnCount * 53 + 7);
+      const goldenSlot = filledIndices[Math.floor(rng() * filledIndices.length)];
+      const newPlayers = clonePlayers(state.players);
+      newPlayers[state.currentTurnPlayerIndex].skillUsed = true;
+
+      return {
+        ...state,
+        players: newPlayers,
+        activeEvent: { type: 'golden_veggie', slotIndex: goldenSlot, bonusPoints: 3 },
+        log: [
+          ...state.log,
+          `${activePlayer.name} memakai Skill ✨ Sentuhan Emas! 1 sayur di talenan berubah jadi Emas (+3 poin)!`,
+        ],
+      };
+    }
+
+    case 'USE_SKILL_STEAL_VEGGIE': {
+      if (state.gameMode !== 'special') {
+        throw new Error('Skills are only available in Special Mode.');
+      }
+      if (state.hasTakenMainActionThisTurn) {
+        throw new Error('Skills can only be used before taking your main action.');
+      }
+      if (activePlayer.assignedSkill !== 'steal_veggie' || activePlayer.skillUsed) {
+        throw new Error('Steal Veggie skill is not available for this player.');
+      }
+      const { targetPlayerIndex, targetResource } = action;
+      if (
+        targetPlayerIndex < 0 ||
+        targetPlayerIndex >= state.players.length ||
+        targetPlayerIndex === state.currentTurnPlayerIndex
+      ) {
+        throw new Error('Invalid target player for Steal Veggie.');
+      }
+
+      const newPlayers = clonePlayers(state.players);
+      const me = newPlayers[state.currentTurnPlayerIndex];
+      const target = newPlayers[targetPlayerIndex];
+
+      if ((target.resources[targetResource] ?? 0) < 1) {
+        throw new Error(`${target.name} does not have any ${targetResource} to steal.`);
+      }
+
+      target.resources[targetResource] -= 1;
+      me.resources[targetResource] = (me.resources[targetResource] ?? 0) + 1;
+      me.skillUsed = true;
+
+      return {
+        ...state,
+        players: newPlayers,
+        log: [
+          ...state.log,
+          `${me.name} memakai Skill 🦝 Curi Sayur: mencuri 1 ${targetResource} milik ${target.name}!`,
+        ],
+      };
+    }
+
+    case 'USE_SKILL_CLONE_VEGGIE': {
+      if (state.gameMode !== 'special') {
+        throw new Error('Skills are only available in Special Mode.');
+      }
+      if (state.hasTakenMainActionThisTurn) {
+        throw new Error('Skills can only be used before taking your main action.');
+      }
+      if (activePlayer.assignedSkill !== 'clone_veggie' || activePlayer.skillUsed) {
+        throw new Error('Clone Veggie skill is not available for this player.');
+      }
+
+      const { myResource } = action;
+      const newPlayers = clonePlayers(state.players);
+      const me = newPlayers[state.currentTurnPlayerIndex];
+
+      if ((me.resources[myResource] ?? 0) < 1) {
+        throw new Error(`You need at least 1 ${myResource} to duplicate.`);
+      }
+
+      me.resources[myResource] += 1;
+      me.skillUsed = true;
+
+      return {
+        ...state,
+        players: newPlayers,
+        log: [
+          ...state.log,
+          `${me.name} memakai Skill 🧬 Gandakan Sayur: mendapat +1 ${myResource} tambahan!`,
+        ],
+      };
+    }
+
     case 'END_TURN': {
       if (!state.hasTakenMainActionThisTurn) {
         throw new Error('Cannot end turn before taking a main action.');
@@ -223,10 +538,16 @@ export function gameReducer(
         return finalizeGame(stateWithRefilledMarket, lang);
       }
 
-      // 3. Advance to next player
+      // 3. Advance to next player & roll random Market Event for Special Mode
       const nextPlayerIndex = (state.currentTurnPlayerIndex + 1) % state.players.length;
       const nextTurnCount = state.turnCount + 1;
       const nextPlayerName = state.players[nextPlayerIndex].name;
+      const nextEvent = rollMarketEvent(
+        refilledMarket,
+        state.seed,
+        nextTurnCount,
+        state.gameMode ?? 'classic'
+      );
 
       const updatedState: GameState = {
         ...stateWithRefilledMarket,
@@ -234,6 +555,8 @@ export function gameReducer(
         turnCount: nextTurnCount,
         hasTakenMainActionThisTurn: false,
         turnSubPhase: 'action',
+        extraVeggieAllowance: nextEvent?.type === 'bountiful_harvest' ? 1 : 0,
+        activeEvent: nextEvent,
         log: [
           ...stateWithRefilledMarket.log,
           `Giliran beralih ke ${nextPlayerName} (Giliran ${nextTurnCount}).`,

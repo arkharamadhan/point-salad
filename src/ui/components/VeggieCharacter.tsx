@@ -8,6 +8,7 @@ import { useGameStore } from '../store/gameStore';
 interface VeggieCharacterProps {
   resource?: ResourceId | null;
   cardKey?: string;
+  eventBadge?: 'golden' | 'rotten' | null;
   onClick?: () => void;
   onDragToShelf?: () => void;
   isSelectable?: boolean;
@@ -19,6 +20,7 @@ interface VeggieCharacterProps {
 export const VeggieCharacter: React.FC<VeggieCharacterProps> = ({
   resource,
   cardKey,
+  eventBadge = null,
   onClick,
   onDragToShelf,
   isSelectable = false,
@@ -74,6 +76,18 @@ export const VeggieCharacter: React.FC<VeggieCharacterProps> = ({
       {/* Subtle grounded shadow on wooden cutting board */}
       <div className="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 w-[70%] h-3 rounded-full bg-[#6E4418]/25 blur-[3px]" />
 
+      {/* Compact corner point tag for Golden (+3) / Rotten (-2) without plain circle ring */}
+      {eventBadge === 'golden' && (
+        <span className="pointer-events-none absolute -top-1 -left-1 z-20 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 border border-white text-white text-[9px] font-black shadow-md leading-none">
+          +3✨
+        </span>
+      )}
+      {eventBadge === 'rotten' && (
+        <span className="pointer-events-none absolute -top-1 -left-1 z-20 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-lime-800 to-stone-800 border border-lime-300 text-lime-100 text-[9px] font-black shadow-md leading-none">
+          -2
+        </span>
+      )}
+
       {/* Selected Indicator Ring & Checkmark */}
       {isSelected && (
         <motion.div
@@ -87,15 +101,23 @@ export const VeggieCharacter: React.FC<VeggieCharacterProps> = ({
         </motion.div>
       )}
 
-      {/* Standalone Vegetable with Crisp Drop Shadow */}
+      {/* Standalone Vegetable with Transformed Golden / Rotten Artwork */}
       <div
         className={`w-[58px] h-[58px] sm:w-[70px] sm:h-[70px] lg:w-[78px] lg:h-[78px] transition-transform duration-150 ${
-          isSelected
+          eventBadge === 'golden'
+            ? 'drop-shadow-[0_0_10px_rgba(245,158,11,0.75)]'
+            : eventBadge === 'rotten'
+            ? 'drop-shadow-[0_4px_8px_rgba(63,77,29,0.55)]'
+            : isSelected
             ? 'drop-shadow-[0_6px_8px_rgba(46,125,50,0.35)]'
             : 'drop-shadow-[0_4px_5px_rgba(68,38,10,0.28)] hover:drop-shadow-[0_7px_9px_rgba(68,38,10,0.38)]'
         }`}
       >
-        <VeggieIcon resource={resource} className="w-full h-full" />
+        <VeggieIcon
+          resource={resource}
+          variant={eventBadge ?? 'normal'}
+          className="w-full h-full"
+        />
       </div>
     </motion.div>
   );

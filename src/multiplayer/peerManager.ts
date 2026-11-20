@@ -12,12 +12,26 @@ export interface LobbyPlayer {
 export type MultiplayerRole = 'none' | 'host' | 'guest';
 export type MultiplayerStatus = 'idle' | 'connecting' | 'connected' | 'error';
 
+export interface ReactionPayload {
+  id: string;
+  senderName: string;
+  senderIndex: number;
+  emoji: string;
+  text?: string;
+}
+
 export type PeerMessage =
   | { type: 'JOIN_REQUEST'; name: string }
   | { type: 'PLAYER_ACTION'; action: GameAction }
   | { type: 'PLAYER_UNDO' }
+  | { type: 'REACTION'; reaction: ReactionPayload }
   | { type: 'LOBBY_UPDATE'; roomCode: string; players: LobbyPlayer[] }
-  | { type: 'GAME_START'; gameState: GameState; playerPeerIds: (string | null)[] }
+  | {
+      type: 'GAME_START';
+      gameState: GameState;
+      playerPeerIds: (string | null)[];
+      seriesWins?: Record<string, number>;
+    }
   | { type: 'STATE_SYNC'; gameState: GameState; hasTurnSnapshot: boolean }
   | { type: 'ERROR'; message: string }
   | { type: 'HOST_CLOSED' };
@@ -60,14 +74,20 @@ interface HostCallbacks {
   onGuestLeave: (peerId: string) => void;
   onGuestAction: (peerId: string, action: GameAction) => void;
   onGuestUndo: (peerId: string) => void;
+  onReaction?: (reaction: ReactionPayload) => void;
   onError: (message: string) => void;
 }
 
 interface GuestCallbacks {
   onConnected: (myPeerId: string) => void;
   onLobbyUpdate: (roomCode: string, players: LobbyPlayer[]) => void;
-  onGameStart: (gameState: GameState, playerPeerIds: (string | null)[]) => void;
+  onGameStart: (
+    gameState: GameState,
+    playerPeerIds: (string | null)[],
+    seriesWins?: Record<string, number>
+  ) => void;
   onStateSync: (gameState: GameState, hasTurnSnapshot: boolean) => void;
+  onReaction?: (reaction: ReactionPayload) => void;
   onHostClosed: () => void;
   onError: (message: string) => void;
 }
@@ -165,6 +185,8 @@ class SupabaseRealtimeManager {
           callbacks.onGuestAction(from, msg.action);
         } else if (msg.type === 'PLAYER_UNDO') {
           callbacks.onGuestUndo(from);
+        } else if (msg.type === 'REACTION') {
+          callbacks.onReaction?.(msg.reaction);
         }
       })
       .on('presence', { event: 'leave' }, ({ key }) => {
@@ -239,9 +261,11 @@ class SupabaseRealtimeManager {
             window.clearTimeout(this.joinTimeoutId);
             this.joinTimeoutId = null;
           }
-          callbacks.onGameStart(msg.gameState, msg.playerPeerIds);
+          callbacks.onGameStart(msg.gameState, msg.playerPeerIds, msg.seriesWins);
         } else if (msg.type === 'STATE_SYNC') {
           callbacks.onStateSync(msg.gameState, msg.hasTurnSnapshot);
+        } else if (msg.type === 'REACTION') {
+          callbacks.onReaction?.(msg.reaction);
         } else if (msg.type === 'ERROR') {
           if (this.joinTimeoutId !== null) {
             window.clearTimeout(this.joinTimeoutId);

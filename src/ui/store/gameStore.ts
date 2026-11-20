@@ -2,18 +2,39 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   GameAction,
+  GameMode,
   GameState,
   initializeGame,
   gameReducer,
   SetupOptions,
+  DeckSizeOption,
   createBot,
+  ResourceId,
 } from '../../engine';
+import { SCORING_CONDITIONS_MAP } from '../../engine/scoring';
 import {
   LobbyPlayer,
   MultiplayerRole,
   MultiplayerStatus,
+  ReactionPayload,
   peerManager,
 } from '../../multiplayer/peerManager';
+import { Sound } from '../sound/soundEffects';
+
+export interface ActionToastItem {
+  id: string;
+  text: string;
+  actorIndex: number;
+}
+
+const VEGGIE_EMOJI: Record<ResourceId, { emoji: string; id: string; en: string }> = {
+  tomat: { emoji: '🍅', id: 'Tomat', en: 'Tomato' },
+  wortel: { emoji: '🥕', id: 'Wortel', en: 'Carrot' },
+  paprika: { emoji: '🫑', id: 'Paprika', en: 'Pepper' },
+  selada: { emoji: '🥬', id: 'Selada', en: 'Lettuce' },
+  bawang: { emoji: '🧅', id: 'Bawang', en: 'Onion' },
+  kubis: { emoji: '🟣', id: 'Kubis', en: 'Cabbage' },
+};
 
 function generateRoomCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -22,6 +43,112 @@ function generateRoomCode(): string {
     code += chars[Math.floor(Math.random() * chars.length)];
   }
   return code;
+}
+
+function buildOpponentActionToast(
+  prevState: GameState,
+  nextState: GameState,
+  lang: 'id' | 'en',
+  mpRole: MultiplayerRole,
+  mpMyPlayerIndex: number | null
+): ActionToastItem | null {
+  const actorIdx = prevState.currentTurnPlayerIndex;
+  const prevP = prevState.players[actorIdx];
+  const nextP = nextState.players[actorIdx];
+  if (!prevP || !nextP) return null;
+
+  // Only show toast for opponent (online) or Bot (solo)
+  const isOpponentOrBot =
+    mpRole !== 'none'
+      ? mpMyPlayerIndex !== null && actorIdx !== mpMyPlayerIndex
+      : Boolean(prevP.isBot);
+  if (!isOpponentOrBot) return null;
+
+  const isId = lang === 'id';
+  const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+  // 1. Drafted veggie resources (including Golden / Rotten notifications)
+  if (nextP.draftedResourceCards.length > prevP.draftedResourceCards.length) {
+    const added = nextP.draftedResourceCards.slice(prevP.draftedResourceCards.length);
+    const names = added
+      .map((c) => {
+        const info = VEGGIE_EMOJI[c.resource];
+        return `${info.emoji} ${isId ? info.id : info.en}`;
+      })
+      .join(' & ');
+    let suffix = '';
+    if ((nextP.goldenBonusPoints ?? 0) > (prevP.goldenBonusPoints ?? 0)) {
+      suffix = isId ? ' (✨ +3 Emas!)' : ' (✨ +3 Golden!)';
+    } else if ((nextP.rottenPenaltyPoints ?? 0) < (prevP.rottenPenaltyPoints ?? 0)) {
+      suffix = isId ? ' (🤢 -2 Busuk!)' : ' (🤢 -2 Rotten!)';
+    }
+    return {
+      id,
+      actorIndex: actorIdx,
+      text: isId
+        ? `${prevP.name} ambil ${added.length} Sayur: ${names}${suffix}`
+        : `${prevP.name} took ${added.length} Veggie${added.length > 1 ? 's' : ''}: ${names}${suffix}`,
+    };
+  }
+
+  // 2. Used a Power-Up Skill
+  if (!prevP.skillUsed && nextP.skillUsed) {
+    const lastLog = nextState.log[nextState.log.length - 1];
+    if (lastLog) {
+      return { id, actorIndex: actorIdx, text: lastLog };
+    }
+  }
+
+  // 2. Drafted scoring recipe card
+  if (nextP.scoringCards.length > prevP.scoringCards.length) {
+    const addedCard = nextP.scoringCards[nextP.scoringCards.length - 1];
+    const cond = SCORING_CONDITIONS_MAP.get(addedCard.scoringId);
+    const desc = cond ? (cond.text[lang] ?? cond.text.id) : addedCard.scoringId;
+    return {
+      id,
+      actorIndex: actorIdx,
+      text: isId
+        ? `${prevP.name} ambil Resep: ${desc}`
+        : `${prevP.name} took Recipe: ${desc}`,
+    };
+  }
+
+  // 3. Flipped a scoring card into a veggie
+  if (nextP.flippedCards.length > prevP.flippedCards.length) {
+    const flipped = nextP.flippedCards[nextP.flippedCards.length - 1];
+    const info = VEGGIE_EMOJI[flipped.resource];
+    return {
+      id,
+      actorIndex: actorIdx,
+      text: isId
+        ? `${prevP.name} balik Resep jadi ${info.emoji} ${info.id}`
+        : `${prevP.name} flipped a Recipe into ${info.emoji} ${info.en}`,
+    };
+  }
+
+  return null;
+}
+
+function applySeriesWinIfFinished(
+  prevState: GameState,
+  nextState: GameState,
+  currentWins: Record<string, number>
+): Record<string, number> {
+  if (
+    prevState.phase !== 'game_over' &&
+    nextState.phase === 'game_over' &&
+    nextState.finalScores &&
+    nextState.finalScores.length > 0
+  ) {
+    const updated = { ...currentWins };
+    for (const report of nextState.finalScores) {
+      if (report.rank === 1) {
+        updated[report.playerId] = (updated[report.playerId] ?? 0) + 1;
+      }
+    }
+    return updated;
+  }
+  return currentWins;
 }
 
 interface GameStoreState {
@@ -48,19 +175,43 @@ interface GameStoreState {
   mpPlayerPeerIds: (string | null)[];
   mpRemoteHasSnapshot: boolean;
 
+  // Social & Session state
+  seriesWins: Record<string, number>;
+  lastDeckSize: DeckSizeOption | undefined;
+  lastGameMode: GameMode;
+  showPowerUpRoll: boolean;
+  activeReactions: ReactionPayload[];
+  actionToast: ActionToastItem | null;
+
   // Navigation & Setup Actions
   setScreen: (screen: 'menu' | 'game') => void;
   setRoomCode: (code: string | null) => void;
-  startNewGame: (options?: Partial<SetupOptions>) => void;
+  startNewGame: (options?: Partial<SetupOptions> & { preserveSeries?: boolean }) => void;
 
   // Multiplayer Actions
   openOnlineRoom: (hostName: string) => void;
   joinOnlineRoom: (roomCode: string, guestName: string) => void;
   addLobbyBot: () => void;
   removeLobbyPlayer: (peerId: string) => void;
-  startOnlineGame: () => void;
+  startOnlineGame: (deckSize?: DeckSizeOption, gameMode?: GameMode) => void;
+  rematchOnlineGame: (deckSize?: DeckSizeOption) => void;
   leaveOnlineRoom: () => void;
   clearMpError: () => void;
+
+  // Social & Skill Actions
+  sendReaction: (emoji: string, text?: string) => void;
+  dismissActionToast: () => void;
+  dismissPowerUpRoll: () => void;
+  useSkillRefreshMarket: () => void;
+  useSkillGrabThree: () => void;
+  useSkillSwapVeggie: (
+    targetPlayerIndex: number,
+    myResource: ResourceId,
+    targetResource: ResourceId
+  ) => void;
+  useSkillGoldenTouch: () => void;
+  useSkillStealVeggie: (targetPlayerIndex: number, targetResource: ResourceId) => void;
+  useSkillCloneVeggie: (myResource: ResourceId) => void;
 
   // Gameplay Actions
   selectResourceSlot: (slotIndex: number) => void;
@@ -91,7 +242,23 @@ const defaultSetup: SetupOptions = {
 export const useGameStore = create<GameStoreState>()(
   persist(
     (set, get) => {
-      // Helper: check if local user is allowed to act right now
+      const pushReaction = (reaction: ReactionPayload) => {
+        Sound.emotePop(get().soundEnabled);
+        set((state) => ({
+          activeReactions: [...state.activeReactions.slice(-4), reaction],
+        }));
+        window.setTimeout(() => {
+          set((state) => ({
+            activeReactions: state.activeReactions.filter((r) => r.id !== reaction.id),
+          }));
+        }, 2900);
+      };
+
+      const showToast = (toast: ActionToastItem | null) => {
+        if (!toast) return;
+        set({ actionToast: toast });
+      };
+
       const canLocalUserAct = (): boolean => {
         const { mpRole, mpMyPlayerIndex, gameState, isBotThinking } = get();
         if (gameState.phase === 'game_over' || isBotThinking) return false;
@@ -99,20 +266,46 @@ export const useGameStore = create<GameStoreState>()(
         return mpMyPlayerIndex !== null && gameState.currentTurnPlayerIndex === mpMyPlayerIndex;
       };
 
-      // Helper: apply an action on Host (or local solo) and broadcast if Host
       const applyAuthoritativeAction = (action: GameAction) => {
-        const { gameState, lang, turnSnapshot, mpRole } = get();
+        const { gameState, lang, turnSnapshot, mpRole, mpMyPlayerIndex, seriesWins, soundEnabled } =
+          get();
         const isEndTurn = action.type === 'END_TURN';
-        const snapshot = isEndTurn ? null : (turnSnapshot ?? gameState);
+        const isSkill =
+          action.type === 'USE_SKILL_REFRESH_MARKET' ||
+          action.type === 'USE_SKILL_GRAB_THREE' ||
+          action.type === 'USE_SKILL_SWAP_VEGGIE' ||
+          action.type === 'USE_SKILL_GOLDEN_TOUCH' ||
+          action.type === 'USE_SKILL_STEAL_VEGGIE' ||
+          action.type === 'USE_SKILL_CLONE_VEGGIE';
+        // Skills cannot be undone (prevents peeking/reshuffling), so snapshot resets on skill use
+        const snapshot = isEndTurn || isSkill ? null : (turnSnapshot ?? gameState);
         const nextState = gameReducer(gameState, action, lang);
+
+        // Play special sound if active player grabbed Golden or Rotten veggie
+        const actorIdx = gameState.currentTurnPlayerIndex;
+        const prevP = gameState.players[actorIdx];
+        const nextP = nextState.players[actorIdx];
+        if (prevP && nextP) {
+          if ((nextP.goldenBonusPoints ?? 0) > (prevP.goldenBonusPoints ?? 0)) {
+            Sound.skillActivate(soundEnabled);
+          } else if ((nextP.rottenPenaltyPoints ?? 0) < (prevP.rottenPenaltyPoints ?? 0)) {
+            Sound.rottenBuzz(soundEnabled);
+          }
+        }
+
+        const nextSeriesWins = applySeriesWinIfFinished(gameState, nextState, seriesWins);
+        const toast = buildOpponentActionToast(gameState, nextState, lang, mpRole, mpMyPlayerIndex);
 
         set({
           gameState: nextState,
           turnSnapshot: snapshot,
           selectedResourceSlots: [],
           shelfViewingPlayerIndex: isEndTurn ? null : get().shelfViewingPlayerIndex,
+          seriesWins: nextSeriesWins,
           errorMessage: null,
         });
+
+        showToast(toast);
 
         if (mpRole === 'host') {
           peerManager.broadcast({
@@ -132,7 +325,6 @@ export const useGameStore = create<GameStoreState>()(
         }
       };
 
-      // Helper: undo on Host (or local solo) and broadcast if Host
       const applyAuthoritativeUndo = () => {
         const { turnSnapshot, mpRole } = get();
         if (!turnSnapshot) return;
@@ -177,25 +369,72 @@ export const useGameStore = create<GameStoreState>()(
         mpPlayerPeerIds: [],
         mpRemoteHasSnapshot: false,
 
+        // Social & session state
+        seriesWins: {},
+        lastDeckSize: undefined,
+        lastGameMode: 'special',
+        showPowerUpRoll: false,
+        activeReactions: [],
+        actionToast: null,
+
         setScreen: (screen) => set({ screen }),
         setRoomCode: (roomCode) => set({ roomCode }),
         clearMpError: () => set({ mpError: null }),
+        dismissActionToast: () => set({ actionToast: null }),
+        dismissPowerUpRoll: () => set({ showPowerUpRoll: false }),
+
+        sendReaction: (emoji, text) => {
+          const { gameState, mpRole, mpMyPlayerIndex } = get();
+          const senderIdx =
+            mpRole !== 'none' && mpMyPlayerIndex !== null
+              ? mpMyPlayerIndex
+              : gameState.currentTurnPlayerIndex;
+          const senderName = gameState.players[senderIdx]?.name ?? 'Pemain';
+
+          const reaction: ReactionPayload = {
+            id: `rx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            senderName,
+            senderIndex: senderIdx,
+            emoji,
+            text,
+          };
+
+          pushReaction(reaction);
+
+          if (mpRole === 'host') {
+            peerManager.broadcast({ type: 'REACTION', reaction });
+          } else if (mpRole === 'guest') {
+            peerManager.sendToHost({ type: 'REACTION', reaction });
+          }
+        },
 
         startNewGame: (options) => {
-          // Starting a local/bot game disconnects any online room
           if (get().mpRole !== 'none') {
             peerManager.disconnect();
           }
 
-          const players = options?.players ?? [
-            { id: 'p1', name: 'Pemain 1', isBot: false },
-            { id: 'p2', name: 'Bot Pintar', isBot: true, botDifficulty: 'greedy' },
-          ];
+          const currentPlayers = get().gameState.players;
+          const players = options?.players ??
+            (options?.preserveSeries && currentPlayers.length >= 2
+              ? currentPlayers.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  isBot: p.isBot,
+                  botDifficulty: p.botDifficulty,
+                }))
+              : [
+                  { id: 'p1', name: 'Pemain 1', isBot: false },
+                  { id: 'p2', name: 'Bot Pintar', isBot: true, botDifficulty: 'greedy' as const },
+                ]);
           const seed = options?.seed ?? Math.floor(Math.random() * 1000000);
+          const deckSize = options?.deckSize ?? (options?.preserveSeries ? get().lastDeckSize : undefined);
+          const gameMode: GameMode = options?.gameMode ?? (options?.preserveSeries ? get().lastGameMode : 'special');
 
           const newState = initializeGame({
             players,
             seed,
+            deckSize,
+            gameMode,
           });
 
           set({
@@ -215,6 +454,11 @@ export const useGameStore = create<GameStoreState>()(
             mpMyPlayerIndex: null,
             mpPlayerPeerIds: [],
             mpRemoteHasSnapshot: false,
+            lastDeckSize: deckSize,
+            lastGameMode: gameMode,
+            showPowerUpRoll: gameMode === 'special',
+            seriesWins: options?.preserveSeries ? get().seriesWins : {},
+            actionToast: null,
           });
 
           setTimeout(() => {
@@ -223,7 +467,7 @@ export const useGameStore = create<GameStoreState>()(
         },
 
         // ==========================================
-        // MULTIPLAYER (PeerJS WebRTC Host-Authoritative)
+        // MULTIPLAYER (Supabase Realtime Broadcast)
         // ==========================================
         openOnlineRoom: (hostName) => {
           const code = generateRoomCode();
@@ -238,6 +482,9 @@ export const useGameStore = create<GameStoreState>()(
             mpMyPlayerIndex: 0,
             mpPlayerPeerIds: [],
             mpRemoteHasSnapshot: false,
+            seriesWins: {},
+            activeReactions: [],
+            actionToast: null,
           });
 
           peerManager.hostRoom(code, {
@@ -300,7 +547,7 @@ export const useGameStore = create<GameStoreState>()(
             onGuestAction: (peerId, action) => {
               const { gameState, mpPlayerPeerIds } = get();
               const activePeerId = mpPlayerPeerIds[gameState.currentTurnPlayerIndex];
-              if (activePeerId !== peerId) return; // Enforce turn authority
+              if (activePeerId !== peerId) return;
               try {
                 applyAuthoritativeAction(action);
               } catch (err: any) {
@@ -315,6 +562,9 @@ export const useGameStore = create<GameStoreState>()(
               const activePeerId = mpPlayerPeerIds[gameState.currentTurnPlayerIndex];
               if (activePeerId !== peerId) return;
               applyAuthoritativeUndo();
+            },
+            onReaction: (reaction) => {
+              pushReaction(reaction);
             },
             onError: (message) => {
               set({ mpStatus: 'error', mpError: message });
@@ -335,6 +585,9 @@ export const useGameStore = create<GameStoreState>()(
             mpMyPlayerIndex: null,
             mpPlayerPeerIds: [],
             mpRemoteHasSnapshot: false,
+            seriesWins: {},
+            activeReactions: [],
+            actionToast: null,
           });
 
           peerManager.joinRoom(cleanCode, cleanName, {
@@ -348,7 +601,7 @@ export const useGameStore = create<GameStoreState>()(
                 mpStatus: 'connected',
               });
             },
-            onGameStart: (gameState, playerPeerIds) => {
+            onGameStart: (gameState, playerPeerIds, incomingSeriesWins) => {
               const myPeerId = peerManager.getMyPeerId();
               const myIdx = myPeerId ? playerPeerIds.indexOf(myPeerId) : -1;
               set({
@@ -360,17 +613,31 @@ export const useGameStore = create<GameStoreState>()(
                 turnSnapshot: null,
                 inspectedPlayerIndex: null,
                 shelfViewingPlayerIndex: null,
+                seriesWins: incomingSeriesWins ?? get().seriesWins,
+                lastGameMode: gameState.gameMode ?? 'classic',
+                showPowerUpRoll: gameState.gameMode === 'special',
+                actionToast: null,
                 errorMessage: null,
                 screen: 'game',
               });
             },
-            onStateSync: (gameState, hasTurnSnapshot) => {
+            onStateSync: (nextState, hasTurnSnapshot) => {
+              const { gameState: prevState, lang, mpRole, mpMyPlayerIndex, seriesWins } = get();
+              const nextSeriesWins = applySeriesWinIfFinished(prevState, nextState, seriesWins);
+              const toast = buildOpponentActionToast(prevState, nextState, lang, mpRole, mpMyPlayerIndex);
+
               set({
-                gameState,
+                gameState: nextState,
                 mpRemoteHasSnapshot: hasTurnSnapshot,
                 selectedResourceSlots: [],
+                seriesWins: nextSeriesWins,
                 errorMessage: null,
               });
+
+              showToast(toast);
+            },
+            onReaction: (reaction) => {
+              pushReaction(reaction);
             },
             onHostClosed: () => {
               peerManager.disconnect();
@@ -383,6 +650,9 @@ export const useGameStore = create<GameStoreState>()(
                 mpPlayerPeerIds: [],
                 mpRemoteHasSnapshot: false,
                 roomCode: null,
+                seriesWins: {},
+                activeReactions: [],
+                actionToast: null,
                 screen: 'menu',
               });
             },
@@ -427,7 +697,7 @@ export const useGameStore = create<GameStoreState>()(
           });
         },
 
-        startOnlineGame: () => {
+        startOnlineGame: (deckSize, gameMode = 'special') => {
           const { mpRole, mpLobbyPlayers } = get();
           if (mpRole !== 'host' || mpLobbyPlayers.length < 2) return;
 
@@ -439,7 +709,7 @@ export const useGameStore = create<GameStoreState>()(
           }));
           const playerPeerIds = mpLobbyPlayers.map((p) => (p.isBot ? null : p.peerId));
           const seed = Math.floor(Math.random() * 1000000);
-          const newState = initializeGame({ players, seed });
+          const newState = initializeGame({ players, seed, deckSize, gameMode });
 
           set({
             gameState: newState,
@@ -450,6 +720,11 @@ export const useGameStore = create<GameStoreState>()(
             turnSnapshot: null,
             inspectedPlayerIndex: null,
             shelfViewingPlayerIndex: null,
+            lastDeckSize: deckSize,
+            lastGameMode: gameMode,
+            showPowerUpRoll: gameMode === 'special',
+            seriesWins: {},
+            actionToast: null,
             errorMessage: null,
             screen: 'game',
           });
@@ -458,6 +733,59 @@ export const useGameStore = create<GameStoreState>()(
             type: 'GAME_START',
             gameState: newState,
             playerPeerIds,
+            seriesWins: {},
+          });
+
+          setTimeout(() => {
+            get().executeBotTurnIfNeeded();
+          }, 500);
+        },
+
+        rematchOnlineGame: (deckSize) => {
+          const { mpRole, mpLobbyPlayers, mpPlayerPeerIds, seriesWins, lastDeckSize, lastGameMode } =
+            get();
+          if (mpRole !== 'host' || mpLobbyPlayers.length < 2) return;
+
+          const effectiveDeckSize = deckSize !== undefined ? deckSize : lastDeckSize;
+          const players = mpLobbyPlayers.map((p, idx) => ({
+            id: `p${idx + 1}`,
+            name: p.name,
+            isBot: !!p.isBot,
+            botDifficulty: p.isBot ? (p.botDifficulty ?? 'greedy') : undefined,
+          }));
+          const peerIds =
+            mpPlayerPeerIds.length === players.length
+              ? mpPlayerPeerIds
+              : mpLobbyPlayers.map((p) => (p.isBot ? null : p.peerId));
+          const seed = Math.floor(Math.random() * 1000000);
+          const newState = initializeGame({
+            players,
+            seed,
+            deckSize: effectiveDeckSize,
+            gameMode: lastGameMode,
+          });
+
+          set({
+            gameState: newState,
+            mpMyPlayerIndex: 0,
+            mpPlayerPeerIds: peerIds,
+            mpRemoteHasSnapshot: false,
+            selectedResourceSlots: [],
+            turnSnapshot: null,
+            inspectedPlayerIndex: null,
+            shelfViewingPlayerIndex: null,
+            lastDeckSize: effectiveDeckSize,
+            showPowerUpRoll: lastGameMode === 'special',
+            actionToast: null,
+            errorMessage: null,
+            screen: 'game',
+          });
+
+          peerManager.broadcast({
+            type: 'GAME_START',
+            gameState: newState,
+            playerPeerIds: peerIds,
+            seriesWins,
           });
 
           setTimeout(() => {
@@ -479,6 +807,9 @@ export const useGameStore = create<GameStoreState>()(
             mpRemoteHasSnapshot: false,
             selectedResourceSlots: [],
             turnSnapshot: null,
+            seriesWins: {},
+            activeReactions: [],
+            actionToast: null,
           });
         },
 
@@ -501,11 +832,15 @@ export const useGameStore = create<GameStoreState>()(
 
           const availableCount = gameState.market.resourceSlots.filter(Boolean).length;
           const allPilesEmpty = gameState.market.piles.every((p) => p.length === 0);
-          const maxSelect = availableCount === 1 && allPilesEmpty ? 1 : 2;
+          const extraAllowance = gameState.extraVeggieAllowance ?? 0;
+          const maxSelect =
+            availableCount === 1 && allPilesEmpty
+              ? 1
+              : Math.min(2 + extraAllowance, availableCount);
 
           if (selectedResourceSlots.length >= maxSelect) {
             set({
-              selectedResourceSlots: [selectedResourceSlots[0], slotIndex],
+              selectedResourceSlots: [...selectedResourceSlots.slice(0, maxSelect - 1), slotIndex],
               errorMessage: null,
             });
           } else {
@@ -513,6 +848,110 @@ export const useGameStore = create<GameStoreState>()(
               selectedResourceSlots: [...selectedResourceSlots, slotIndex],
               errorMessage: null,
             });
+          }
+        },
+
+        useSkillRefreshMarket: () => {
+          const { gameState, mpRole } = get();
+          if (!canLocalUserAct() || gameState.hasTakenMainActionThisTurn) return;
+          const action: GameAction = { type: 'USE_SKILL_REFRESH_MARKET' };
+          if (mpRole === 'guest') {
+            peerManager.sendToHost({ type: 'PLAYER_ACTION', action });
+            set({ selectedResourceSlots: [], errorMessage: null });
+            return;
+          }
+          try {
+            applyAuthoritativeAction(action);
+          } catch (err: any) {
+            set({ errorMessage: err?.message ?? 'Skill tidak bisa digunakan.' });
+          }
+        },
+
+        useSkillGrabThree: () => {
+          const { gameState, mpRole } = get();
+          if (!canLocalUserAct() || gameState.hasTakenMainActionThisTurn) return;
+          const action: GameAction = { type: 'USE_SKILL_GRAB_THREE' };
+          if (mpRole === 'guest') {
+            peerManager.sendToHost({ type: 'PLAYER_ACTION', action });
+            set({ errorMessage: null });
+            return;
+          }
+          try {
+            applyAuthoritativeAction(action);
+          } catch (err: any) {
+            set({ errorMessage: err?.message ?? 'Skill tidak bisa digunakan.' });
+          }
+        },
+
+        useSkillSwapVeggie: (targetPlayerIndex, myResource, targetResource) => {
+          const { gameState, mpRole } = get();
+          if (!canLocalUserAct() || gameState.hasTakenMainActionThisTurn) return;
+          const action: GameAction = {
+            type: 'USE_SKILL_SWAP_VEGGIE',
+            targetPlayerIndex,
+            myResource,
+            targetResource,
+          };
+          if (mpRole === 'guest') {
+            peerManager.sendToHost({ type: 'PLAYER_ACTION', action });
+            return;
+          }
+          try {
+            applyAuthoritativeAction(action);
+          } catch (err: any) {
+            set({ errorMessage: err?.message ?? 'Gagal menukar sayur.' });
+          }
+        },
+
+        useSkillGoldenTouch: () => {
+          const { gameState, mpRole } = get();
+          if (!canLocalUserAct() || gameState.hasTakenMainActionThisTurn) return;
+          const action: GameAction = { type: 'USE_SKILL_GOLDEN_TOUCH' };
+          if (mpRole === 'guest') {
+            peerManager.sendToHost({ type: 'PLAYER_ACTION', action });
+            return;
+          }
+          try {
+            applyAuthoritativeAction(action);
+          } catch (err: any) {
+            set({ errorMessage: err?.message ?? 'Skill Sentuhan Emas tidak bisa dipakai.' });
+          }
+        },
+
+        useSkillStealVeggie: (targetPlayerIndex, targetResource) => {
+          const { gameState, mpRole } = get();
+          if (!canLocalUserAct() || gameState.hasTakenMainActionThisTurn) return;
+          const action: GameAction = {
+            type: 'USE_SKILL_STEAL_VEGGIE',
+            targetPlayerIndex,
+            targetResource,
+          };
+          if (mpRole === 'guest') {
+            peerManager.sendToHost({ type: 'PLAYER_ACTION', action });
+            return;
+          }
+          try {
+            applyAuthoritativeAction(action);
+          } catch (err: any) {
+            set({ errorMessage: err?.message ?? 'Gagal mencuri sayur.' });
+          }
+        },
+
+        useSkillCloneVeggie: (myResource) => {
+          const { gameState, mpRole } = get();
+          if (!canLocalUserAct() || gameState.hasTakenMainActionThisTurn) return;
+          const action: GameAction = {
+            type: 'USE_SKILL_CLONE_VEGGIE',
+            myResource,
+          };
+          if (mpRole === 'guest') {
+            peerManager.sendToHost({ type: 'PLAYER_ACTION', action });
+            return;
+          }
+          try {
+            applyAuthoritativeAction(action);
+          } catch (err: any) {
+            set({ errorMessage: err?.message ?? 'Gagal menggandakan sayur.' });
           }
         },
 
@@ -625,11 +1064,17 @@ export const useGameStore = create<GameStoreState>()(
 
           if (mpRole === 'guest') {
             peerManager.sendToHost({ type: 'PLAYER_ACTION', action });
-            set({ selectedResourceSlots: [], shelfViewingPlayerIndex: null, errorMessage: null });
+            set({
+              selectedResourceSlots: [],
+              shelfViewingPlayerIndex: null,
+              actionToast: null,
+              errorMessage: null,
+            });
             return;
           }
 
           try {
+            set({ actionToast: null });
             applyAuthoritativeAction(action);
           } catch (err: any) {
             set({ errorMessage: err?.message ?? 'Tidak dapat mengakhiri giliran' });
@@ -638,7 +1083,6 @@ export const useGameStore = create<GameStoreState>()(
 
         executeBotTurnIfNeeded: () => {
           const { gameState, lang, isBotThinking, mpRole } = get();
-          // Only local solo or Host executes bot turns
           if (mpRole === 'guest') return;
           if (gameState.phase === 'game_over' || isBotThinking) return;
 
@@ -666,10 +1110,22 @@ export const useGameStore = create<GameStoreState>()(
                 return;
               }
 
+              const prevState = currentState;
               const action = actions[actionIdx];
               currentState = gameReducer(currentState, action, lang);
               actionIdx++;
-              set({ gameState: currentState });
+
+              const nextSeriesWins = applySeriesWinIfFinished(prevState, currentState, get().seriesWins);
+              const toast = buildOpponentActionToast(
+                prevState,
+                currentState,
+                lang,
+                get().mpRole,
+                get().mpMyPlayerIndex
+              );
+
+              set({ gameState: currentState, seriesWins: nextSeriesWins });
+              showToast(toast);
 
               if (get().mpRole === 'host') {
                 peerManager.broadcast({
@@ -679,7 +1135,7 @@ export const useGameStore = create<GameStoreState>()(
                 });
               }
 
-              setTimeout(executeNextAction, 450);
+              setTimeout(executeNextAction, 480);
             };
 
             setTimeout(executeNextAction, 500);
@@ -693,12 +1149,7 @@ export const useGameStore = create<GameStoreState>()(
 
         setLang: (lang) => set({ lang }),
         toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
-        toggleMusic: () =>
-          set((state) => ({
-            musicEnabled: !state.musicEnabled,
-            // If user explicitly turns music back on while master sound was muted, unmute master sound too
-            soundEnabled: !state.musicEnabled ? true : state.soundEnabled,
-          })),
+        toggleMusic: () => set((state) => ({ musicEnabled: !state.musicEnabled })),
         setSettingsOpen: (open) => set({ isSettingsOpen: open }),
         setInspectedPlayerIndex: (index) => set({ inspectedPlayerIndex: index }),
         setShelfViewingPlayerIndex: (index) => set({ shelfViewingPlayerIndex: index }),

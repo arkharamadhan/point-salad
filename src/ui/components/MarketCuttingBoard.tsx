@@ -19,11 +19,26 @@ export const MarketCuttingBoard: React.FC = () => {
     mpMyPlayerIndex,
   } = useGameStore();
 
-  const { market, hasTakenMainActionThisTurn, phase, players, currentTurnPlayerIndex } = gameState;
+  const {
+    market,
+    hasTakenMainActionThisTurn,
+    phase,
+    players,
+    currentTurnPlayerIndex,
+    activeEvent,
+    extraVeggieAllowance,
+  } = gameState;
   const isMyTurn =
     mpRole === 'none' || (mpMyPlayerIndex !== null && currentTurnPlayerIndex === mpMyPlayerIndex);
   const activePlayerName = players[currentTurnPlayerIndex]?.name ?? '';
   const isActionAllowed = phase !== 'game_over' && !hasTakenMainActionThisTurn && isMyTurn;
+
+  const getSlotEventBadge = (slotIndex: number): 'golden' | 'rotten' | null => {
+    if (!activeEvent || phase === 'game_over') return null;
+    if (activeEvent.type === 'golden_veggie' && activeEvent.slotIndex === slotIndex) return 'golden';
+    if (activeEvent.type === 'rotten_veggie' && activeEvent.slotIndex === slotIndex) return 'rotten';
+    return null;
+  };
 
   const totalCardsInPiles = market.piles.reduce((sum, p) => sum + p.length, 0);
 
@@ -44,7 +59,10 @@ export const MarketCuttingBoard: React.FC = () => {
       const currentSelected = useGameStore.getState().selectedResourceSlots;
       const availableCount = market.resourceSlots.filter(Boolean).length;
       const allPilesEmpty = market.piles.every((p) => p.length === 0);
-      const needed = availableCount === 1 && allPilesEmpty ? 1 : 2;
+      const needed =
+        availableCount === 1 && allPilesEmpty
+          ? 1
+          : Math.min(2 + (extraVeggieAllowance ?? 0), availableCount);
       if (currentSelected.length === needed) {
         confirmTakeResources();
       }
@@ -105,6 +123,43 @@ export const MarketCuttingBoard: React.FC = () => {
 
       {/* Top-Left Cutting Board Handle Slot Accent */}
       <div className="pointer-events-none absolute top-2.5 left-3.5 z-10 w-8 h-3 rounded-full bg-[#A8753A]/45 border border-[#8E5F29]/40 shadow-inner" />
+
+      {/* Active Market Event Pill (Special Mode) */}
+      {activeEvent && phase !== 'game_over' && (
+        <div className="z-20 flex justify-center -mt-1 mb-1">
+          <div
+            className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-black font-fredoka shadow-sm border ${
+              activeEvent.type === 'golden_veggie'
+                ? 'bg-amber-100 text-amber-900 border-amber-400'
+                : activeEvent.type === 'rotten_veggie'
+                ? 'bg-lime-100 text-purple-900 border-lime-600'
+                : 'bg-emerald-100 text-emerald-900 border-emerald-400'
+            }`}
+          >
+            {activeEvent.type === 'golden_veggie' && (
+              <span>
+                {lang === 'id'
+                  ? '✨ Event: Sayur Emas (+3 Poin Bonus)!'
+                  : '✨ Event: Golden Veggie (+3 Bonus Pts)!'}
+              </span>
+            )}
+            {activeEvent.type === 'rotten_veggie' && (
+              <span>
+                {lang === 'id'
+                  ? '🤢 Event: Awas Sayur Busuk (-2 Poin)!'
+                  : '🤢 Event: Watch out! Rotten Veggie (-2 Pts)!'}
+              </span>
+            )}
+            {activeEvent.type === 'bountiful_harvest' && (
+              <span>
+                {lang === 'id'
+                  ? '🌟 Event: Panen Raya (Ambil 3 Sayur)!'
+                  : '🌟 Event: Bountiful Harvest (Take 3 Veggies)!'}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Top-Right Deck Count Badge */}
       <button
@@ -167,8 +222,9 @@ export const MarketCuttingBoard: React.FC = () => {
           return (
             <VeggieCharacter
               key={slotIndex}
-              cardKey={resCard?.id ?? `empty-${slotIndex}`}
+              cardKey={resCard ? `${resCard.id}-${resCard.resource}` : `empty-${slotIndex}`}
               resource={resCard?.resource}
+              eventBadge={resCard ? getSlotEventBadge(slotIndex) : null}
               isSelectable={isActionAllowed && !!resCard}
               isSelected={selectedResourceSlots.includes(slotIndex)}
               onClick={
@@ -191,8 +247,9 @@ export const MarketCuttingBoard: React.FC = () => {
           return (
             <VeggieCharacter
               key={slotIndex}
-              cardKey={resCard?.id ?? `empty-${slotIndex}`}
+              cardKey={resCard ? `${resCard.id}-${resCard.resource}` : `empty-${slotIndex}`}
               resource={resCard?.resource}
+              eventBadge={resCard ? getSlotEventBadge(slotIndex) : null}
               isSelectable={isActionAllowed && !!resCard}
               isSelected={selectedResourceSlots.includes(slotIndex)}
               onClick={

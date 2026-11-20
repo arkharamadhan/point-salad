@@ -20,7 +20,16 @@ import {
 import { useGameStore } from '../store/gameStore';
 import { VeggieIcon } from './icons/SpiceIcon';
 import { Sound } from '../sound/soundEffects';
-import { ResourceId } from '../../engine/types';
+import { ResourceId, GameMode } from '../../engine/types';
+import { DeckSizeOption } from '../../engine';
+
+const DECK_SIZE_CHOICES: Array<{ value: DeckSizeOption | undefined; labelId: string; labelEn: string }> = [
+  { value: undefined, labelId: 'Auto', labelEn: 'Auto' },
+  { value: 36, labelId: '36', labelEn: '36' },
+  { value: 54, labelId: '54', labelEn: '54' },
+  { value: 72, labelId: '72', labelEn: '72' },
+  { value: 108, labelId: '108', labelEn: '108' },
+];
 
 type MenuView = 'home' | 'bot' | 'open-room' | 'join-room';
 
@@ -77,6 +86,8 @@ export const MainMenu: React.FC = () => {
   // Bot setup state
   const [botCount, setBotCount] = useState<number>(1);
   const [botDifficulty, setBotDifficulty] = useState<'easy' | 'greedy'>('greedy');
+  const [selectedDeckSize, setSelectedDeckSize] = useState<DeckSizeOption | undefined>(undefined);
+  const [selectedGameMode, setSelectedGameMode] = useState<GameMode>('special');
 
   // Copy feedback
   const [copied, setCopied] = useState<boolean>(false);
@@ -142,6 +153,8 @@ export const MainMenu: React.FC = () => {
     startNewGame({
       players,
       seed: Math.floor(Math.random() * 1000000),
+      deckSize: selectedDeckSize,
+      gameMode: selectedGameMode,
     });
     setScreen('game');
   };
@@ -503,6 +516,58 @@ export const MainMenu: React.FC = () => {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase mb-1.5">
+                    {isId ? 'Mode Permainan' : 'Game Mode'}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGameMode('special')}
+                      className={`py-2 px-2 rounded-xl font-bold text-xs border-2 transition cursor-pointer ${
+                        selectedGameMode === 'special'
+                          ? 'bg-[#7B1FA2] border-[#4A148C] text-white shadow'
+                          : 'bg-white border-stone-300 text-stone-700 hover:border-stone-400'
+                      }`}
+                    >
+                      ✨ {isId ? 'Mode Seru (Power-Up)' : 'Special (Power-Ups)'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGameMode('classic')}
+                      className={`py-2 px-2 rounded-xl font-bold text-xs border-2 transition cursor-pointer ${
+                        selectedGameMode === 'classic'
+                          ? 'bg-[#23583A] border-[#143522] text-white shadow'
+                          : 'bg-white border-stone-300 text-stone-700 hover:border-stone-400'
+                      }`}
+                    >
+                      🥗 {isId ? 'Mode Klasik' : 'Classic Mode'}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-stone-600 uppercase mb-1.5">
+                    {isId ? 'Jumlah Kartu (Ukuran Dek)' : 'Deck Size (Cards)'}
+                  </label>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {DECK_SIZE_CHOICES.map((opt) => (
+                      <button
+                        key={opt.labelId}
+                        type="button"
+                        onClick={() => setSelectedDeckSize(opt.value)}
+                        className={`py-2 rounded-xl font-bold text-xs border-2 transition cursor-pointer ${
+                          selectedDeckSize === opt.value
+                            ? 'bg-[#23583A] border-[#143522] text-white shadow'
+                            : 'bg-white border-stone-300 text-stone-700 hover:border-stone-400'
+                        }`}
+                      >
+                        {isId ? opt.labelId : opt.labelEn}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleStartBotGame}
@@ -673,12 +738,66 @@ export const MainMenu: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Game Mode Choice for Online Room */}
+                    <div>
+                      <label className="block text-[11px] font-black text-stone-600 uppercase mb-1">
+                        {isId ? 'Mode Permainan' : 'Game Mode'}
+                      </label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGameMode('special')}
+                          className={`py-1.5 rounded-xl font-bold text-xs border-2 transition cursor-pointer ${
+                            selectedGameMode === 'special'
+                              ? 'bg-[#7B1FA2] border-[#4A148C] text-white shadow'
+                              : 'bg-white border-stone-300 text-stone-700 hover:border-stone-400'
+                          }`}
+                        >
+                          ✨ {isId ? 'Mode Seru' : 'Special'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGameMode('classic')}
+                          className={`py-1.5 rounded-xl font-bold text-xs border-2 transition cursor-pointer ${
+                            selectedGameMode === 'classic'
+                              ? 'bg-[#23583A] border-[#143522] text-white shadow'
+                              : 'bg-white border-stone-300 text-stone-700 hover:border-stone-400'
+                          }`}
+                        >
+                          🥗 {isId ? 'Klasik' : 'Classic'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Deck Size Choice for Online Room */}
+                    <div>
+                      <label className="block text-[11px] font-black text-stone-600 uppercase mb-1">
+                        {isId ? 'Jumlah Kartu (Bisa > 36 walau berdua!)' : 'Deck Size (Cards)'}
+                      </label>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {DECK_SIZE_CHOICES.map((opt) => (
+                          <button
+                            key={opt.labelId}
+                            type="button"
+                            onClick={() => setSelectedDeckSize(opt.value)}
+                            className={`py-1.5 rounded-xl font-bold text-xs border-2 transition cursor-pointer ${
+                              selectedDeckSize === opt.value
+                                ? 'bg-[#D97706] border-[#92400E] text-white shadow'
+                                : 'bg-white border-stone-300 text-stone-700 hover:border-stone-400'
+                            }`}
+                          >
+                            {isId ? opt.labelId : opt.labelEn}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <button
                       type="button"
                       disabled={mpLobbyPlayers.length < 2 || mpStatus !== 'connected'}
                       onClick={() => {
                         Sound.confirmAction(soundEnabled);
-                        startOnlineGame();
+                        startOnlineGame(selectedDeckSize, selectedGameMode);
                       }}
                       className={`w-full py-3.5 rounded-2xl font-black text-base border-b-4 shadow-md flex items-center justify-center gap-2 transition-all ${
                         mpLobbyPlayers.length >= 2 && mpStatus === 'connected'

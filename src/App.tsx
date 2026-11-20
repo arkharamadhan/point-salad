@@ -8,6 +8,9 @@ import { EndGameModal } from './ui/components/EndGameModal';
 import { SettingsModal } from './ui/components/SettingsModal';
 import { PlayerRecipesModal } from './ui/components/PlayerRecipesModal';
 import { MainMenu } from './ui/components/MainMenu';
+import { EmoteBar } from './ui/components/EmoteBar';
+import { ActionToastBanner } from './ui/components/ActionToastBanner';
+import { PowerUpRollModal } from './ui/components/PowerUpRollModal';
 import { VeggieIcon } from './ui/components/icons/SpiceIcon';
 import { useKeyboardNav } from './ui/hooks/useKeyboardNav';
 import { BgmPlayer } from './ui/sound/bgmPlayer';
@@ -85,23 +88,6 @@ export const App: React.FC = () => {
         <GameTopBar />
       </div>
 
-      {/* 1B. MOBILE COMPACT PLAYER STRIP (Always visible above cutting board on mobile/tablet) */}
-      <div className="relative z-10 lg:hidden w-full max-w-xl mx-auto px-2.5 pb-1.5 flex-shrink-0">
-        <div className={`grid gap-2 ${players.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-          {players.map((player, index) => (
-            <PlayerSideCard
-              key={player.id}
-              player={player}
-              playerIndex={index}
-              allPlayers={players}
-              isActiveTurn={index === currentTurnPlayerIndex && !isGameOver}
-              isGameOver={isGameOver}
-              compact={true}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* 2. MAIN CENTER ARENA: LEFT PLAYERS | BIG WOODEN CUTTING BOARD | RIGHT PLAYERS */}
       <main className="relative z-10 flex-1 min-h-0 flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-5 xl:gap-7 w-full max-w-[1380px] mx-auto px-2.5 sm:px-4 py-1">
         {/* Desktop Left Side Players */}
@@ -118,8 +104,25 @@ export const App: React.FC = () => {
           ))}
         </aside>
 
-        {/* Center: Wooden Cutting Board Market */}
-        <section className="flex-1 flex justify-center items-center w-full">
+        {/* Center: Mobile Player Cards (snug directly above board) + Wooden Cutting Board Market */}
+        <section className="flex-1 flex flex-col justify-center items-center w-full">
+          {/* Mobile Compact Player Strip — sits directly flush on top of the cutting board */}
+          <div className="lg:hidden w-full max-w-[440px] sm:max-w-[540px] mb-1.5">
+            <div className={`grid gap-1.5 ${players.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+              {players.map((player, index) => (
+                <PlayerSideCard
+                  key={player.id}
+                  player={player}
+                  playerIndex={index}
+                  allPlayers={players}
+                  isActiveTurn={index === currentTurnPlayerIndex && !isGameOver}
+                  isGameOver={isGameOver}
+                  compact={true}
+                />
+              ))}
+            </div>
+          </div>
+
           <MarketCuttingBoard />
         </section>
 
@@ -161,7 +164,12 @@ export const App: React.FC = () => {
         ↺
       </button>
 
+      {/* Live Opponent Action Toast & Floating Emote/Quick Chat */}
+      <ActionToastBanner />
+      <EmoteBar />
+
       {/* Modals */}
+      <PowerUpRollModal />
       <EndGameModal />
       <SettingsModal />
       <PlayerRecipesModal />

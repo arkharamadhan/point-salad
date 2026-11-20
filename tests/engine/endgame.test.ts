@@ -153,23 +153,23 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
     });
 
     it('Level 3: When score and resources are tied, most unflipped scoring cards wins', () => {
-      // Both have 12 pts and 4 total resources.
-      // P1: 2 jahe, 2 kunyit (total 4 resources)
-      // S01 (+3 jahe): 2*3 = 6 pts
-      // S02 (+3 kunyit): 2*3 = 6 pts -> total 12 pts (2 unflipped cards)
+      // Both have 8 pts and 4 total resources.
+      // P1: 2 wortel, 2 paprika (total 4 resources)
+      // S01 (+2 wortel): 2*2 = 4 pts
+      // S04 (+2 paprika): 2*2 = 4 pts -> total 8 pts (2 unflipped cards)
       const p1 = makePlayer('p1', 'Alice', { wortel: 2, paprika: 2 }, [
         { id: 'c1', resource: 'wortel', scoringId: 'S01' },
-        { id: 'c2', resource: 'paprika', scoringId: 'S02' },
+        { id: 'c2', resource: 'paprika', scoringId: 'S04' },
       ]);
-      // P2: 4 jahe (total 4 resources)
-      // S01 (+3 jahe): 4*3 = 12 pts (1 unflipped card)
+      // P2: 4 wortel (total 4 resources)
+      // S01 (+2 wortel): 4*2 = 8 pts (1 unflipped card)
       const p2 = makePlayer('p2', 'Bob', { wortel: 4 }, [
         { id: 'c3', resource: 'wortel', scoringId: 'S01' },
       ]);
 
       const scores = calculateFinalScores([p1, p2]);
       expect(scores[0].totalScore).toBe(scores[1].totalScore);
-      expect(scores[0].totalScore).toBe(12);
+      expect(scores[0].totalScore).toBe(8);
       expect(scores[0].totalResources).toBe(scores[1].totalResources);
       expect(scores[0].totalResources).toBe(4);
       expect(scores[0].playerId).toBe('p1'); // P1 has 2 unflipped cards vs 1

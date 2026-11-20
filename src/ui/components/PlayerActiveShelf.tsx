@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { PlateView } from './PlateView';
+import { SkillBar } from './SkillBar';
 import { evaluatePlayerScore } from '../../engine/scoring';
 
 export const PlayerActiveShelf: React.FC = () => {
@@ -42,9 +43,21 @@ export const PlayerActiveShelf: React.FC = () => {
   // Instruction banner text based on turn state
   const availableResourceCount = gameState.market.resourceSlots.filter(Boolean).length;
   const allPilesEmpty = gameState.market.piles.every((p) => p.length === 0);
-  const neededResourcesCount = availableResourceCount === 1 && allPilesEmpty ? 1 : 2;
+  const extraAllowance = gameState.extraVeggieAllowance ?? 0;
+  const maxSelectableResources =
+    availableResourceCount === 1 && allPilesEmpty
+      ? 1
+      : Math.min(2 + extraAllowance, availableResourceCount);
+  const remainingToPick = Math.max(0, maxSelectableResources - selectedResourceSlots.length);
 
-  let instructionText = lang === 'id' ? 'Pilih 2 Sayur atau 1 Resep Poin!' : 'Choose your veggies!';
+  let instructionText =
+    maxSelectableResources === 3
+      ? lang === 'id'
+        ? 'Pilih 3 Sayur atau 1 Resep Poin!'
+        : 'Choose 3 Veggies or 1 Point Recipe!'
+      : lang === 'id'
+      ? 'Pilih 2 Sayur atau 1 Resep Poin!'
+      : 'Choose your veggies!';
   if (isGameOver) {
     instructionText = lang === 'id' ? 'Permainan Selesai!' : 'Game Over!';
   } else if (!isMyTurn) {
@@ -59,15 +72,23 @@ export const PlayerActiveShelf: React.FC = () => {
       lang === 'id'
         ? 'Kartu berhasil diambil!'
         : 'Cards drafted!';
-  } else if (selectedResourceSlots.length === 1) {
-    instructionText = lang === 'id' ? 'Pilih 1 Sayur lagi!' : 'Choose 1 more veggie!';
-  } else if (selectedResourceSlots.length === neededResourcesCount) {
+  } else if (selectedResourceSlots.length > 0 && remainingToPick > 0) {
     instructionText =
-      lang === 'id' ? 'Ambil Sayur!' : 'Confirm veggies or press [Space]!';
+      lang === 'id'
+        ? `Pilih ${remainingToPick} Sayur lagi!`
+        : `Choose ${remainingToPick} more veggie${remainingToPick > 1 ? 's' : ''}!`;
+  } else if (selectedResourceSlots.length === maxSelectableResources && maxSelectableResources > 0) {
+    instructionText =
+      lang === 'id'
+        ? `Ambil ${selectedResourceSlots.length} Sayur!`
+        : `Confirm ${selectedResourceSlots.length} veggies`;
   }
 
   const canConfirm =
-    isMyTurn && !hasTakenMainActionThisTurn && selectedResourceSlots.length === neededResourcesCount;
+    isMyTurn &&
+    !hasTakenMainActionThisTurn &&
+    (selectedResourceSlots.length === maxSelectableResources ||
+      (extraAllowance > 0 && selectedResourceSlots.length === 2));
   const hasUndoAvailable = mpRole === 'guest' ? mpRemoteHasSnapshot : (hasTakenMainActionThisTurn || !!turnSnapshot);
   const canUndo = isMyTurn && hasUndoAvailable && !isGameOver && !isBotThinking;
 
@@ -107,9 +128,10 @@ export const PlayerActiveShelf: React.FC = () => {
       {/* 2. Player Point Plates Shelf */}
       <div className="w-full bg-gradient-to-b from-[#8BC34A] to-[#7CB342] border-t-4 border-[#689F38] rounded-t-3xl pt-6 sm:pt-7 pb-3 px-2.5 sm:px-4 md:px-6 shadow-[0_-8px_24px_rgba(40,60,15,0.18)] overflow-visible">
         <div className="max-w-5xl mx-auto flex flex-col gap-1.5 overflow-visible">
-          {/* Top Shelf Row: Player Switcher Tabs + Helper Hint */}
+          {/* Top Shelf Row: Player Switcher Tabs + Power-Up Skill Pill */}
           <div className="flex flex-wrap items-center justify-between gap-2 px-1">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+              <SkillBar />
               {players.map((p, idx) => {
                 const isSelected = idx === targetPlayerIndex;
                 const isMe = idx === currentTurnPlayerIndex;
@@ -169,7 +191,11 @@ export const PlayerActiveShelf: React.FC = () => {
                       card={card}
                       size="shelf"
                       showFlipArrow={!isViewingOpponent && isMyTurn}
-                      liveScore={liveScore}
+                      liveScore={
+                        isGameOver || (!isViewingOpponent && !targetPlayer.isBot)
+                          ? liveScore
+                          : undefined
+                      }
                       onFlip={!isViewingOpponent && isMyTurn ? () => flipCard(card.id) : undefined}
                       onDragToMarket={!isViewingOpponent && canUndo ? () => undoCurrentTurnAction() : undefined}
                       className="overflow-visible"

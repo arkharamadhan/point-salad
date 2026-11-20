@@ -114,6 +114,36 @@ describe('Game Setup (RULES.md section 3)', () => {
     expect(state.market.piles[2]).toHaveLength(21);
   });
 
+  it('correctly sets up a 2-player game with custom deckSize (72 or 108 cards)', () => {
+    const state72 = initializeGame({
+      players: [
+        { id: 'p1', name: 'Alice' },
+        { id: 'p2', name: 'Bob' },
+      ],
+      seed: 99,
+      deckSize: 72,
+    });
+
+    expect(state72.discardedCards).toHaveLength(36);
+    expect(state72.market.piles[0]).toHaveLength(21);
+    expect(state72.market.piles[1]).toHaveLength(21);
+    expect(state72.market.piles[2]).toHaveLength(21);
+
+    const state108 = initializeGame({
+      players: [
+        { id: 'p1', name: 'Alice' },
+        { id: 'p2', name: 'Bob' },
+      ],
+      seed: 99,
+      deckSize: 108,
+    });
+
+    expect(state108.discardedCards).toHaveLength(0);
+    expect(state108.market.piles[0]).toHaveLength(33);
+    expect(state108.market.piles[1]).toHaveLength(33);
+    expect(state108.market.piles[2]).toHaveLength(33);
+  });
+
   it('correctly sets up a 6-player game (108 cards used, 0 discarded)', () => {
     const state = initializeGame({
       players: [

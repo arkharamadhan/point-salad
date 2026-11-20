@@ -282,6 +282,21 @@ export const PointBowlRenderer: React.FC<PointBowlRendererProps> = ({ scoringId,
 
     case 'perMissingType': {
       const params = condition.params as PerMissingTypeParams;
+      if (params.resource) {
+        return (
+          <div className="flex flex-col items-center justify-center gap-0.5 w-full py-0.5 text-center font-fredoka select-none">
+            <span className="text-[8px] sm:text-[9px] font-black uppercase text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded-full border border-rose-200 leading-none">
+              TANPA (0)
+            </span>
+            <div className="flex items-center justify-center gap-1 mt-0.5">
+              <VeggieIcon resource={params.resource} size={iconSize} />
+              <span className="text-stone-400 font-black text-[10px]">=</span>
+              <ScallopBadge value={`+${params.points}`} size={badgeSize} badgeBg="#7CB342" />
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="flex flex-col items-center justify-center gap-0.5 w-full py-0.5 text-center font-fredoka select-none">
           <ScallopBadge value={`+${params.points}`} size={badgeSize} />

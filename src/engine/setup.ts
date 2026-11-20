@@ -1,6 +1,19 @@
 import cardsData from '../data/cards.json';
-import { Card, GameState, PlayerState, ResourceCounts, ResourceId, ALL_RESOURCES } from './types';
+import {
+  ALL_RESOURCES,
+  ALL_SKILLS,
+  Card,
+  GameMode,
+  GameState,
+  MarketEvent,
+  MarketState,
+  PlayerState,
+  ResourceCounts,
+  ResourceId,
+} from './types';
 import { createRNG, shuffle } from './rng';
+
+export type DeckSizeOption = 36 | 54 | 72 | 90 | 108;
 
 export interface SetupOptions {
   players: Array<{
@@ -10,6 +23,47 @@ export interface SetupOptions {
     botDifficulty?: 'easy' | 'greedy';
   }>;
   seed?: number;
+  deckSize?: DeckSizeOption;
+  gameMode?: GameMode;
+}
+
+/**
+ * Deterministically rolls a random Market Event for a turn (~40% total chance):
+ * - ~15% Golden Veggie (+3 bonus pts on an occupied veggie slot)
+ * - ~15% Rotten Veggie (-2 penalty pts on an occupied veggie slot)
+ * - ~10% Bountiful Harvest (may draft up to 3 veggies this turn)
+ */
+export function rollMarketEvent(
+  market: MarketState,
+  seed: number,
+  turnCount: number,
+  gameMode: GameMode
+): MarketEvent | null {
+  if (gameMode !== 'special') return null;
+
+  const filledIndices: number[] = [];
+  for (let i = 0; i < market.resourceSlots.length; i++) {
+    if (market.resourceSlots[i] !== null) {
+      filledIndices.push(i);
+    }
+  }
+  if (filledIndices.length === 0) return null;
+
+  const rng = createRNG(seed + turnCount * 313 + 17);
+  const roll = rng();
+
+  if (roll < 0.15) {
+    const slotIndex = filledIndices[Math.floor(rng() * filledIndices.length)];
+    return { type: 'golden_veggie', slotIndex, bonusPoints: 3 };
+  }
+  if (roll < 0.3) {
+    const slotIndex = filledIndices[Math.floor(rng() * filledIndices.length)];
+    return { type: 'rotten_veggie', slotIndex, penaltyPoints: -2 };
+  }
+  if (roll < 0.4 && filledIndices.length >= 3) {
+    return { type: 'bountiful_harvest' };
+  }
+  return null;
 }
 
 export function createEmptyResourceCounts(): ResourceCounts {
@@ -46,13 +100,13 @@ export function initializeGame(options: SetupOptions): GameState {
     throw new Error(`Expected 108 cards in cards.json, found ${rawCards.length}`);
   }
 
-  // 1. Remove cards per resource according to player count:
-  // 2 players: keep 6 per resource (12 removed, 36 used)
-  // 3 players: keep 9 per resource (9 removed, 54 used)
-  // 4 players: keep 12 per resource (6 removed, 72 used)
-  // 5 players: keep 15 per resource (3 removed, 90 used)
-  // 6 players: keep 18 per resource (0 removed, 108 used)
-  const keptPerResource = playerCount * 3;
+  // 1. Determine deck size (custom deckSize or automatic by player count):
+  // Default: 2p=36, 3p=54, 4p=72, 5p=90, 6p=108
+  const expectedTotalCards = options.deckSize ?? playerCount * 18;
+  if (expectedTotalCards % 6 !== 0 || expectedTotalCards < 36 || expectedTotalCards > 108) {
+    throw new Error(`Invalid deckSize: ${expectedTotalCards}. Must be 36, 54, 72, 90, or 108.`);
+  }
+  const keptPerResource = expectedTotalCards / 6;
   const removePerResource = 18 - keptPerResource;
 
   const usedCards: Card[] = [];
@@ -74,7 +128,6 @@ export function initializeGame(options: SetupOptions): GameState {
   const fullyShuffledCards = shuffle(usedCards, rng);
 
   // Divide into 3 equal draw piles
-  const expectedTotalCards = playerCount * 18;
   if (fullyShuffledCards.length !== expectedTotalCards) {
     throw new Error(`Mismatch in used cards: expected ${expectedTotalCards}, got ${fullyShuffledCards.length}`);
   }
@@ -109,34 +162,50 @@ export function initializeGame(options: SetupOptions): GameState {
   }
 
   // 4. Initialize players
-  const players: PlayerState[] = options.players.map((p) => ({
-    id: p.id,
-    name: p.name,
-    isBot: Boolean(p.isBot),
-    botDifficulty: p.botDifficulty ?? (p.isBot ? 'greedy' : undefined),
-    scoringCards: [],
-    draftedResourceCards: [],
-    flippedCards: [],
-    resources: createEmptyResourceCounts(),
-  }));
+  const gameMode: GameMode = options.gameMode ?? 'special';
+  const players: PlayerState[] = options.players.map((p) => {
+    const assignedSkill =
+      gameMode === 'special'
+        ? ALL_SKILLS[Math.floor(rng() * ALL_SKILLS.length)]
+        : null;
+    return {
+      id: p.id,
+      name: p.name,
+      isBot: Boolean(p.isBot),
+      botDifficulty: p.botDifficulty ?? (p.isBot ? 'greedy' : undefined),
+      scoringCards: [],
+      draftedResourceCards: [],
+      flippedCards: [],
+      resources: createEmptyResourceCounts(),
+      assignedSkill,
+      skillUsed: false,
+      goldenBonusPoints: 0,
+      rottenPenaltyPoints: 0,
+    };
+  });
 
   // 5. Starting player chosen at random using the seeded RNG
   const startingPlayerIndex = Math.floor(rng() * playerCount);
+  const initialMarket: MarketState = {
+    piles,
+    scoringSlots,
+    resourceSlots,
+  };
+  const initialEvent = rollMarketEvent(initialMarket, seed, 1, gameMode);
 
   return {
     players,
     currentTurnPlayerIndex: startingPlayerIndex,
     turnSubPhase: 'action',
     hasTakenMainActionThisTurn: false,
-    market: {
-      piles,
-      scoringSlots,
-      resourceSlots,
-    },
+    market: initialMarket,
     phase: 'in_progress',
     turnCount: 1,
     discardedCards,
     seed,
+    gameMode,
+    extraVeggieAllowance: initialEvent?.type === 'bountiful_harvest' ? 1 : 0,
+    activeEvent: initialEvent,
     log: [`Game started with seed ${seed}. Player ${players[startingPlayerIndex].name} goes first.`],
   };
 }

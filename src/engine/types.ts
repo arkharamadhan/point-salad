@@ -55,6 +55,7 @@ export interface PerTypeAtLeastParams {
 }
 
 export interface PerMissingTypeParams {
+  resource?: ResourceId;
   points: number;
 }
 
@@ -99,6 +100,30 @@ export interface Card {
   scoringId: string;
 }
 
+export type GameMode = 'classic' | 'special';
+
+export type SkillId =
+  | 'refresh_market'
+  | 'grab_three'
+  | 'swap_veggie'
+  | 'golden_touch'
+  | 'steal_veggie'
+  | 'clone_veggie';
+
+export const ALL_SKILLS: readonly SkillId[] = [
+  'refresh_market',
+  'grab_three',
+  'swap_veggie',
+  'golden_touch',
+  'steal_veggie',
+  'clone_veggie',
+] as const;
+
+export type MarketEvent =
+  | { type: 'golden_veggie'; slotIndex: number; bonusPoints: number }
+  | { type: 'rotten_veggie'; slotIndex: number; penaltyPoints: number }
+  | { type: 'bountiful_harvest' };
+
 export interface PlayerState {
   id: string;
   name: string;
@@ -108,6 +133,10 @@ export interface PlayerState {
   draftedResourceCards: Card[];
   flippedCards: Card[];
   resources: ResourceCounts;
+  assignedSkill?: SkillId | null;
+  skillUsed?: boolean;
+  goldenBonusPoints?: number;
+  rottenPenaltyPoints?: number;
 }
 
 export interface MarketState {
@@ -149,11 +178,32 @@ export interface GameState {
   log: string[];
   winnerIds?: string[];
   finalScores?: FinalScoreReport[];
+  gameMode?: GameMode;
+  extraVeggieAllowance?: number;
+  activeEvent?: MarketEvent | null;
 }
 
 export type GameAction =
-  | { type: 'TAKE_RESOURCES'; slotIndices: [number, number] | [number] }
+  | { type: 'TAKE_RESOURCES'; slotIndices: number[] }
   | { type: 'TAKE_SCORING_MARKET'; slotIndex: number }
   | { type: 'TAKE_SCORING_PILE'; pileIndex: number }
   | { type: 'FLIP_CARD'; cardId: string }
+  | { type: 'USE_SKILL_REFRESH_MARKET' }
+  | { type: 'USE_SKILL_GRAB_THREE' }
+  | {
+      type: 'USE_SKILL_SWAP_VEGGIE';
+      targetPlayerIndex: number;
+      myResource: ResourceId;
+      targetResource: ResourceId;
+    }
+  | { type: 'USE_SKILL_GOLDEN_TOUCH' }
+  | {
+      type: 'USE_SKILL_STEAL_VEGGIE';
+      targetPlayerIndex: number;
+      targetResource: ResourceId;
+    }
+  | {
+      type: 'USE_SKILL_CLONE_VEGGIE';
+      myResource: ResourceId;
+    }
   | { type: 'END_TURN' };

@@ -167,6 +167,31 @@ export function evaluatePlayerScore(
     totalScore += detail.score;
   }
 
+  // Include Golden Veggie bonuses & Rotten Veggie penalties (Special Mode)
+  const goldenBonus = player.goldenBonusPoints ?? 0;
+  if (goldenBonus > 0) {
+    cardScores.push({
+      cardId: 'event-golden-bonus',
+      scoringId: 'EVENT_GOLDEN',
+      score: goldenBonus,
+      description:
+        lang === 'id' ? '✨ Bonus Sayur Emas' : '✨ Golden Veggie Bonus',
+    });
+    totalScore += goldenBonus;
+  }
+
+  const rottenPenalty = player.rottenPenaltyPoints ?? 0;
+  if (rottenPenalty < 0) {
+    cardScores.push({
+      cardId: 'event-rotten-penalty',
+      scoringId: 'EVENT_ROTTEN',
+      score: rottenPenalty,
+      description:
+        lang === 'id' ? '🤢 Penalti Sayur Busuk' : '🤢 Rotten Veggie Penalty',
+    });
+    totalScore += rottenPenalty;
+  }
+
   return { totalScore, cardScores };
 }
 

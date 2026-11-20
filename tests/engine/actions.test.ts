@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { gameReducer } from '../../src/engine/actions';
 import { initializeGame } from '../../src/engine/setup';
+import { evaluatePlayerScore } from '../../src/engine/scoring';
 import { Card, GameState } from '../../src/engine/types';
 
 function createTestGame(): GameState {
@@ -293,5 +294,219 @@ describe('Game Reducer & Actions (RULES.md section 4)', () => {
         slotIndex: 0,
       })
     ).toThrowError(/Cannot perform actions in a completed game/);
+  });
+});
+
+describe('Special Mode: 1 Random Power-Up & Market Events (Golden / Rotten / Panen Raya)', () => {
+  it('assigns 1 random Power-Up per player in special mode and none in classic mode', () => {
+    const special = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 101,
+      gameMode: 'special',
+    });
+    expect(special.gameMode).toBe('special');
+    expect(special.players[0].assignedSkill).toBeTruthy();
+    expect(special.players[1].assignedSkill).toBeTruthy();
+
+    const classic = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 101,
+      gameMode: 'classic',
+    });
+    expect(classic.gameMode).toBe('classic');
+    expect(classic.players[0].assignedSkill).toBeNull();
+    expect(classic.activeEvent).toBeNull();
+  });
+
+  it('supports USE_SKILL_GRAB_THREE allowing 3 veggies in one turn and marks skillUsed', () => {
+    const state = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 202,
+      gameMode: 'special',
+    });
+    const idx = state.currentTurnPlayerIndex;
+    state.players[idx].assignedSkill = 'grab_three';
+    state.players[idx].skillUsed = false;
+
+    const afterSkill = gameReducer(state, { type: 'USE_SKILL_GRAB_THREE' });
+    expect(afterSkill.players[idx].skillUsed).toBe(true);
+    expect(afterSkill.extraVeggieAllowance).toBe(1);
+
+    const afterDraft3 = gameReducer(afterSkill, {
+      type: 'TAKE_RESOURCES',
+      slotIndices: [0, 1, 2],
+    });
+    expect(afterDraft3.players[idx].draftedResourceCards).toHaveLength(3);
+  });
+
+  it('supports USE_SKILL_SWAP_VEGGIE between active player and opponent', () => {
+    const state = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 303,
+      gameMode: 'special',
+    });
+    const meIdx = state.currentTurnPlayerIndex;
+    const oppIdx = (meIdx + 1) % 2;
+    state.players[meIdx].assignedSkill = 'swap_veggie';
+    state.players[meIdx].skillUsed = false;
+    state.players[meIdx].resources.tomat = 2;
+    state.players[oppIdx].resources.wortel = 1;
+
+    const afterSwap = gameReducer(state, {
+      type: 'USE_SKILL_SWAP_VEGGIE',
+      targetPlayerIndex: oppIdx,
+      myResource: 'tomat',
+      targetResource: 'wortel',
+    });
+
+    expect(afterSwap.players[meIdx].skillUsed).toBe(true);
+    expect(afterSwap.players[meIdx].resources.tomat).toBe(1);
+    expect(afterSwap.players[meIdx].resources.wortel).toBe(1);
+    expect(afterSwap.players[oppIdx].resources.tomat).toBe(1);
+    expect(afterSwap.players[oppIdx].resources.wortel).toBe(0);
+  });
+
+  it('awards +3 for Golden Veggie and applies -2 for Rotten Veggie in evaluatePlayerScore', () => {
+    const state = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 404,
+      gameMode: 'special',
+    });
+    const idx = state.currentTurnPlayerIndex;
+
+    // Force Golden Veggie on slot 0
+    state.activeEvent = { type: 'golden_veggie', slotIndex: 0, bonusPoints: 3 };
+    const afterGolden = gameReducer(state, { type: 'TAKE_RESOURCES', slotIndices: [0, 1] });
+    expect(afterGolden.players[idx].goldenBonusPoints).toBe(3);
+    expect(evaluatePlayerScore(idx, afterGolden.players).totalScore).toBe(3);
+
+    // Force Rotten Veggie on slot 2 in a fresh turn
+    const state2 = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 404,
+      gameMode: 'special',
+    });
+    const idx2 = state2.currentTurnPlayerIndex;
+    state2.activeEvent = { type: 'rotten_veggie', slotIndex: 2, penaltyPoints: -2 };
+    const afterRotten = gameReducer(state2, { type: 'TAKE_RESOURCES', slotIndices: [2, 3] });
+    expect(afterRotten.players[idx2].rottenPenaltyPoints).toBe(-2);
+    expect(evaluatePlayerScore(idx2, afterRotten.players).totalScore).toBe(-2);
+  });
+});
+
+describe('Additional Power-Ups: Golden Touch, Steal Veggie, Clone Veggie', () => {
+  it('supports USE_SKILL_GOLDEN_TOUCH turning a board veggie into a Golden Veggie (+3)', () => {
+    const state = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 505,
+      gameMode: 'special',
+    });
+    const idx = state.currentTurnPlayerIndex;
+    state.players[idx].assignedSkill = 'golden_touch';
+    state.players[idx].skillUsed = false;
+    state.activeEvent = null;
+
+    const afterTouch = gameReducer(state, { type: 'USE_SKILL_GOLDEN_TOUCH' });
+    expect(afterTouch.players[idx].skillUsed).toBe(true);
+    expect(afterTouch.activeEvent?.type).toBe('golden_veggie');
+  });
+
+  it('supports USE_SKILL_STEAL_VEGGIE taking 1 veggie from an opponent', () => {
+    const state = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 606,
+      gameMode: 'special',
+    });
+    const meIdx = state.currentTurnPlayerIndex;
+    const oppIdx = (meIdx + 1) % 2;
+    state.players[meIdx].assignedSkill = 'steal_veggie';
+    state.players[meIdx].skillUsed = false;
+    state.players[oppIdx].resources.paprika = 2;
+
+    const afterSteal = gameReducer(state, {
+      type: 'USE_SKILL_STEAL_VEGGIE',
+      targetPlayerIndex: oppIdx,
+      targetResource: 'paprika',
+    });
+    expect(afterSteal.players[meIdx].skillUsed).toBe(true);
+    expect(afterSteal.players[meIdx].resources.paprika).toBe(1);
+    expect(afterSteal.players[oppIdx].resources.paprika).toBe(1);
+  });
+
+  it('supports USE_SKILL_CLONE_VEGGIE duplicating an owned veggie', () => {
+    const state = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 707,
+      gameMode: 'special',
+    });
+    const idx = state.currentTurnPlayerIndex;
+    state.players[idx].assignedSkill = 'clone_veggie';
+    state.players[idx].skillUsed = false;
+    state.players[idx].resources.kubis = 1;
+
+    const afterClone = gameReducer(state, {
+      type: 'USE_SKILL_CLONE_VEGGIE',
+      myResource: 'kubis',
+    });
+    expect(afterClone.players[idx].skillUsed).toBe(true);
+    expect(afterClone.players[idx].resources.kubis).toBe(2);
+  });
+
+  it('USE_SKILL_REFRESH_MARKET guarantees new vegetables even when only 3 tomatoes remain and draw piles are empty', () => {
+    const state = initializeGame({
+      players: [
+        { id: 'p1', name: 'A' },
+        { id: 'p2', name: 'B' },
+      ],
+      seed: 808,
+      gameMode: 'special',
+    });
+    const idx = state.currentTurnPlayerIndex;
+    state.players[idx].assignedSkill = 'refresh_market';
+    state.players[idx].skillUsed = false;
+
+    // Empty all draw piles & leave only 3 tomatoes on the board
+    state.market.piles = [[], [], []];
+    state.market.resourceSlots = [
+      { id: 't1', resource: 'tomat', scoringId: 'S01' },
+      null,
+      { id: 't2', resource: 'tomat', scoringId: 'S02' },
+      null,
+      { id: 't3', resource: 'tomat', scoringId: 'S03' },
+      null,
+    ];
+
+    const refreshed = gameReducer(state, { type: 'USE_SKILL_REFRESH_MARKET' });
+    expect(refreshed.players[idx].skillUsed).toBe(true);
+    expect(refreshed.market.resourceSlots[0]?.resource).not.toBe('tomat');
+    expect(refreshed.market.resourceSlots[2]?.resource).not.toBe('tomat');
+    expect(refreshed.market.resourceSlots[4]?.resource).not.toBe('tomat');
   });
 });

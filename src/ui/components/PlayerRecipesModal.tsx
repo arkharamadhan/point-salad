@@ -12,12 +12,21 @@ const PLAYER_COLORS = [
 ];
 
 export const PlayerRecipesModal: React.FC = () => {
-  const { gameState, inspectedPlayerIndex, setInspectedPlayerIndex, lang } = useGameStore();
+  const { gameState, inspectedPlayerIndex, setInspectedPlayerIndex, lang, mpRole, mpMyPlayerIndex } =
+    useGameStore();
 
   if (inspectedPlayerIndex === null) return null;
 
   const player = gameState.players[inspectedPlayerIndex];
   if (!player) return null;
+
+  const isGameOver = gameState.phase === 'game_over';
+  const humanCount = gameState.players.filter((p) => !p.isBot).length;
+  const isMe =
+    mpRole !== 'none'
+      ? mpMyPlayerIndex !== null && inspectedPlayerIndex === mpMyPlayerIndex
+      : !player.isBot && (humanCount === 1 || inspectedPlayerIndex === gameState.currentTurnPlayerIndex);
+  const canSeeScore = isGameOver || isMe;
 
   const colorTheme = PLAYER_COLORS[inspectedPlayerIndex % PLAYER_COLORS.length];
   const { totalScore, cardScores } = evaluatePlayerScore(inspectedPlayerIndex, gameState.players);
@@ -26,7 +35,6 @@ export const PlayerRecipesModal: React.FC = () => {
     cardScoresMap.set(cs.cardId, cs.score);
   }
 
-  const isMe = inspectedPlayerIndex === gameState.currentTurnPlayerIndex;
   const row1Resources = ['kubis', 'tomat', 'paprika'] as const;
   const row2Resources = ['bawang', 'wortel', 'selada'] as const;
 
@@ -59,7 +67,7 @@ export const PlayerRecipesModal: React.FC = () => {
             <div className="flex items-center gap-1.5 bg-black/25 px-2.5 py-1 rounded-full text-xs font-black font-fredoka">
               <span>🏆</span>
               <span>
-                {totalScore} {lang === 'id' ? 'Poin' : 'Pts'}
+                {canSeeScore ? `${totalScore} ${lang === 'id' ? 'Poin' : 'Pts'}` : '?'}
               </span>
             </div>
             <button
@@ -119,9 +127,13 @@ export const PlayerRecipesModal: React.FC = () => {
                 </span>
               </span>
               <span className="text-[11px] text-stone-500 font-normal">
-                {lang === 'id'
-                  ? 'Angka hijau di pojok adalah poin saat ini'
-                  : 'Green badge shows current live score'}
+                {canSeeScore
+                  ? lang === 'id'
+                    ? 'Angka hijau di pojok adalah poin saat ini'
+                    : 'Green badge shows current live score'
+                  : lang === 'id'
+                  ? 'Skor lawan dirahasiakan sampai akhir permainan'
+                  : 'Opponent score is hidden until game over'}
               </span>
             </div>
 
@@ -135,7 +147,7 @@ export const PlayerRecipesModal: React.FC = () => {
                         card={card}
                         size="shelf"
                         showFlipArrow={true}
-                        liveScore={liveScore}
+                        liveScore={canSeeScore ? liveScore : undefined}
                         className="overflow-visible"
                       />
                     </div>

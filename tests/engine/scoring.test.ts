@@ -157,19 +157,19 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     ).toBe(3);
   });
 
-  it('5. evaluateMajority handles most, least, ties (split points rounded down), and total veggies (resource: "all")', () => {
+  it('5. evaluateMajority handles most, least, ties (full points for all tied winners), and total veggies (resource: "all")', () => {
     const p1 = makePlayer('p1', 'Alice', { wortel: 5, bawang: 0 });
     const p2 = makePlayer('p2', 'Bob', { wortel: 5, bawang: 0 });
     const p3 = makePlayer('p3', 'Charlie', { wortel: 2, bawang: 3 });
     const players = [p1, p2, p3];
 
-    // Majority most: p1 and p2 tie with 5 jahe. Points = 10 / 2 = 5 each.
+    // Majority most: p1 and p2 tie with 5 wortel -> BOTH get full 10 points
     const resP1Most = evaluateMajority(0, players, {
       resource: 'wortel',
       mode: 'most',
       points: 10,
     });
-    expect(resP1Most.score).toBe(5);
+    expect(resP1Most.score).toBe(10);
     expect(resP1Most.isWinner).toBe(true);
     expect(resP1Most.tieCount).toBe(2);
 
@@ -182,29 +182,29 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     expect(resP3Most.score).toBe(0);
     expect(resP3Most.isWinner).toBe(false);
 
-    // Majority least: p1 and p2 tie with 0 cengkeh. 0 is valid! Points = 8 / 2 = 4.
+    // Majority least: p1 and p2 tie with 0 bawang -> 0 is valid, BOTH get full 7 points
     const resP1Least = evaluateMajority(0, players, {
       resource: 'bawang',
       mode: 'least',
-      points: 8,
+      points: 7,
     });
-    expect(resP1Least.score).toBe(4);
+    expect(resP1Least.score).toBe(7);
     expect(resP1Least.isWinner).toBe(true);
 
     const resP3Least = evaluateMajority(2, players, {
       resource: 'bawang',
       mode: 'least',
-      points: 8,
+      points: 7,
     });
     expect(resP3Least.score).toBe(0);
 
-    // Majority with resource: 'all' (total sayur terbanyak: p1=5, p2=5, p3=5 -> 3-way tie)
+    // Majority with resource: 'all' (total sayur terbanyak: p1=5, p2=5, p3=5 -> 3-way tie gets full 10)
     const resTotal = evaluateMajority(0, players, {
       resource: 'all',
       mode: 'most',
       points: 10,
     });
-    expect(resTotal.score).toBe(3); // 10 / 3 = 3
+    expect(resTotal.score).toBe(10);
     expect(resTotal.isWinner).toBe(true);
     expect(resTotal.tieCount).toBe(3);
   });
@@ -218,26 +218,28 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
       kubis: 5,
       selada: 3,
     };
-    // Threshold 3: jahe(3), kunyit(4), pala(5), lada(3) -> 4 types * 3 pts = 12
-    const score = evaluatePerTypeAtLeast(res, { threshold: 3, points: 3 });
-    expect(score).toBe(12);
+    // Threshold 3: wortel(3), paprika(4), kubis(5), selada(3) -> 4 types * 5 pts = 20
+    const score = evaluatePerTypeAtLeast(res, { threshold: 3, points: 5 });
+    expect(score).toBe(20);
   });
 
-  it('7. evaluatePerMissingType scores points for each type with count 0 (requires at least 1 veggie)', () => {
-    // 0 total veggies scores 0 (prevents instant free points)
-    expect(evaluatePerMissingType(createEmptyResourceCounts(), { points: 3 })).toBe(0);
+  it('7. evaluatePerMissingType scores +5 when a specific veggie count is 0 (and 0 if owned)', () => {
+    // Specific veggie missing: 0 tomat -> +5 even when player has 0 total veggies
+    expect(evaluatePerMissingType(createEmptyResourceCounts(), { resource: 'tomat', points: 5 })).toBe(5);
 
     const res: ResourceCounts = {
       wortel: 3,
       paprika: 0,
-      tomat: 0,
+      tomat: 1,
       bawang: 1,
       kubis: 0,
       selada: 2,
     };
-    // Missing types: paprika, tomat, kubis -> 3 types * 3 pts = 9
-    const score = evaluatePerMissingType(res, { points: 3 });
-    expect(score).toBe(9);
+    expect(evaluatePerMissingType(res, { resource: 'tomat', points: 5 })).toBe(0);
+    expect(evaluatePerMissingType(res, { resource: 'paprika', points: 5 })).toBe(5);
+
+    // Generic fallback (no resource specified): 2 missing types * 5 = 10
+    expect(evaluatePerMissingType(res, { points: 5 })).toBe(10);
   });
 
   it('8. evaluatePerPairAny sums floor(count / 2) across all 6 types', () => {
@@ -312,11 +314,9 @@ describe('Registry & Player Score Evaluation', () => {
     }
   });
 
-  it('evaluates example from RULES.md section 7 correctly', () => {
-    // RULES.md Section 7:
-    // Jahe 4, Kunyit 2, Kayu Manis 3, Cengkeh 0, Pala 5, Lada 1
-    // S01: "+3 per Jahe, -1 per Lada" -> 4*3 - 1*1 = 11
-    // S07: "4 poin per set Jahe + Kunyit" -> min(4, 2) = 2 set -> 8
+  it('evaluates combined scoring cards from new 108-card deck correctly', () => {
+    // S01: "+2 per Wortel" -> 4*2 = 8
+    // S07: "+3 per Wortel, -1 per Selada" -> 4*3 - 1*1 = 11
     // Total = 19
     const player = makePlayer(
       'p1',
@@ -338,8 +338,8 @@ describe('Registry & Player Score Evaluation', () => {
     const evalResult = evaluatePlayerScore(0, [player]);
     expect(evalResult.totalScore).toBe(19);
     expect(evalResult.cardScores).toHaveLength(2);
-    expect(evalResult.cardScores[0].score).toBe(11);
-    expect(evalResult.cardScores[1].score).toBe(8);
+    expect(evalResult.cardScores[0].score).toBe(8);
+    expect(evalResult.cardScores[1].score).toBe(11);
   });
 
   it('handles invalid inputs and errors in registry', () => {

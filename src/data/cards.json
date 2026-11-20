@@ -1,8 +1,8 @@
 {
   "meta": {
-    "workingTitle": "Point Salad",
-    "version": "2.0.0",
-    "note": "108 kartu bolak-balik resmi Point Salad dengan 6 jenis sayuran (18 kartu per sayur) dan 108 kondisi skor unik.",
+    "workingTitle": "Sayur Heryana",
+    "version": "3.0.0",
+    "note": "108 kartu bolak-balik Sayur Heryana (6 jenis sayur x 18 kartu) dengan 6 kategori rumus Point Salad autentik.",
     "totalCards": 108,
     "playerCounts": {
       "2": {
@@ -33,16 +33,13 @@
     }
   },
   "scoringTypes": {
-    "perItem": "Jumlahkan points x jumlah kartu untuk tiap entri items (points boleh negatif).",
-    "perSet": "points x jumlah set lengkap = min(floor(count_i / required_i)).",
-    "perDistinctSet": "points x m, m = bilangan bulat terbesar yang memenuhi sum(min(count_i, m)) >= size*m (set berisi size jenis berbeda).",
-    "parity": "evenPoints jika jumlah resource genap (angka 0 bernilai 0 / tidak genap), selain itu oddPoints.",
-    "majority": "mode most/least dibandingkan antar semua pemain (sayur tertentu atau total seluruh sayur). Seri membagi points rata, dibulatkan ke bawah.",
-    "perTypeAtLeast": "points untuk setiap jenis sayur dengan count >= threshold.",
-    "perMissingType": "points untuk setiap jenis sayur dengan count == 0.",
-    "perPairAny": "points x sum(floor(count/2)) di seluruh jenis sayur.",
-    "maxStack": "pointsPerCard x count terbesar di antara 6 jenis sayur.",
-    "balanced": "points jika (count terbesar - count terkecil) <= maxDifference, selain itu 0. Hitung semua 6 jenis, termasuk yang 0."
+    "perItem": "Poin per sayur tertentu (+2 murni, +3/-1, +4/-2/-2, +4/-1/-1).",
+    "perSet": "Poin per kombinasi set (2 sama +5, 3 sama +8, 2 beda +5, 3 beda +8, 2+1 +7).",
+    "perDistinctSet": "Salad lengkap 6 jenis sayur berbeda (+12 per set).",
+    "parity": "Genap (+7, 0 tidak dihitung) / Ganjil (+3).",
+    "majority": "Terbanyak (+10) atau Tersedikit (+7, 0 dihitung); seri mendapat poin penuh.",
+    "perTypeAtLeast": "Kelengkapan per jenis sayur: >= 3 (+5) atau >= 2 (+3).",
+    "perMissingType": "Pantangan 1 jenis sayur spesifik: +5 poin jika jumlahnya 0."
   },
   "resources": [
     {
@@ -52,8 +49,8 @@
         "en": "Carrot"
       },
       "icon": {
-        "shape": "circle",
-        "color": "#E69F00"
+        "shape": "triangle",
+        "color": "#F17816"
       }
     },
     {
@@ -64,7 +61,7 @@
       },
       "icon": {
         "shape": "star",
-        "color": "#009E73"
+        "color": "#3D9942"
       }
     },
     {
@@ -75,7 +72,7 @@
       },
       "icon": {
         "shape": "diamond",
-        "color": "#CC79A7"
+        "color": "#C72C72"
       }
     },
     {
@@ -86,7 +83,7 @@
       },
       "icon": {
         "shape": "square",
-        "color": "#F0E442"
+        "color": "#F2C11C"
       }
     },
     {
@@ -96,8 +93,8 @@
         "en": "Tomato"
       },
       "icon": {
-        "shape": "triangle",
-        "color": "#D55E00"
+        "shape": "circle",
+        "color": "#D8342E"
       }
     },
     {
@@ -108,13 +105,109 @@
       },
       "icon": {
         "shape": "hexagon",
-        "color": "#0072B2"
+        "color": "#7B2B9E"
       }
     }
   ],
   "scoringConditions": [
     {
       "id": "S01",
+      "type": "perItem",
+      "params": {
+        "items": [
+          {
+            "resource": "wortel",
+            "points": 2
+          }
+        ]
+      },
+      "text": {
+        "id": "+2 poin untuk setiap Wortel.",
+        "en": "+2 points per Carrot."
+      }
+    },
+    {
+      "id": "S02",
+      "type": "perItem",
+      "params": {
+        "items": [
+          {
+            "resource": "selada",
+            "points": 2
+          }
+        ]
+      },
+      "text": {
+        "id": "+2 poin untuk setiap Selada.",
+        "en": "+2 points per Lettuce."
+      }
+    },
+    {
+      "id": "S03",
+      "type": "perItem",
+      "params": {
+        "items": [
+          {
+            "resource": "bawang",
+            "points": 2
+          }
+        ]
+      },
+      "text": {
+        "id": "+2 poin untuk setiap Bawang.",
+        "en": "+2 points per Onion."
+      }
+    },
+    {
+      "id": "S04",
+      "type": "perItem",
+      "params": {
+        "items": [
+          {
+            "resource": "paprika",
+            "points": 2
+          }
+        ]
+      },
+      "text": {
+        "id": "+2 poin untuk setiap Paprika.",
+        "en": "+2 points per Pepper."
+      }
+    },
+    {
+      "id": "S05",
+      "type": "perItem",
+      "params": {
+        "items": [
+          {
+            "resource": "tomat",
+            "points": 2
+          }
+        ]
+      },
+      "text": {
+        "id": "+2 poin untuk setiap Tomat.",
+        "en": "+2 points per Tomato."
+      }
+    },
+    {
+      "id": "S06",
+      "type": "perItem",
+      "params": {
+        "items": [
+          {
+            "resource": "kubis",
+            "points": 2
+          }
+        ]
+      },
+      "text": {
+        "id": "+2 poin untuk setiap Kubis.",
+        "en": "+2 points per Cabbage."
+      }
+    },
+    {
+      "id": "S07",
       "type": "perItem",
       "params": {
         "items": [
@@ -134,87 +227,67 @@
       }
     },
     {
-      "id": "S02",
+      "id": "S08",
       "type": "perItem",
       "params": {
         "items": [
-          {
-            "resource": "paprika",
-            "points": 3
-          },
-          {
-            "resource": "kubis",
-            "points": -1
-          }
-        ]
-      },
-      "text": {
-        "id": "+3 poin per Paprika, -1 poin per Kubis.",
-        "en": "+3 points per Pepper, -1 point per Cabbage."
-      }
-    },
-    {
-      "id": "S03",
-      "type": "perItem",
-      "params": {
-        "items": [
-          {
-            "resource": "tomat",
-            "points": 3
-          },
-          {
-            "resource": "bawang",
-            "points": -1
-          }
-        ]
-      },
-      "text": {
-        "id": "+3 poin per Tomat, -1 poin per Bawang.",
-        "en": "+3 points per Tomato, -1 point per Onion."
-      }
-    },
-    {
-      "id": "S04",
-      "type": "perItem",
-      "params": {
-        "items": [
-          {
-            "resource": "bawang",
-            "points": 3
-          },
           {
             "resource": "wortel",
+            "points": 3
+          },
+          {
+            "resource": "bawang",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Bawang, -1 poin per Wortel.",
-        "en": "+3 points per Onion, -1 point per Carrot."
+        "id": "+3 poin per Wortel, -1 poin per Bawang.",
+        "en": "+3 points per Carrot, -1 point per Onion."
       }
     },
     {
-      "id": "S05",
+      "id": "S09",
       "type": "perItem",
       "params": {
         "items": [
           {
-            "resource": "kubis",
+            "resource": "wortel",
             "points": 3
           },
           {
-            "resource": "tomat",
+            "resource": "paprika",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Kubis, -1 poin per Tomat.",
-        "en": "+3 points per Cabbage, -1 point per Tomato."
+        "id": "+3 poin per Wortel, -1 poin per Paprika.",
+        "en": "+3 points per Carrot, -1 point per Pepper."
       }
     },
     {
-      "id": "S06",
+      "id": "S10",
+      "type": "perItem",
+      "params": {
+        "items": [
+          {
+            "resource": "selada",
+            "points": 3
+          },
+          {
+            "resource": "bawang",
+            "points": -1
+          }
+        ]
+      },
+      "text": {
+        "id": "+3 poin per Selada, -1 poin per Bawang.",
+        "en": "+3 points per Lettuce, -1 point per Onion."
+      }
+    },
+    {
+      "id": "S11",
       "type": "perItem",
       "params": {
         "items": [
@@ -234,245 +307,223 @@
       }
     },
     {
-      "id": "S07",
-      "type": "perSet",
-      "params": {
-        "set": [
-          "wortel",
-          "paprika"
-        ],
-        "points": 4
-      },
-      "text": {
-        "id": "+4 poin per set (Wortel + Paprika).",
-        "en": "+4 points per set (Carrot + Pepper)."
-      }
-    },
-    {
-      "id": "S08",
-      "type": "perSet",
-      "params": {
-        "set": [
-          "tomat",
-          "bawang"
-        ],
-        "points": 4
-      },
-      "text": {
-        "id": "+4 poin per set (Tomat + Bawang).",
-        "en": "+4 points per set (Tomato + Onion)."
-      }
-    },
-    {
-      "id": "S09",
-      "type": "perSet",
-      "params": {
-        "set": [
-          "kubis",
-          "selada"
-        ],
-        "points": 4
-      },
-      "text": {
-        "id": "+4 poin per set (Kubis + Selada).",
-        "en": "+4 points per set (Cabbage + Lettuce)."
-      }
-    },
-    {
-      "id": "S10",
-      "type": "perSet",
-      "params": {
-        "set": [
-          "wortel",
-          "kubis"
-        ],
-        "points": 5
-      },
-      "text": {
-        "id": "+5 poin per set (Wortel + Kubis).",
-        "en": "+5 points per set (Carrot + Cabbage)."
-      }
-    },
-    {
-      "id": "S11",
-      "type": "perSet",
-      "params": {
-        "set": [
-          "selada",
-          "bawang"
-        ],
-        "points": 5
-      },
-      "text": {
-        "id": "+5 poin per set (Selada + Bawang).",
-        "en": "+5 points per set (Lettuce + Onion)."
-      }
-    },
-    {
       "id": "S12",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "paprika",
-          "tomat"
-        ],
-        "points": 5
+        "items": [
+          {
+            "resource": "selada",
+            "points": 3
+          },
+          {
+            "resource": "tomat",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+5 poin per set (Paprika + Tomat).",
-        "en": "+5 points per set (Pepper + Tomato)."
+        "id": "+3 poin per Selada, -1 poin per Tomat.",
+        "en": "+3 points per Lettuce, -1 point per Tomato."
       }
     },
     {
       "id": "S13",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "wortel",
-          "tomat",
-          "selada"
-        ],
-        "points": 7
+        "items": [
+          {
+            "resource": "bawang",
+            "points": 3
+          },
+          {
+            "resource": "paprika",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+7 poin per paket (1 Wortel + 1 Tomat + 1 Selada).",
-        "en": "+7 points per pack (1 Carrot + 1 Tomato + 1 Lettuce)."
+        "id": "+3 poin per Bawang, -1 poin per Paprika.",
+        "en": "+3 points per Onion, -1 point per Pepper."
       }
     },
     {
       "id": "S14",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "wortel",
-          "paprika",
-          "bawang"
-        ],
-        "points": 8
+        "items": [
+          {
+            "resource": "bawang",
+            "points": 3
+          },
+          {
+            "resource": "tomat",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+8 poin per paket (1 Wortel + 1 Paprika + 1 Bawang).",
-        "en": "+8 points per pack (1 Carrot + 1 Pepper + 1 Onion)."
+        "id": "+3 poin per Bawang, -1 poin per Tomat.",
+        "en": "+3 points per Onion, -1 point per Tomato."
       }
     },
     {
       "id": "S15",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "tomat",
-          "selada",
-          "kubis"
-        ],
-        "points": 8
+        "items": [
+          {
+            "resource": "bawang",
+            "points": 3
+          },
+          {
+            "resource": "kubis",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+8 poin per paket (1 Tomat + 1 Selada + 1 Kubis).",
-        "en": "+8 points per pack (1 Tomato + 1 Lettuce + 1 Cabbage)."
+        "id": "+3 poin per Bawang, -1 poin per Kubis.",
+        "en": "+3 points per Onion, -1 point per Cabbage."
       }
     },
     {
       "id": "S16",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "wortel",
-          "tomat",
-          "bawang"
-        ],
-        "points": 8
+        "items": [
+          {
+            "resource": "paprika",
+            "points": 3
+          },
+          {
+            "resource": "tomat",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+8 poin per paket (1 Wortel + 1 Tomat + 1 Bawang).",
-        "en": "+8 points per pack (1 Carrot + 1 Tomato + 1 Onion)."
+        "id": "+3 poin per Paprika, -1 poin per Tomat.",
+        "en": "+3 points per Pepper, -1 point per Tomato."
       }
     },
     {
       "id": "S17",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "paprika",
-          "selada",
-          "kubis"
-        ],
-        "points": 8
+        "items": [
+          {
+            "resource": "paprika",
+            "points": 3
+          },
+          {
+            "resource": "kubis",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+8 poin per paket (1 Paprika + 1 Selada + 1 Kubis).",
-        "en": "+8 points per pack (1 Pepper + 1 Lettuce + 1 Cabbage)."
+        "id": "+3 poin per Paprika, -1 poin per Kubis.",
+        "en": "+3 points per Pepper, -1 point per Cabbage."
       }
     },
     {
       "id": "S18",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "wortel",
-          "selada",
-          "kubis"
-        ],
-        "points": 8
+        "items": [
+          {
+            "resource": "paprika",
+            "points": 3
+          },
+          {
+            "resource": "wortel",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+8 poin per paket (1 Wortel + 1 Selada + 1 Kubis).",
-        "en": "+8 points per pack (1 Carrot + 1 Lettuce + 1 Cabbage)."
+        "id": "+3 poin per Paprika, -1 poin per Wortel.",
+        "en": "+3 points per Pepper, -1 point per Carrot."
       }
     },
     {
       "id": "S19",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "tomat",
-          "paprika",
-          "bawang"
-        ],
-        "points": 8
+        "items": [
+          {
+            "resource": "tomat",
+            "points": 3
+          },
+          {
+            "resource": "kubis",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+8 poin per paket (1 Tomat + 1 Paprika + 1 Bawang).",
-        "en": "+8 points per pack (1 Tomato + 1 Pepper + 1 Onion)."
+        "id": "+3 poin per Tomat, -1 poin per Kubis.",
+        "en": "+3 points per Tomato, -1 point per Cabbage."
       }
     },
     {
       "id": "S20",
-      "type": "perSet",
+      "type": "perItem",
       "params": {
-        "set": [
-          "wortel",
-          "paprika",
-          "tomat"
-        ],
-        "points": 8
+        "items": [
+          {
+            "resource": "tomat",
+            "points": 3
+          },
+          {
+            "resource": "wortel",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+8 poin per paket (1 Wortel + 1 Paprika + 1 Tomat).",
-        "en": "+8 points per pack (1 Carrot + 1 Pepper + 1 Tomato)."
+        "id": "+3 poin per Tomat, -1 poin per Wortel.",
+        "en": "+3 points per Tomato, -1 point per Carrot."
       }
     },
     {
       "id": "S21",
-      "type": "perDistinctSet",
+      "type": "perItem",
       "params": {
-        "size": 6,
-        "points": 12
+        "items": [
+          {
+            "resource": "tomat",
+            "points": 3
+          },
+          {
+            "resource": "selada",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+12 poin jika punya lengkap semua 6 jenis sayur berbeda.",
-        "en": "+12 points per complete set of all 6 distinct veggies."
+        "id": "+3 poin per Tomat, -1 poin per Selada.",
+        "en": "+3 points per Tomato, -1 point per Lettuce."
       }
     },
     {
       "id": "S22",
-      "type": "perDistinctSet",
+      "type": "perItem",
       "params": {
-        "size": 5,
-        "points": 10
+        "items": [
+          {
+            "resource": "kubis",
+            "points": 3
+          },
+          {
+            "resource": "wortel",
+            "points": -1
+          }
+        ]
       },
       "text": {
-        "id": "+10 poin per set 5 jenis sayur berbeda.",
-        "en": "+10 points per set of 5 distinct veggies."
+        "id": "+3 poin per Kubis, -1 poin per Wortel.",
+        "en": "+3 points per Cabbage, -1 point per Carrot."
       }
     },
     {
@@ -481,14 +532,18 @@
       "params": {
         "items": [
           {
-            "resource": "wortel",
-            "points": 2
+            "resource": "kubis",
+            "points": 3
+          },
+          {
+            "resource": "selada",
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+2 poin per Wortel.",
-        "en": "+2 points per Carrot."
+        "id": "+3 poin per Kubis, -1 poin per Selada.",
+        "en": "+3 points per Cabbage, -1 point per Lettuce."
       }
     },
     {
@@ -497,14 +552,18 @@
       "params": {
         "items": [
           {
-            "resource": "selada",
-            "points": 2
+            "resource": "kubis",
+            "points": 3
+          },
+          {
+            "resource": "bawang",
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+2 poin per Selada.",
-        "en": "+2 points per Lettuce."
+        "id": "+3 poin per Kubis, -1 poin per Bawang.",
+        "en": "+3 points per Cabbage, -1 point per Onion."
       }
     },
     {
@@ -513,14 +572,22 @@
       "params": {
         "items": [
           {
-            "resource": "bawang",
-            "points": 2
+            "resource": "wortel",
+            "points": 4
+          },
+          {
+            "resource": "selada",
+            "points": -2
+          },
+          {
+            "resource": "tomat",
+            "points": -2
           }
         ]
       },
       "text": {
-        "id": "+2 poin per Bawang.",
-        "en": "+2 points per Onion."
+        "id": "+4 poin per Wortel, -2 per Selada, -2 per Tomat.",
+        "en": "+4 points per Carrot, -2 per Lettuce, -2 per Tomato."
       }
     },
     {
@@ -529,14 +596,22 @@
       "params": {
         "items": [
           {
-            "resource": "paprika",
-            "points": 2
+            "resource": "selada",
+            "points": 4
+          },
+          {
+            "resource": "bawang",
+            "points": -2
+          },
+          {
+            "resource": "kubis",
+            "points": -2
           }
         ]
       },
       "text": {
-        "id": "+2 poin per Paprika.",
-        "en": "+2 points per Pepper."
+        "id": "+4 poin per Selada, -2 per Bawang, -2 per Kubis.",
+        "en": "+4 points per Lettuce, -2 per Onion, -2 per Cabbage."
       }
     },
     {
@@ -545,14 +620,22 @@
       "params": {
         "items": [
           {
-            "resource": "tomat",
-            "points": 2
+            "resource": "bawang",
+            "points": 4
+          },
+          {
+            "resource": "paprika",
+            "points": -2
+          },
+          {
+            "resource": "wortel",
+            "points": -2
           }
         ]
       },
       "text": {
-        "id": "+2 poin per Tomat.",
-        "en": "+2 points per Tomato."
+        "id": "+4 poin per Bawang, -2 per Paprika, -2 per Wortel.",
+        "en": "+4 points per Onion, -2 per Pepper, -2 per Carrot."
       }
     },
     {
@@ -561,14 +644,22 @@
       "params": {
         "items": [
           {
-            "resource": "kubis",
-            "points": 2
+            "resource": "paprika",
+            "points": 4
+          },
+          {
+            "resource": "tomat",
+            "points": -2
+          },
+          {
+            "resource": "selada",
+            "points": -2
           }
         ]
       },
       "text": {
-        "id": "+2 poin per Kubis.",
-        "en": "+2 points per Cabbage."
+        "id": "+4 poin per Paprika, -2 per Tomat, -2 per Selada.",
+        "en": "+4 points per Pepper, -2 per Tomato, -2 per Lettuce."
       }
     },
     {
@@ -577,18 +668,22 @@
       "params": {
         "items": [
           {
-            "resource": "wortel",
-            "points": 1
+            "resource": "tomat",
+            "points": 4
           },
           {
-            "resource": "selada",
-            "points": 1
+            "resource": "kubis",
+            "points": -2
+          },
+          {
+            "resource": "bawang",
+            "points": -2
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Wortel, +1 poin per Selada.",
-        "en": "+1 point per Carrot, +1 point per Lettuce."
+        "id": "+4 poin per Tomat, -2 per Kubis, -2 per Bawang.",
+        "en": "+4 points per Tomato, -2 per Cabbage, -2 per Onion."
       }
     },
     {
@@ -597,18 +692,22 @@
       "params": {
         "items": [
           {
-            "resource": "wortel",
-            "points": 1
+            "resource": "kubis",
+            "points": 4
           },
           {
-            "resource": "bawang",
-            "points": 1
+            "resource": "wortel",
+            "points": -2
+          },
+          {
+            "resource": "paprika",
+            "points": -2
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Wortel, +1 poin per Bawang.",
-        "en": "+1 point per Carrot, +1 point per Onion."
+        "id": "+4 poin per Kubis, -2 per Wortel, -2 per Paprika.",
+        "en": "+4 points per Cabbage, -2 per Carrot, -2 per Pepper."
       }
     },
     {
@@ -618,17 +717,21 @@
         "items": [
           {
             "resource": "wortel",
-            "points": 1
+            "points": 4
           },
           {
-            "resource": "paprika",
-            "points": 1
+            "resource": "bawang",
+            "points": -1
+          },
+          {
+            "resource": "kubis",
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Wortel, +1 poin per Paprika.",
-        "en": "+1 point per Carrot, +1 point per Pepper."
+        "id": "+4 poin per Wortel, -1 per Bawang, -1 per Kubis.",
+        "en": "+4 points per Carrot, -1 per Onion, -1 per Cabbage."
       }
     },
     {
@@ -637,18 +740,22 @@
       "params": {
         "items": [
           {
-            "resource": "wortel",
-            "points": 1
+            "resource": "selada",
+            "points": 4
           },
           {
-            "resource": "tomat",
-            "points": 1
+            "resource": "paprika",
+            "points": -1
+          },
+          {
+            "resource": "wortel",
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Wortel, +1 poin per Tomat.",
-        "en": "+1 point per Carrot, +1 point per Tomato."
+        "id": "+4 poin per Selada, -1 per Paprika, -1 per Wortel.",
+        "en": "+4 points per Lettuce, -1 per Pepper, -1 per Carrot."
       }
     },
     {
@@ -657,18 +764,22 @@
       "params": {
         "items": [
           {
-            "resource": "wortel",
-            "points": 1
+            "resource": "bawang",
+            "points": 4
           },
           {
-            "resource": "kubis",
-            "points": 1
+            "resource": "tomat",
+            "points": -1
+          },
+          {
+            "resource": "selada",
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Wortel, +1 poin per Kubis.",
-        "en": "+1 point per Carrot, +1 point per Cabbage."
+        "id": "+4 poin per Bawang, -1 per Tomat, -1 per Selada.",
+        "en": "+4 points per Onion, -1 per Tomato, -1 per Lettuce."
       }
     },
     {
@@ -677,18 +788,22 @@
       "params": {
         "items": [
           {
-            "resource": "selada",
-            "points": 1
+            "resource": "paprika",
+            "points": 4
+          },
+          {
+            "resource": "kubis",
+            "points": -1
           },
           {
             "resource": "bawang",
-            "points": 1
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Selada, +1 poin per Bawang.",
-        "en": "+1 point per Lettuce, +1 point per Onion."
+        "id": "+4 poin per Paprika, -1 per Kubis, -1 per Bawang.",
+        "en": "+4 points per Pepper, -1 per Cabbage, -1 per Onion."
       }
     },
     {
@@ -697,18 +812,22 @@
       "params": {
         "items": [
           {
-            "resource": "selada",
-            "points": 1
+            "resource": "tomat",
+            "points": 4
+          },
+          {
+            "resource": "wortel",
+            "points": -1
           },
           {
             "resource": "paprika",
-            "points": 1
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Selada, +1 poin per Paprika.",
-        "en": "+1 point per Lettuce, +1 point per Pepper."
+        "id": "+4 poin per Tomat, -1 per Wortel, -1 per Paprika.",
+        "en": "+4 points per Tomato, -1 per Carrot, -1 per Pepper."
       }
     },
     {
@@ -717,518 +836,358 @@
       "params": {
         "items": [
           {
+            "resource": "kubis",
+            "points": 4
+          },
+          {
             "resource": "selada",
-            "points": 1
+            "points": -1
           },
           {
             "resource": "tomat",
-            "points": 1
+            "points": -1
           }
         ]
       },
       "text": {
-        "id": "+1 poin per Selada, +1 poin per Tomat.",
-        "en": "+1 point per Lettuce, +1 point per Tomato."
+        "id": "+4 poin per Kubis, -1 per Selada, -1 per Tomat.",
+        "en": "+4 points per Cabbage, -1 per Lettuce, -1 per Tomato."
       }
     },
     {
       "id": "S37",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "selada",
-            "points": 1
-          },
-          {
-            "resource": "kubis",
-            "points": 1
-          }
-        ]
+        "set": [
+          "wortel",
+          "wortel"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+1 poin per Selada, +1 poin per Kubis.",
-        "en": "+1 point per Lettuce, +1 point per Cabbage."
+        "id": "+5 poin untuk setiap 2 Wortel.",
+        "en": "+5 points per 2 Carrots."
       }
     },
     {
       "id": "S38",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "bawang",
-            "points": 1
-          },
-          {
-            "resource": "paprika",
-            "points": 1
-          }
-        ]
+        "set": [
+          "selada",
+          "selada"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+1 poin per Bawang, +1 poin per Paprika.",
-        "en": "+1 point per Onion, +1 point per Pepper."
+        "id": "+5 poin untuk setiap 2 Selada.",
+        "en": "+5 points per 2 Lettuces."
       }
     },
     {
       "id": "S39",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "bawang",
-            "points": 1
-          },
-          {
-            "resource": "tomat",
-            "points": 1
-          }
-        ]
+        "set": [
+          "bawang",
+          "bawang"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+1 poin per Bawang, +1 poin per Tomat.",
-        "en": "+1 point per Onion, +1 point per Tomato."
+        "id": "+5 poin untuk setiap 2 Bawang.",
+        "en": "+5 points per 2 Onions."
       }
     },
     {
       "id": "S40",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "bawang",
-            "points": 1
-          },
-          {
-            "resource": "kubis",
-            "points": 1
-          }
-        ]
+        "set": [
+          "paprika",
+          "paprika"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+1 poin per Bawang, +1 poin per Kubis.",
-        "en": "+1 point per Onion, +1 point per Cabbage."
+        "id": "+5 poin untuk setiap 2 Paprika.",
+        "en": "+5 points per 2 Peppers."
       }
     },
     {
       "id": "S41",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "paprika",
-            "points": 1
-          },
-          {
-            "resource": "tomat",
-            "points": 1
-          }
-        ]
+        "set": [
+          "tomat",
+          "tomat"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+1 poin per Paprika, +1 poin per Tomat.",
-        "en": "+1 point per Pepper, +1 point per Tomato."
+        "id": "+5 poin untuk setiap 2 Tomat.",
+        "en": "+5 points per 2 Tomatos."
       }
     },
     {
       "id": "S42",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "paprika",
-            "points": 1
-          },
-          {
-            "resource": "kubis",
-            "points": 1
-          }
-        ]
+        "set": [
+          "kubis",
+          "kubis"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+1 poin per Paprika, +1 poin per Kubis.",
-        "en": "+1 point per Pepper, +1 point per Cabbage."
+        "id": "+5 poin untuk setiap 2 Kubis.",
+        "en": "+5 points per 2 Cabbages."
       }
     },
     {
       "id": "S43",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "tomat",
-            "points": 1
-          },
-          {
-            "resource": "kubis",
-            "points": 1
-          }
-        ]
+        "set": [
+          "wortel",
+          "wortel",
+          "wortel"
+        ],
+        "points": 8
       },
       "text": {
-        "id": "+1 poin per Tomat, +1 poin per Kubis.",
-        "en": "+1 point per Tomato, +1 point per Cabbage."
+        "id": "+8 poin untuk setiap 3 Wortel.",
+        "en": "+8 points per 3 Carrots."
       }
     },
     {
       "id": "S44",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "paprika",
-            "points": 2
-          },
-          {
-            "resource": "kubis",
-            "points": 1
-          },
-          {
-            "resource": "tomat",
-            "points": -2
-          }
-        ]
+        "set": [
+          "selada",
+          "selada",
+          "selada"
+        ],
+        "points": 8
       },
       "text": {
-        "id": "+2 poin per Paprika, +1 poin per Kubis, -2 poin per Tomat.",
-        "en": "+2 points per Pepper, +1 point per Cabbage, -2 points per Tomato."
+        "id": "+8 poin untuk setiap 3 Selada.",
+        "en": "+8 points per 3 Lettuces."
       }
     },
     {
       "id": "S45",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "tomat",
-            "points": 2
-          },
-          {
-            "resource": "wortel",
-            "points": 1
-          },
-          {
-            "resource": "selada",
-            "points": -2
-          }
-        ]
+        "set": [
+          "bawang",
+          "bawang",
+          "bawang"
+        ],
+        "points": 8
       },
       "text": {
-        "id": "+2 poin per Tomat, +1 poin per Wortel, -2 poin per Selada.",
-        "en": "+2 points per Tomato, +1 point per Carrot, -2 points per Lettuce."
+        "id": "+8 poin untuk setiap 3 Bawang.",
+        "en": "+8 points per 3 Onions."
       }
     },
     {
       "id": "S46",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "selada",
-            "points": 2
-          },
-          {
-            "resource": "bawang",
-            "points": 1
-          },
-          {
-            "resource": "paprika",
-            "points": -2
-          }
-        ]
+        "set": [
+          "paprika",
+          "paprika",
+          "paprika"
+        ],
+        "points": 8
       },
       "text": {
-        "id": "+2 poin per Selada, +1 poin per Bawang, -2 poin per Paprika.",
-        "en": "+2 points per Lettuce, +1 point per Onion, -2 points per Pepper."
+        "id": "+8 poin untuk setiap 3 Paprika.",
+        "en": "+8 points per 3 Peppers."
       }
     },
     {
       "id": "S47",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "bawang",
-            "points": 2
-          },
-          {
-            "resource": "tomat",
-            "points": 1
-          },
-          {
-            "resource": "kubis",
-            "points": -2
-          }
-        ]
+        "set": [
+          "tomat",
+          "tomat",
+          "tomat"
+        ],
+        "points": 8
       },
       "text": {
-        "id": "+2 poin per Bawang, +1 poin per Tomat, -2 poin per Kubis.",
-        "en": "+2 points per Onion, +1 point per Tomato, -2 points per Cabbage."
+        "id": "+8 poin untuk setiap 3 Tomat.",
+        "en": "+8 points per 3 Tomatos."
       }
     },
     {
       "id": "S48",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "kubis",
-            "points": 2
-          },
-          {
-            "resource": "paprika",
-            "points": 1
-          },
-          {
-            "resource": "wortel",
-            "points": -2
-          }
-        ]
+        "set": [
+          "kubis",
+          "kubis",
+          "kubis"
+        ],
+        "points": 8
       },
       "text": {
-        "id": "+2 poin per Kubis, +1 poin per Paprika, -2 poin per Wortel.",
-        "en": "+2 points per Cabbage, +1 point per Pepper, -2 points per Carrot."
+        "id": "+8 poin untuk setiap 3 Kubis.",
+        "en": "+8 points per 3 Cabbages."
       }
     },
     {
       "id": "S49",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "wortel",
-            "points": 2
-          },
-          {
-            "resource": "selada",
-            "points": 1
-          },
-          {
-            "resource": "bawang",
-            "points": -2
-          }
-        ]
+        "set": [
+          "wortel",
+          "selada"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Wortel, +1 poin per Selada, -2 poin per Bawang.",
-        "en": "+2 points per Carrot, +1 point per Lettuce, -2 points per Onion."
+        "id": "+5 poin untuk setiap kombinasi Wortel + Selada.",
+        "en": "+5 points per Carrot + Lettuce pair."
       }
     },
     {
       "id": "S50",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "paprika",
-            "points": 2
-          },
-          {
-            "resource": "wortel",
-            "points": 1
-          },
-          {
-            "resource": "kubis",
-            "points": -2
-          }
-        ]
+        "set": [
+          "selada",
+          "bawang"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Paprika, +1 poin per Wortel, -2 poin per Kubis.",
-        "en": "+2 points per Pepper, +1 point per Carrot, -2 points per Cabbage."
+        "id": "+5 poin untuk setiap kombinasi Selada + Bawang.",
+        "en": "+5 points per Lettuce + Onion pair."
       }
     },
     {
       "id": "S51",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "tomat",
-            "points": 2
-          },
-          {
-            "resource": "bawang",
-            "points": 1
-          },
-          {
-            "resource": "paprika",
-            "points": -2
-          }
-        ]
+        "set": [
+          "bawang",
+          "paprika"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Tomat, +1 poin per Bawang, -2 poin per Paprika.",
-        "en": "+2 points per Tomato, +1 point per Onion, -2 points per Pepper."
+        "id": "+5 poin untuk setiap kombinasi Bawang + Paprika.",
+        "en": "+5 points per Onion + Pepper pair."
       }
     },
     {
       "id": "S52",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "selada",
-            "points": 2
-          },
-          {
-            "resource": "kubis",
-            "points": 1
-          },
-          {
-            "resource": "wortel",
-            "points": -2
-          }
-        ]
+        "set": [
+          "paprika",
+          "tomat"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Selada, +1 poin per Kubis, -2 poin per Wortel.",
-        "en": "+2 points per Lettuce, +1 point per Cabbage, -2 points per Carrot."
+        "id": "+5 poin untuk setiap kombinasi Paprika + Tomat.",
+        "en": "+5 points per Pepper + Tomato pair."
       }
     },
     {
       "id": "S53",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "bawang",
-            "points": 2
-          },
-          {
-            "resource": "selada",
-            "points": 1
-          },
-          {
-            "resource": "tomat",
-            "points": -2
-          }
-        ]
+        "set": [
+          "tomat",
+          "kubis"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Bawang, +1 poin per Selada, -2 poin per Tomat.",
-        "en": "+2 points per Onion, +1 point per Lettuce, -2 points per Tomato."
+        "id": "+5 poin untuk setiap kombinasi Tomat + Kubis.",
+        "en": "+5 points per Tomato + Cabbage pair."
       }
     },
     {
       "id": "S54",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "kubis",
-            "points": 2
-          },
-          {
-            "resource": "tomat",
-            "points": 1
-          },
-          {
-            "resource": "bawang",
-            "points": -2
-          }
-        ]
+        "set": [
+          "kubis",
+          "wortel"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Kubis, +1 poin per Tomat, -2 poin per Bawang.",
-        "en": "+2 points per Cabbage, +1 point per Tomato, -2 points per Onion."
+        "id": "+5 poin untuk setiap kombinasi Kubis + Wortel.",
+        "en": "+5 points per Cabbage + Carrot pair."
       }
     },
     {
       "id": "S55",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "wortel",
-            "points": 2
-          },
-          {
-            "resource": "kubis",
-            "points": 1
-          },
-          {
-            "resource": "selada",
-            "points": -2
-          }
-        ]
+        "set": [
+          "wortel",
+          "bawang"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Wortel, +1 poin per Kubis, -2 poin per Selada.",
-        "en": "+2 points per Carrot, +1 point per Cabbage, -2 points per Lettuce."
+        "id": "+5 poin untuk setiap kombinasi Wortel + Bawang.",
+        "en": "+5 points per Carrot + Onion pair."
       }
     },
     {
       "id": "S56",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "paprika",
-            "points": 2
-          },
-          {
-            "resource": "selada",
-            "points": 1
-          },
-          {
-            "resource": "tomat",
-            "points": -2
-          }
-        ]
+        "set": [
+          "selada",
+          "paprika"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Paprika, +1 poin per Selada, -2 poin per Tomat.",
-        "en": "+2 points per Pepper, +1 point per Lettuce, -2 points per Tomato."
+        "id": "+5 poin untuk setiap kombinasi Selada + Paprika.",
+        "en": "+5 points per Lettuce + Pepper pair."
       }
     },
     {
       "id": "S57",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "tomat",
-            "points": 2
-          },
-          {
-            "resource": "paprika",
-            "points": 1
-          },
-          {
-            "resource": "bawang",
-            "points": -2
-          }
-        ]
+        "set": [
+          "bawang",
+          "tomat"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Tomat, +1 poin per Paprika, -2 poin per Bawang.",
-        "en": "+2 points per Tomato, +1 point per Pepper, -2 points per Onion."
+        "id": "+5 poin untuk setiap kombinasi Bawang + Tomat.",
+        "en": "+5 points per Onion + Tomato pair."
       }
     },
     {
       "id": "S58",
-      "type": "perItem",
+      "type": "perSet",
       "params": {
-        "items": [
-          {
-            "resource": "kubis",
-            "points": 2
-          },
-          {
-            "resource": "selada",
-            "points": 1
-          },
-          {
-            "resource": "paprika",
-            "points": -2
-          }
-        ]
+        "set": [
+          "paprika",
+          "kubis"
+        ],
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per Kubis, +1 poin per Selada, -2 poin per Paprika.",
-        "en": "+2 points per Cabbage, +1 point per Lettuce, -2 points per Pepper."
+        "id": "+5 poin untuk setiap kombinasi Paprika + Kubis.",
+        "en": "+5 points per Pepper + Cabbage pair."
       }
     },
     {
@@ -1236,14 +1195,14 @@
       "type": "perSet",
       "params": {
         "set": [
-          "wortel",
+          "tomat",
           "wortel"
         ],
         "points": 5
       },
       "text": {
-        "id": "+5 poin tiap 2 Wortel.",
-        "en": "+5 points per 2 Carrot."
+        "id": "+5 poin untuk setiap kombinasi Tomat + Wortel.",
+        "en": "+5 points per Tomato + Carrot pair."
       }
     },
     {
@@ -1251,14 +1210,14 @@
       "type": "perSet",
       "params": {
         "set": [
-          "selada",
+          "kubis",
           "selada"
         ],
         "points": 5
       },
       "text": {
-        "id": "+5 poin tiap 2 Selada.",
-        "en": "+5 points per 2 Lettuce."
+        "id": "+5 poin untuk setiap kombinasi Kubis + Selada.",
+        "en": "+5 points per Cabbage + Lettuce pair."
       }
     },
     {
@@ -1266,14 +1225,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "bawang",
+          "wortel",
+          "selada",
           "bawang"
         ],
-        "points": 5
+        "points": 8
       },
       "text": {
-        "id": "+5 poin tiap 2 Bawang.",
-        "en": "+5 points per 2 Onion."
+        "id": "+8 poin per trio Wortel + Selada + Bawang.",
+        "en": "+8 points per Carrot + Lettuce + Onion trio."
       }
     },
     {
@@ -1281,14 +1241,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "paprika",
+          "selada",
+          "bawang",
           "paprika"
         ],
-        "points": 5
+        "points": 8
       },
       "text": {
-        "id": "+5 poin tiap 2 Paprika.",
-        "en": "+5 points per 2 Pepper."
+        "id": "+8 poin per trio Selada + Bawang + Paprika.",
+        "en": "+8 points per Lettuce + Onion + Pepper trio."
       }
     },
     {
@@ -1296,14 +1257,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "tomat",
+          "bawang",
+          "paprika",
           "tomat"
         ],
-        "points": 5
+        "points": 8
       },
       "text": {
-        "id": "+5 poin tiap 2 Tomat.",
-        "en": "+5 points per 2 Tomato."
+        "id": "+8 poin per trio Bawang + Paprika + Tomat.",
+        "en": "+8 points per Onion + Pepper + Tomato trio."
       }
     },
     {
@@ -1311,14 +1273,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "kubis",
+          "paprika",
+          "tomat",
           "kubis"
         ],
-        "points": 5
+        "points": 8
       },
       "text": {
-        "id": "+5 poin tiap 2 Kubis.",
-        "en": "+5 points per 2 Cabbage."
+        "id": "+8 poin per trio Paprika + Tomat + Kubis.",
+        "en": "+8 points per Pepper + Tomato + Cabbage trio."
       }
     },
     {
@@ -1326,15 +1289,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "wortel",
-          "wortel",
+          "tomat",
+          "kubis",
           "wortel"
         ],
         "points": 8
       },
       "text": {
-        "id": "+8 poin tiap 3 Wortel.",
-        "en": "+8 points per 3 Carrot."
+        "id": "+8 poin per trio Tomat + Kubis + Wortel.",
+        "en": "+8 points per Tomato + Cabbage + Carrot trio."
       }
     },
     {
@@ -1342,15 +1305,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "selada",
-          "selada",
+          "kubis",
+          "wortel",
           "selada"
         ],
         "points": 8
       },
       "text": {
-        "id": "+8 poin tiap 3 Selada.",
-        "en": "+8 points per 3 Lettuce."
+        "id": "+8 poin per trio Kubis + Wortel + Selada.",
+        "en": "+8 points per Cabbage + Carrot + Lettuce trio."
       }
     },
     {
@@ -1358,15 +1321,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "bawang",
-          "bawang",
-          "bawang"
+          "wortel",
+          "wortel",
+          "paprika"
         ],
-        "points": 8
+        "points": 7
       },
       "text": {
-        "id": "+8 poin tiap 3 Bawang.",
-        "en": "+8 points per 3 Onion."
+        "id": "+7 poin untuk setiap 2 Wortel + 1 Paprika.",
+        "en": "+7 points per 2 Carrots + 1 Pepper."
       }
     },
     {
@@ -1374,15 +1337,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "paprika",
-          "paprika",
-          "paprika"
+          "selada",
+          "selada",
+          "tomat"
         ],
-        "points": 8
+        "points": 7
       },
       "text": {
-        "id": "+8 poin tiap 3 Paprika.",
-        "en": "+8 points per 3 Pepper."
+        "id": "+7 poin untuk setiap 2 Selada + 1 Tomat.",
+        "en": "+7 points per 2 Lettuces + 1 Tomato."
       }
     },
     {
@@ -1390,15 +1353,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "tomat",
-          "tomat",
-          "tomat"
+          "bawang",
+          "bawang",
+          "kubis"
         ],
-        "points": 8
+        "points": 7
       },
       "text": {
-        "id": "+8 poin tiap 3 Tomat.",
-        "en": "+8 points per 3 Tomato."
+        "id": "+7 poin untuk setiap 2 Bawang + 1 Kubis.",
+        "en": "+7 points per 2 Onions + 1 Cabbage."
       }
     },
     {
@@ -1406,110 +1369,142 @@
       "type": "perSet",
       "params": {
         "set": [
-          "kubis",
-          "kubis",
-          "kubis"
+          "paprika",
+          "paprika",
+          "wortel"
         ],
-        "points": 8
+        "points": 7
       },
       "text": {
-        "id": "+8 poin tiap 3 Kubis.",
-        "en": "+8 points per 3 Cabbage."
+        "id": "+7 poin untuk setiap 2 Paprika + 1 Wortel.",
+        "en": "+7 points per 2 Peppers + 1 Carrot."
       }
     },
     {
       "id": "S71",
-      "type": "majority",
+      "type": "perSet",
       "params": {
-        "resource": "wortel",
-        "mode": "most",
-        "points": 10
+        "set": [
+          "tomat",
+          "tomat",
+          "selada"
+        ],
+        "points": 7
       },
       "text": {
-        "id": "+10 poin untuk pemilik Wortel terbanyak (seri bagi rata).",
-        "en": "+10 points for most Carrot (ties split)."
+        "id": "+7 poin untuk setiap 2 Tomat + 1 Selada.",
+        "en": "+7 points per 2 Tomatos + 1 Lettuce."
       }
     },
     {
       "id": "S72",
-      "type": "majority",
+      "type": "perSet",
       "params": {
-        "resource": "selada",
-        "mode": "most",
-        "points": 10
+        "set": [
+          "kubis",
+          "kubis",
+          "bawang"
+        ],
+        "points": 7
       },
       "text": {
-        "id": "+10 poin untuk pemilik Selada terbanyak (seri bagi rata).",
-        "en": "+10 points for most Lettuce (ties split)."
+        "id": "+7 poin untuk setiap 2 Kubis + 1 Bawang.",
+        "en": "+7 points per 2 Cabbages + 1 Onion."
       }
     },
     {
       "id": "S73",
       "type": "majority",
       "params": {
-        "resource": "bawang",
+        "resource": "wortel",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "+10 poin untuk pemilik Bawang terbanyak (seri bagi rata).",
-        "en": "+10 points for most Onion (ties split)."
+        "id": "+10 poin jika punya Wortel terbanyak (seri tetap dapat 10).",
+        "en": "+10 points for most Carrots (ties get full 10)."
       }
     },
     {
       "id": "S74",
       "type": "majority",
       "params": {
-        "resource": "paprika",
+        "resource": "selada",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "+10 poin untuk pemilik Paprika terbanyak (seri bagi rata).",
-        "en": "+10 points for most Pepper (ties split)."
+        "id": "+10 poin jika punya Selada terbanyak (seri tetap dapat 10).",
+        "en": "+10 points for most Lettuces (ties get full 10)."
       }
     },
     {
       "id": "S75",
       "type": "majority",
       "params": {
-        "resource": "tomat",
+        "resource": "bawang",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "+10 poin untuk pemilik Tomat terbanyak (seri bagi rata).",
-        "en": "+10 points for most Tomato (ties split)."
+        "id": "+10 poin jika punya Bawang terbanyak (seri tetap dapat 10).",
+        "en": "+10 points for most Onions (ties get full 10)."
       }
     },
     {
       "id": "S76",
       "type": "majority",
       "params": {
-        "resource": "kubis",
+        "resource": "paprika",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "+10 poin untuk pemilik Kubis terbanyak (seri bagi rata).",
-        "en": "+10 points for most Cabbage (ties split)."
+        "id": "+10 poin jika punya Paprika terbanyak (seri tetap dapat 10).",
+        "en": "+10 points for most Peppers (ties get full 10)."
       }
     },
     {
       "id": "S77",
       "type": "majority",
       "params": {
+        "resource": "tomat",
+        "mode": "most",
+        "points": 10
+      },
+      "text": {
+        "id": "+10 poin jika punya Tomat terbanyak (seri tetap dapat 10).",
+        "en": "+10 points for most Tomatos (ties get full 10)."
+      }
+    },
+    {
+      "id": "S78",
+      "type": "majority",
+      "params": {
+        "resource": "kubis",
+        "mode": "most",
+        "points": 10
+      },
+      "text": {
+        "id": "+10 poin jika punya Kubis terbanyak (seri tetap dapat 10).",
+        "en": "+10 points for most Cabbages (ties get full 10)."
+      }
+    },
+    {
+      "id": "S79",
+      "type": "majority",
+      "params": {
         "resource": "wortel",
         "mode": "least",
         "points": 7
       },
       "text": {
-        "id": "+7 poin untuk pemilik Wortel tersedikit (seri bagi rata).",
-        "en": "+7 points for fewest Carrot (ties split)."
+        "id": "+7 poin jika punya Wortel tersedikit (0 dihitung, seri dapat 7).",
+        "en": "+7 points for fewest Carrots (0 counts, ties get full 7)."
       }
     },
     {
-      "id": "S78",
+      "id": "S80",
       "type": "majority",
       "params": {
         "resource": "selada",
@@ -1517,12 +1512,12 @@
         "points": 7
       },
       "text": {
-        "id": "+7 poin untuk pemilik Selada tersedikit (seri bagi rata).",
-        "en": "+7 points for fewest Lettuce (ties split)."
+        "id": "+7 poin jika punya Selada tersedikit (0 dihitung, seri dapat 7).",
+        "en": "+7 points for fewest Lettuces (0 counts, ties get full 7)."
       }
     },
     {
-      "id": "S79",
+      "id": "S81",
       "type": "majority",
       "params": {
         "resource": "bawang",
@@ -1530,12 +1525,12 @@
         "points": 7
       },
       "text": {
-        "id": "+7 poin untuk pemilik Bawang tersedikit (seri bagi rata).",
-        "en": "+7 points for fewest Onion (ties split)."
+        "id": "+7 poin jika punya Bawang tersedikit (0 dihitung, seri dapat 7).",
+        "en": "+7 points for fewest Onions (0 counts, ties get full 7)."
       }
     },
     {
-      "id": "S80",
+      "id": "S82",
       "type": "majority",
       "params": {
         "resource": "paprika",
@@ -1543,12 +1538,12 @@
         "points": 7
       },
       "text": {
-        "id": "+7 poin untuk pemilik Paprika tersedikit (seri bagi rata).",
-        "en": "+7 points for fewest Pepper (ties split)."
+        "id": "+7 poin jika punya Paprika tersedikit (0 dihitung, seri dapat 7).",
+        "en": "+7 points for fewest Peppers (0 counts, ties get full 7)."
       }
     },
     {
-      "id": "S81",
+      "id": "S83",
       "type": "majority",
       "params": {
         "resource": "tomat",
@@ -1556,12 +1551,12 @@
         "points": 7
       },
       "text": {
-        "id": "+7 poin untuk pemilik Tomat tersedikit (seri bagi rata).",
-        "en": "+7 points for fewest Tomato (ties split)."
+        "id": "+7 poin jika punya Tomat tersedikit (0 dihitung, seri dapat 7).",
+        "en": "+7 points for fewest Tomatos (0 counts, ties get full 7)."
       }
     },
     {
-      "id": "S82",
+      "id": "S84",
       "type": "majority",
       "params": {
         "resource": "kubis",
@@ -1569,12 +1564,12 @@
         "points": 7
       },
       "text": {
-        "id": "+7 poin untuk pemilik Kubis tersedikit (seri bagi rata).",
-        "en": "+7 points for fewest Cabbage (ties split)."
+        "id": "+7 poin jika punya Kubis tersedikit (0 dihitung, seri dapat 7).",
+        "en": "+7 points for fewest Cabbages (0 counts, ties get full 7)."
       }
     },
     {
-      "id": "S83",
+      "id": "S85",
       "type": "majority",
       "params": {
         "resource": "all",
@@ -1582,12 +1577,12 @@
         "points": 10
       },
       "text": {
-        "id": "+10 poin untuk total sayur terbanyak (seri bagi rata).",
-        "en": "+10 points for most total veggies (ties split)."
+        "id": "+10 poin jika total seluruh sayurmu paling banyak (seri dapat 10).",
+        "en": "+10 points for most total veggies (ties get full 10)."
       }
     },
     {
-      "id": "S84",
+      "id": "S86",
       "type": "majority",
       "params": {
         "resource": "all",
@@ -1595,843 +1590,820 @@
         "points": 7
       },
       "text": {
-        "id": "+7 poin untuk total sayur tersedikit (seri bagi rata).",
-        "en": "+7 points for fewest total veggies (ties split)."
-      }
-    },
-    {
-      "id": "S85",
-      "type": "parity",
-      "params": {
-        "resource": "wortel",
-        "evenPoints": 7,
-        "oddPoints": 0
-      },
-      "text": {
-        "id": "+7 poin jika jumlah Wortel genap (angka 0 bernilai 0).",
-        "en": "+7 points if Carrot count is even (0 scores 0)."
-      }
-    },
-    {
-      "id": "S86",
-      "type": "parity",
-      "params": {
-        "resource": "selada",
-        "evenPoints": 7,
-        "oddPoints": 0
-      },
-      "text": {
-        "id": "+7 poin jika jumlah Selada genap (angka 0 bernilai 0).",
-        "en": "+7 points if Lettuce count is even (0 scores 0)."
+        "id": "+7 poin jika total seluruh sayurmu paling sedikit (seri dapat 7).",
+        "en": "+7 points for fewest total veggies (ties get full 7)."
       }
     },
     {
       "id": "S87",
-      "type": "parity",
+      "type": "perDistinctSet",
       "params": {
-        "resource": "bawang",
-        "evenPoints": 7,
-        "oddPoints": 0
+        "size": 6,
+        "points": 12
       },
       "text": {
-        "id": "+7 poin jika jumlah Bawang genap (angka 0 bernilai 0).",
-        "en": "+7 points if Onion count is even (0 scores 0)."
+        "id": "+12 poin untuk setiap set lengkap 6 jenis sayur berbeda.",
+        "en": "+12 points per complete set of all 6 veggie types."
       }
     },
     {
       "id": "S88",
-      "type": "parity",
+      "type": "perDistinctSet",
       "params": {
-        "resource": "paprika",
-        "evenPoints": 7,
-        "oddPoints": 0
+        "size": 6,
+        "points": 12
       },
       "text": {
-        "id": "+7 poin jika jumlah Paprika genap (angka 0 bernilai 0).",
-        "en": "+7 points if Pepper count is even (0 scores 0)."
+        "id": "+12 poin untuk setiap set lengkap 6 jenis sayur berbeda.",
+        "en": "+12 points per complete set of all 6 veggie types."
       }
     },
     {
       "id": "S89",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "tomat",
-        "evenPoints": 7,
-        "oddPoints": 0
+        "threshold": 3,
+        "points": 5
       },
       "text": {
-        "id": "+7 poin jika jumlah Tomat genap (angka 0 bernilai 0).",
-        "en": "+7 points if Tomato count is even (0 scores 0)."
+        "id": "+5 poin untuk setiap jenis sayur yang berjumlah minimal 3 kartu.",
+        "en": "+5 points per veggie type with at least 3 cards."
       }
     },
     {
       "id": "S90",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "kubis",
-        "evenPoints": 7,
-        "oddPoints": 0
+        "threshold": 3,
+        "points": 5
       },
       "text": {
-        "id": "+7 poin jika jumlah Kubis genap (angka 0 bernilai 0).",
-        "en": "+7 points if Cabbage count is even (0 scores 0)."
+        "id": "+5 poin untuk setiap jenis sayur yang berjumlah minimal 3 kartu.",
+        "en": "+5 points per veggie type with at least 3 cards."
       }
     },
     {
       "id": "S91",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "wortel",
-        "evenPoints": 0,
-        "oddPoints": 3
+        "threshold": 3,
+        "points": 5
       },
       "text": {
-        "id": "+3 poin jika jumlah Wortel ganjil.",
-        "en": "+3 points if Carrot count is odd."
+        "id": "+5 poin untuk setiap jenis sayur yang berjumlah minimal 3 kartu.",
+        "en": "+5 points per veggie type with at least 3 cards."
       }
     },
     {
       "id": "S92",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "selada",
-        "evenPoints": 0,
-        "oddPoints": 3
+        "threshold": 3,
+        "points": 5
       },
       "text": {
-        "id": "+3 poin jika jumlah Selada ganjil.",
-        "en": "+3 points if Lettuce count is odd."
+        "id": "+5 poin untuk setiap jenis sayur yang berjumlah minimal 3 kartu.",
+        "en": "+5 points per veggie type with at least 3 cards."
       }
     },
     {
       "id": "S93",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "bawang",
-        "evenPoints": 0,
-        "oddPoints": 3
+        "threshold": 2,
+        "points": 3
       },
       "text": {
-        "id": "+3 poin jika jumlah Bawang ganjil.",
-        "en": "+3 points if Onion count is odd."
+        "id": "+3 poin untuk setiap jenis sayur yang berjumlah minimal 2 kartu.",
+        "en": "+3 points per veggie type with at least 2 cards."
       }
     },
     {
       "id": "S94",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "paprika",
-        "evenPoints": 0,
-        "oddPoints": 3
+        "threshold": 2,
+        "points": 3
       },
       "text": {
-        "id": "+3 poin jika jumlah Paprika ganjil.",
-        "en": "+3 points if Pepper count is odd."
+        "id": "+3 poin untuk setiap jenis sayur yang berjumlah minimal 2 kartu.",
+        "en": "+3 points per veggie type with at least 2 cards."
       }
     },
     {
       "id": "S95",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "tomat",
-        "evenPoints": 0,
-        "oddPoints": 3
+        "threshold": 2,
+        "points": 3
       },
       "text": {
-        "id": "+3 poin jika jumlah Tomat ganjil.",
-        "en": "+3 points if Tomato count is odd."
+        "id": "+3 poin untuk setiap jenis sayur yang berjumlah minimal 2 kartu.",
+        "en": "+3 points per veggie type with at least 2 cards."
       }
     },
     {
       "id": "S96",
-      "type": "parity",
+      "type": "perTypeAtLeast",
       "params": {
-        "resource": "kubis",
-        "evenPoints": 0,
-        "oddPoints": 3
+        "threshold": 2,
+        "points": 3
       },
       "text": {
-        "id": "+3 poin jika jumlah Kubis ganjil.",
-        "en": "+3 points if Cabbage count is odd."
+        "id": "+3 poin untuk setiap jenis sayur yang berjumlah minimal 2 kartu.",
+        "en": "+3 points per veggie type with at least 2 cards."
       }
     },
     {
       "id": "S97",
-      "type": "perTypeAtLeast",
+      "type": "parity",
       "params": {
-        "threshold": 2,
-        "points": 5
+        "resource": "wortel",
+        "evenPoints": 7,
+        "oddPoints": 3
       },
       "text": {
-        "id": "+5 poin untuk setiap jenis sayur yang kamu punya minimal 2.",
-        "en": "+5 points for each veggie type you have at least 2 of."
+        "id": "+7 poin jika Wortel genap (≥2), +3 poin jika ganjil (0 = 0).",
+        "en": "+7 points if Carrot is even (≥2), +3 if odd (0 = 0)."
       }
     },
     {
       "id": "S98",
-      "type": "perTypeAtLeast",
+      "type": "parity",
       "params": {
-        "threshold": 2,
-        "points": 5
+        "resource": "selada",
+        "evenPoints": 7,
+        "oddPoints": 3
       },
       "text": {
-        "id": "+5 poin untuk setiap jenis sayur yang kamu punya minimal 2.",
-        "en": "+5 points for each veggie type you have at least 2 of."
+        "id": "+7 poin jika Selada genap (≥2), +3 poin jika ganjil (0 = 0).",
+        "en": "+7 points if Lettuce is even (≥2), +3 if odd (0 = 0)."
       }
     },
     {
       "id": "S99",
-      "type": "perTypeAtLeast",
+      "type": "parity",
       "params": {
-        "threshold": 3,
-        "points": 7
+        "resource": "bawang",
+        "evenPoints": 7,
+        "oddPoints": 3
       },
       "text": {
-        "id": "+7 poin untuk setiap jenis sayur yang kamu punya minimal 3.",
-        "en": "+7 points for each veggie type you have at least 3 of."
+        "id": "+7 poin jika Bawang genap (≥2), +3 poin jika ganjil (0 = 0).",
+        "en": "+7 points if Onion is even (≥2), +3 if odd (0 = 0)."
       }
     },
     {
       "id": "S100",
-      "type": "perTypeAtLeast",
+      "type": "parity",
       "params": {
-        "threshold": 3,
-        "points": 7
+        "resource": "paprika",
+        "evenPoints": 7,
+        "oddPoints": 3
       },
       "text": {
-        "id": "+7 poin untuk setiap jenis sayur yang kamu punya minimal 3.",
-        "en": "+7 points for each veggie type you have at least 3 of."
+        "id": "+7 poin jika Paprika genap (≥2), +3 poin jika ganjil (0 = 0).",
+        "en": "+7 points if Pepper is even (≥2), +3 if odd (0 = 0)."
       }
     },
     {
       "id": "S101",
-      "type": "perMissingType",
+      "type": "parity",
       "params": {
-        "points": 3
+        "resource": "tomat",
+        "evenPoints": 7,
+        "oddPoints": 3
       },
       "text": {
-        "id": "+3 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
-        "en": "+3 points for each veggie type you have none of (0). Requires at least 1 veggie."
+        "id": "+7 poin jika Tomat genap (≥2), +3 poin jika ganjil (0 = 0).",
+        "en": "+7 points if Tomato is even (≥2), +3 if odd (0 = 0)."
       }
     },
     {
       "id": "S102",
-      "type": "perMissingType",
+      "type": "parity",
       "params": {
-        "points": 3
+        "resource": "kubis",
+        "evenPoints": 7,
+        "oddPoints": 3
       },
       "text": {
-        "id": "+3 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
-        "en": "+3 points for each veggie type you have none of (0). Requires at least 1 veggie."
+        "id": "+7 poin jika Kubis genap (≥2), +3 poin jika ganjil (0 = 0).",
+        "en": "+7 points if Cabbage is even (≥2), +3 if odd (0 = 0)."
       }
     },
     {
       "id": "S103",
       "type": "perMissingType",
       "params": {
-        "points": 2
+        "resource": "wortel",
+        "points": 5
       },
       "text": {
-        "id": "+2 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
-        "en": "+2 points for each veggie type you have none of (0). Requires at least 1 veggie."
+        "id": "+5 poin jika tidak punya Wortel sama sekali (0 Wortel).",
+        "en": "+5 points if you have 0 Carrots."
       }
     },
     {
       "id": "S104",
       "type": "perMissingType",
       "params": {
-        "points": 2
+        "resource": "selada",
+        "points": 5
       },
       "text": {
-        "id": "+2 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
-        "en": "+2 points for each veggie type you have none of (0). Requires at least 1 veggie."
+        "id": "+5 poin jika tidak punya Selada sama sekali (0 Selada).",
+        "en": "+5 points if you have 0 Lettuces."
       }
     },
     {
       "id": "S105",
-      "type": "perPairAny",
+      "type": "perMissingType",
       "params": {
-        "points": 3
+        "resource": "bawang",
+        "points": 5
       },
       "text": {
-        "id": "+3 poin per pasang sayur sejenis apa saja.",
-        "en": "+3 points per pair of any matching veggie."
+        "id": "+5 poin jika tidak punya Bawang sama sekali (0 Bawang).",
+        "en": "+5 points if you have 0 Onions."
       }
     },
     {
       "id": "S106",
-      "type": "perPairAny",
+      "type": "perMissingType",
       "params": {
-        "points": 3
+        "resource": "paprika",
+        "points": 5
       },
       "text": {
-        "id": "+3 poin per pasang sayur sejenis apa saja.",
-        "en": "+3 points per pair of any matching veggie."
+        "id": "+5 poin jika tidak punya Paprika sama sekali (0 Paprika).",
+        "en": "+5 points if you have 0 Peppers."
       }
     },
     {
       "id": "S107",
-      "type": "maxStack",
+      "type": "perMissingType",
       "params": {
-        "pointsPerCard": 2
+        "resource": "tomat",
+        "points": 5
       },
       "text": {
-        "id": "+2 poin per kartu pada tumpukan sayur terbanyakmu.",
-        "en": "+2 points per card in your largest veggie stack."
+        "id": "+5 poin jika tidak punya Tomat sama sekali (0 Tomat).",
+        "en": "+5 points if you have 0 Tomatos."
       }
     },
     {
       "id": "S108",
-      "type": "balanced",
+      "type": "perMissingType",
       "params": {
-        "maxDifference": 2,
-        "points": 12
+        "resource": "kubis",
+        "points": 5
       },
       "text": {
-        "id": "+12 poin jika selisih jenis terbanyak dan tersedikit <= 2 (semua 6 jenis).",
-        "en": "+12 points if difference between max and min veggie <= 2."
+        "id": "+5 poin jika tidak punya Kubis sama sekali (0 Kubis).",
+        "en": "+5 points if you have 0 Cabbages."
       }
     }
   ],
   "cards": [
     {
-      "id": "C01",
-      "resource": "wortel",
+      "id": "C001",
+      "resource": "paprika",
       "scoring": "S01"
     },
     {
-      "id": "C02",
-      "resource": "selada",
+      "id": "C002",
+      "resource": "tomat",
       "scoring": "S02"
     },
     {
-      "id": "C03",
-      "resource": "bawang",
+      "id": "C003",
+      "resource": "kubis",
       "scoring": "S03"
     },
     {
-      "id": "C04",
-      "resource": "paprika",
+      "id": "C004",
+      "resource": "wortel",
       "scoring": "S04"
     },
     {
-      "id": "C05",
-      "resource": "tomat",
+      "id": "C005",
+      "resource": "selada",
       "scoring": "S05"
     },
     {
-      "id": "C06",
-      "resource": "kubis",
+      "id": "C006",
+      "resource": "bawang",
       "scoring": "S06"
     },
     {
-      "id": "C07",
-      "resource": "wortel",
+      "id": "C007",
+      "resource": "paprika",
       "scoring": "S07"
     },
     {
-      "id": "C08",
-      "resource": "selada",
+      "id": "C008",
+      "resource": "tomat",
       "scoring": "S08"
     },
     {
-      "id": "C09",
-      "resource": "bawang",
+      "id": "C009",
+      "resource": "kubis",
       "scoring": "S09"
     },
     {
-      "id": "C10",
-      "resource": "paprika",
+      "id": "C010",
+      "resource": "wortel",
       "scoring": "S10"
     },
     {
-      "id": "C11",
-      "resource": "tomat",
+      "id": "C011",
+      "resource": "selada",
       "scoring": "S11"
     },
     {
-      "id": "C12",
-      "resource": "kubis",
+      "id": "C012",
+      "resource": "bawang",
       "scoring": "S12"
     },
     {
-      "id": "C13",
-      "resource": "wortel",
+      "id": "C013",
+      "resource": "paprika",
       "scoring": "S13"
     },
     {
-      "id": "C14",
-      "resource": "selada",
+      "id": "C014",
+      "resource": "tomat",
       "scoring": "S14"
     },
     {
-      "id": "C15",
-      "resource": "bawang",
+      "id": "C015",
+      "resource": "kubis",
       "scoring": "S15"
     },
     {
-      "id": "C16",
-      "resource": "paprika",
+      "id": "C016",
+      "resource": "wortel",
       "scoring": "S16"
     },
     {
-      "id": "C17",
-      "resource": "tomat",
+      "id": "C017",
+      "resource": "selada",
       "scoring": "S17"
     },
     {
-      "id": "C18",
-      "resource": "kubis",
+      "id": "C018",
+      "resource": "bawang",
       "scoring": "S18"
     },
     {
-      "id": "C19",
-      "resource": "wortel",
+      "id": "C019",
+      "resource": "paprika",
       "scoring": "S19"
     },
     {
-      "id": "C20",
-      "resource": "selada",
+      "id": "C020",
+      "resource": "tomat",
       "scoring": "S20"
     },
     {
-      "id": "C21",
-      "resource": "bawang",
+      "id": "C021",
+      "resource": "kubis",
       "scoring": "S21"
     },
     {
-      "id": "C22",
-      "resource": "paprika",
+      "id": "C022",
+      "resource": "wortel",
       "scoring": "S22"
     },
     {
-      "id": "C23",
-      "resource": "tomat",
+      "id": "C023",
+      "resource": "selada",
       "scoring": "S23"
     },
     {
-      "id": "C24",
-      "resource": "kubis",
+      "id": "C024",
+      "resource": "bawang",
       "scoring": "S24"
     },
     {
-      "id": "C25",
-      "resource": "wortel",
+      "id": "C025",
+      "resource": "paprika",
       "scoring": "S25"
     },
     {
-      "id": "C26",
-      "resource": "selada",
+      "id": "C026",
+      "resource": "tomat",
       "scoring": "S26"
     },
     {
-      "id": "C27",
-      "resource": "bawang",
+      "id": "C027",
+      "resource": "kubis",
       "scoring": "S27"
     },
     {
-      "id": "C28",
-      "resource": "paprika",
+      "id": "C028",
+      "resource": "wortel",
       "scoring": "S28"
     },
     {
-      "id": "C29",
-      "resource": "tomat",
+      "id": "C029",
+      "resource": "selada",
       "scoring": "S29"
     },
     {
-      "id": "C30",
-      "resource": "kubis",
+      "id": "C030",
+      "resource": "bawang",
       "scoring": "S30"
     },
     {
-      "id": "C31",
-      "resource": "wortel",
+      "id": "C031",
+      "resource": "paprika",
       "scoring": "S31"
     },
     {
-      "id": "C32",
-      "resource": "selada",
+      "id": "C032",
+      "resource": "tomat",
       "scoring": "S32"
     },
     {
-      "id": "C33",
-      "resource": "bawang",
+      "id": "C033",
+      "resource": "kubis",
       "scoring": "S33"
     },
     {
-      "id": "C34",
-      "resource": "paprika",
+      "id": "C034",
+      "resource": "wortel",
       "scoring": "S34"
     },
     {
-      "id": "C35",
-      "resource": "tomat",
+      "id": "C035",
+      "resource": "selada",
       "scoring": "S35"
     },
     {
-      "id": "C36",
-      "resource": "kubis",
+      "id": "C036",
+      "resource": "bawang",
       "scoring": "S36"
     },
     {
-      "id": "C37",
-      "resource": "wortel",
+      "id": "C037",
+      "resource": "paprika",
       "scoring": "S37"
     },
     {
-      "id": "C38",
-      "resource": "selada",
+      "id": "C038",
+      "resource": "tomat",
       "scoring": "S38"
     },
     {
-      "id": "C39",
-      "resource": "bawang",
+      "id": "C039",
+      "resource": "kubis",
       "scoring": "S39"
     },
     {
-      "id": "C40",
-      "resource": "paprika",
+      "id": "C040",
+      "resource": "wortel",
       "scoring": "S40"
     },
     {
-      "id": "C41",
-      "resource": "tomat",
+      "id": "C041",
+      "resource": "selada",
       "scoring": "S41"
     },
     {
-      "id": "C42",
-      "resource": "kubis",
+      "id": "C042",
+      "resource": "bawang",
       "scoring": "S42"
     },
     {
-      "id": "C43",
-      "resource": "wortel",
+      "id": "C043",
+      "resource": "paprika",
       "scoring": "S43"
     },
     {
-      "id": "C44",
-      "resource": "selada",
+      "id": "C044",
+      "resource": "tomat",
       "scoring": "S44"
     },
     {
-      "id": "C45",
-      "resource": "bawang",
+      "id": "C045",
+      "resource": "kubis",
       "scoring": "S45"
     },
     {
-      "id": "C46",
-      "resource": "paprika",
+      "id": "C046",
+      "resource": "wortel",
       "scoring": "S46"
     },
     {
-      "id": "C47",
-      "resource": "tomat",
+      "id": "C047",
+      "resource": "selada",
       "scoring": "S47"
     },
     {
-      "id": "C48",
-      "resource": "kubis",
+      "id": "C048",
+      "resource": "bawang",
       "scoring": "S48"
     },
     {
-      "id": "C49",
-      "resource": "wortel",
+      "id": "C049",
+      "resource": "paprika",
       "scoring": "S49"
     },
     {
-      "id": "C50",
-      "resource": "selada",
+      "id": "C050",
+      "resource": "tomat",
       "scoring": "S50"
     },
     {
-      "id": "C51",
-      "resource": "bawang",
+      "id": "C051",
+      "resource": "kubis",
       "scoring": "S51"
     },
     {
-      "id": "C52",
-      "resource": "paprika",
+      "id": "C052",
+      "resource": "wortel",
       "scoring": "S52"
     },
     {
-      "id": "C53",
-      "resource": "tomat",
+      "id": "C053",
+      "resource": "selada",
       "scoring": "S53"
     },
     {
-      "id": "C54",
-      "resource": "kubis",
+      "id": "C054",
+      "resource": "bawang",
       "scoring": "S54"
     },
     {
-      "id": "C55",
-      "resource": "wortel",
+      "id": "C055",
+      "resource": "paprika",
       "scoring": "S55"
     },
     {
-      "id": "C56",
-      "resource": "selada",
+      "id": "C056",
+      "resource": "tomat",
       "scoring": "S56"
     },
     {
-      "id": "C57",
-      "resource": "bawang",
+      "id": "C057",
+      "resource": "kubis",
       "scoring": "S57"
     },
     {
-      "id": "C58",
-      "resource": "paprika",
+      "id": "C058",
+      "resource": "wortel",
       "scoring": "S58"
     },
     {
-      "id": "C59",
-      "resource": "tomat",
+      "id": "C059",
+      "resource": "selada",
       "scoring": "S59"
     },
     {
-      "id": "C60",
-      "resource": "kubis",
+      "id": "C060",
+      "resource": "bawang",
       "scoring": "S60"
     },
     {
-      "id": "C61",
-      "resource": "wortel",
+      "id": "C061",
+      "resource": "paprika",
       "scoring": "S61"
     },
     {
-      "id": "C62",
-      "resource": "selada",
+      "id": "C062",
+      "resource": "tomat",
       "scoring": "S62"
     },
     {
-      "id": "C63",
-      "resource": "bawang",
+      "id": "C063",
+      "resource": "kubis",
       "scoring": "S63"
     },
     {
-      "id": "C64",
-      "resource": "paprika",
+      "id": "C064",
+      "resource": "wortel",
       "scoring": "S64"
     },
     {
-      "id": "C65",
-      "resource": "tomat",
+      "id": "C065",
+      "resource": "selada",
       "scoring": "S65"
     },
     {
-      "id": "C66",
-      "resource": "kubis",
+      "id": "C066",
+      "resource": "bawang",
       "scoring": "S66"
     },
     {
-      "id": "C67",
-      "resource": "wortel",
+      "id": "C067",
+      "resource": "paprika",
       "scoring": "S67"
     },
     {
-      "id": "C68",
-      "resource": "selada",
+      "id": "C068",
+      "resource": "tomat",
       "scoring": "S68"
     },
     {
-      "id": "C69",
-      "resource": "bawang",
+      "id": "C069",
+      "resource": "kubis",
       "scoring": "S69"
     },
     {
-      "id": "C70",
-      "resource": "paprika",
+      "id": "C070",
+      "resource": "wortel",
       "scoring": "S70"
     },
     {
-      "id": "C71",
-      "resource": "tomat",
+      "id": "C071",
+      "resource": "selada",
       "scoring": "S71"
     },
     {
-      "id": "C72",
-      "resource": "kubis",
+      "id": "C072",
+      "resource": "bawang",
       "scoring": "S72"
     },
     {
-      "id": "C73",
-      "resource": "wortel",
+      "id": "C073",
+      "resource": "paprika",
       "scoring": "S73"
     },
     {
-      "id": "C74",
-      "resource": "selada",
+      "id": "C074",
+      "resource": "tomat",
       "scoring": "S74"
     },
     {
-      "id": "C75",
-      "resource": "bawang",
+      "id": "C075",
+      "resource": "kubis",
       "scoring": "S75"
     },
     {
-      "id": "C76",
-      "resource": "paprika",
+      "id": "C076",
+      "resource": "wortel",
       "scoring": "S76"
     },
     {
-      "id": "C77",
-      "resource": "tomat",
+      "id": "C077",
+      "resource": "selada",
       "scoring": "S77"
     },
     {
-      "id": "C78",
-      "resource": "kubis",
+      "id": "C078",
+      "resource": "bawang",
       "scoring": "S78"
     },
     {
-      "id": "C79",
-      "resource": "wortel",
+      "id": "C079",
+      "resource": "paprika",
       "scoring": "S79"
     },
     {
-      "id": "C80",
-      "resource": "selada",
+      "id": "C080",
+      "resource": "tomat",
       "scoring": "S80"
     },
     {
-      "id": "C81",
-      "resource": "bawang",
+      "id": "C081",
+      "resource": "kubis",
       "scoring": "S81"
     },
     {
-      "id": "C82",
-      "resource": "paprika",
+      "id": "C082",
+      "resource": "wortel",
       "scoring": "S82"
     },
     {
-      "id": "C83",
-      "resource": "tomat",
+      "id": "C083",
+      "resource": "selada",
       "scoring": "S83"
     },
     {
-      "id": "C84",
-      "resource": "kubis",
+      "id": "C084",
+      "resource": "bawang",
       "scoring": "S84"
     },
     {
-      "id": "C85",
-      "resource": "wortel",
+      "id": "C085",
+      "resource": "paprika",
       "scoring": "S85"
     },
     {
-      "id": "C86",
-      "resource": "selada",
+      "id": "C086",
+      "resource": "tomat",
       "scoring": "S86"
     },
     {
-      "id": "C87",
-      "resource": "bawang",
+      "id": "C087",
+      "resource": "kubis",
       "scoring": "S87"
     },
     {
-      "id": "C88",
-      "resource": "paprika",
+      "id": "C088",
+      "resource": "wortel",
       "scoring": "S88"
     },
     {
-      "id": "C89",
-      "resource": "tomat",
+      "id": "C089",
+      "resource": "selada",
       "scoring": "S89"
     },
     {
-      "id": "C90",
-      "resource": "kubis",
+      "id": "C090",
+      "resource": "bawang",
       "scoring": "S90"
     },
     {
-      "id": "C91",
-      "resource": "wortel",
+      "id": "C091",
+      "resource": "paprika",
       "scoring": "S91"
     },
     {
-      "id": "C92",
-      "resource": "selada",
+      "id": "C092",
+      "resource": "tomat",
       "scoring": "S92"
     },
     {
-      "id": "C93",
-      "resource": "bawang",
+      "id": "C093",
+      "resource": "kubis",
       "scoring": "S93"
     },
     {
-      "id": "C94",
-      "resource": "paprika",
+      "id": "C094",
+      "resource": "wortel",
       "scoring": "S94"
     },
     {
-      "id": "C95",
-      "resource": "tomat",
+      "id": "C095",
+      "resource": "selada",
       "scoring": "S95"
     },
     {
-      "id": "C96",
-      "resource": "kubis",
+      "id": "C096",
+      "resource": "bawang",
       "scoring": "S96"
     },
     {
-      "id": "C97",
-      "resource": "wortel",
+      "id": "C097",
+      "resource": "paprika",
       "scoring": "S97"
     },
     {
-      "id": "C98",
-      "resource": "selada",
+      "id": "C098",
+      "resource": "tomat",
       "scoring": "S98"
     },
     {
-      "id": "C99",
-      "resource": "bawang",
+      "id": "C099",
+      "resource": "kubis",
       "scoring": "S99"
     },
     {
       "id": "C100",
-      "resource": "paprika",
+      "resource": "wortel",
       "scoring": "S100"
     },
     {
       "id": "C101",
-      "resource": "tomat",
+      "resource": "selada",
       "scoring": "S101"
     },
     {
       "id": "C102",
-      "resource": "kubis",
+      "resource": "bawang",
       "scoring": "S102"
     },
     {
       "id": "C103",
-      "resource": "wortel",
+      "resource": "paprika",
       "scoring": "S103"
     },
     {
       "id": "C104",
-      "resource": "selada",
+      "resource": "tomat",
       "scoring": "S104"
     },
     {
       "id": "C105",
-      "resource": "bawang",
+      "resource": "kubis",
       "scoring": "S105"
     },
     {
       "id": "C106",
-      "resource": "paprika",
+      "resource": "wortel",
       "scoring": "S106"
     },
     {
       "id": "C107",
-      "resource": "tomat",
+      "resource": "selada",
       "scoring": "S107"
     },
     {
       "id": "C108",
-      "resource": "kubis",
+      "resource": "bawang",
       "scoring": "S108"
     }
   ]

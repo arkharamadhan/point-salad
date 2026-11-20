@@ -120,8 +120,7 @@ export function evaluateMajority(
     const maxVal = Math.max(...counts);
     if (targetCount === maxVal) {
       const tieCount = counts.filter((c) => c === maxVal).length;
-      const score = Math.floor(params.points / tieCount);
-      return { score, tieCount, isWinner: true };
+      return { score: params.points, tieCount, isWinner: true };
     }
     return { score: 0, tieCount: 0, isWinner: false };
   } else {
@@ -129,8 +128,7 @@ export function evaluateMajority(
     const minVal = Math.min(...counts);
     if (targetCount === minVal) {
       const tieCount = counts.filter((c) => c === minVal).length;
-      const score = Math.floor(params.points / tieCount);
-      return { score, tieCount, isWinner: true };
+      return { score: params.points, tieCount, isWinner: true };
     }
     return { score: 0, tieCount: 0, isWinner: false };
   }
@@ -155,23 +153,23 @@ export function evaluatePerTypeAtLeast(
 
 /**
  * 7. perMissingType:
- * points for each of the 6 veggie types that has count === 0.
- * Requires having at least 1 veggie card total (so 0 total veggies scores 0, preventing free instant points).
+ * - If `params.resource` is specified: awards `params.points` (+5) when that specific veggie count === 0.
+ * - Otherwise (generic fallback): awards `params.points` for each veggie type with count === 0.
  */
 export function evaluatePerMissingType(
   resources: ResourceCounts,
   params: PerMissingTypeParams
 ): number {
-  let totalVeggies = 0;
+  if (params.resource) {
+    return (resources[params.resource] ?? 0) === 0 ? params.points : 0;
+  }
+
   let missingTypes = 0;
   for (const res of ALL_RESOURCES) {
-    const count = resources[res] ?? 0;
-    totalVeggies += count;
-    if (count === 0) {
+    if ((resources[res] ?? 0) === 0) {
       missingTypes++;
     }
   }
-  if (totalVeggies === 0) return 0;
   return missingTypes * params.points;
 }
 

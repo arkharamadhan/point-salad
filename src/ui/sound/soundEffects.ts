@@ -148,6 +148,103 @@ export const Sound = {
   },
 
   /**
+   * Magical shimmer chime when activating a Power-Up or grabbing a Golden Veggie
+   */
+  skillActivate(enabled = true) {
+    if (!enabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const notes = [587.33, 783.99, 1046.5]; // D5, G5, C6
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.065);
+      gain.gain.setValueAtTime(0.11, ctx.currentTime + idx * 0.065);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.065 + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + idx * 0.065);
+      osc.stop(ctx.currentTime + idx * 0.065 + 0.22);
+    });
+  },
+
+  /**
+   * Comedic descending buzz when grabbing a Rotten Veggie (-2 pts)
+   */
+  rottenBuzz(enabled = true) {
+    if (!enabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(95, ctx.currentTime + 0.24);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.26);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.26);
+  },
+
+  /**
+   * Cute soft pop sound for floating emoji / quick chat reactions
+   */
+  emotePop(enabled = true) {
+    if (!enabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(420, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.09);
+
+    gain.gain.setValueAtTime(0.11, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.13);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.13);
+  },
+
+  /**
+   * Rising marimba-like tick for dramatic end-game score counting
+   */
+  scoreTick(enabled = true, step = 1) {
+    if (!enabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const scale = [392.0, 440.0, 493.88, 523.25, 587.33, 659.25, 783.99, 880.0];
+    const freq = scale[(Math.max(1, step) - 1) % scale.length];
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.06, ctx.currentTime + 0.12);
+
+    gain.gain.setValueAtTime(0.11, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.16);
+  },
+
+  /**
    * Celebratory win fanfare arpeggio
    */
   winFanfare(enabled = true) {

@@ -27,13 +27,39 @@ export const PlayerSideCard: React.FC<PlayerSideCardProps> = ({
   playerIndex,
   allPlayers,
   isActiveTurn,
-  isGameOver: _isGameOver,
+  isGameOver,
   compact = false,
   className = '',
 }) => {
-  const { setInspectedPlayerIndex, lang } = useGameStore();
+  const { setInspectedPlayerIndex, lang, mpRole, mpMyPlayerIndex, gameState, seriesWins } =
+    useGameStore();
   const colorTheme = PLAYER_COLORS[playerIndex % PLAYER_COLORS.length];
   const { totalScore } = evaluatePlayerScore(playerIndex, [...allPlayers]);
+
+  // Recipe score stays hidden (?) for opponents/bots until game over
+  const humanCount = allPlayers.filter((p) => !p.isBot).length;
+  const canSeeScore =
+    isGameOver ||
+    (mpRole !== 'none'
+      ? mpMyPlayerIndex !== null && playerIndex === mpMyPlayerIndex
+      : !player.isBot && (humanCount === 1 || playerIndex === gameState.currentTurnPlayerIndex));
+  const displayedScore = canSeeScore ? totalScore : '?';
+
+  // Match / Series win standing: 👑 for match leader, 🐵 for trailing player
+  const allWins = allPlayers.map((p) => seriesWins[p.id] ?? 0);
+  const winCount = allWins[playerIndex] ?? 0;
+  const maxWins = Math.max(...allWins);
+  const minWins = Math.min(...allWins);
+  const hasMatchHistory = maxWins > 0;
+  const hasWinDiff = maxWins > minWins;
+
+  const standingEmoji = hasWinDiff
+    ? winCount === maxWins
+      ? '👑'
+      : winCount === minWins
+      ? '🐵'
+      : null
+    : null;
 
   const row1Resources = ['kubis', 'tomat', 'paprika'] as const;
   const row2Resources = ['bawang', 'wortel', 'selada'] as const;
@@ -58,18 +84,37 @@ export const PlayerSideCard: React.FC<PlayerSideCardProps> = ({
             {isActiveTurn && (
               <span className="w-2 h-2 rounded-full bg-lime-300 animate-ping shrink-0" />
             )}
+            {standingEmoji && (
+              <span
+                className="text-sm leading-none shrink-0 drop-shadow-xs"
+                title={standingEmoji === '👑' ? 'Unggul Skor Match!' : 'Tertinggal Skor Match!'}
+              >
+                {standingEmoji}
+              </span>
+            )}
             <span className="font-black text-[11px] font-fredoka truncate">
               {player.name}
             </span>
+            {hasMatchHistory && (
+              <span
+                className="text-[9px] bg-black/30 px-1.5 py-0.2 rounded-full font-black text-amber-200 shrink-0"
+                title={`Skor Match: ${winCount} menang`}
+              >
+                🏆{winCount}
+              </span>
+            )}
           </div>
           <motion.div
-            key={totalScore}
+            key={String(displayedScore)}
             initial={{ scale: 1.35 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 450, damping: 18 }}
-            className="w-6 h-6 rounded-full bg-[#7CB342] border-[1.5px] border-white shadow-xs flex items-center justify-center font-black font-fredoka text-[11px] text-white shrink-0"
+            className={`w-6 h-6 rounded-full border-[1.5px] border-white shadow-xs flex items-center justify-center font-black font-fredoka text-[11px] text-white shrink-0 ${
+              canSeeScore ? 'bg-[#7CB342]' : 'bg-stone-600/80'
+            }`}
+            title={canSeeScore ? `${totalScore} Poin` : 'Skor resep lawan dirahasiakan sampai akhir game'}
           >
-            {totalScore}
+            {displayedScore}
           </motion.div>
         </div>
 
@@ -118,12 +163,32 @@ export const PlayerSideCard: React.FC<PlayerSideCardProps> = ({
       >
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
+            {standingEmoji && (
+              <motion.span
+                key={standingEmoji}
+                initial={{ scale: 0.5, rotate: -15 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+                className="text-base xl:text-lg leading-none shrink-0 drop-shadow-xs"
+                title={standingEmoji === '👑' ? 'Sedang Memimpin!' : 'Lagi Tertinggal!'}
+              >
+                {standingEmoji}
+              </motion.span>
+            )}
             <span className="font-black text-sm xl:text-base font-fredoka truncate tracking-wide drop-shadow-xs">
               {playerIndex + 1}. {player.name}
             </span>
             {player.isBot && (
               <span className="text-[9px] bg-black/25 px-1.5 py-0.5 rounded font-black font-mono shrink-0">
                 BOT
+              </span>
+            )}
+            {hasMatchHistory && (
+              <span
+                className="text-[10px] bg-black/30 px-1.5 py-0.5 rounded-full font-black text-amber-200 shrink-0"
+                title={`Skor Match: ${winCount} menang`}
+              >
+                🏆 {winCount}
               </span>
             )}
           </div>
@@ -137,13 +202,16 @@ export const PlayerSideCard: React.FC<PlayerSideCardProps> = ({
 
         {/* Circular Live Score Badge with Pop Animation */}
         <motion.div
-          key={totalScore}
+          key={String(displayedScore)}
           initial={{ scale: 1.4 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 420, damping: 16 }}
-          className="w-8 h-8 xl:w-9 xl:h-9 rounded-full bg-[#7CB342] border-2 border-white shadow-sm flex items-center justify-center font-black font-fredoka text-sm xl:text-base text-white flex-shrink-0"
+          className={`w-8 h-8 xl:w-9 xl:h-9 rounded-full border-2 border-white shadow-sm flex items-center justify-center font-black font-fredoka text-sm xl:text-base text-white flex-shrink-0 ${
+            canSeeScore ? 'bg-[#7CB342]' : 'bg-stone-600/80'
+          }`}
+          title={canSeeScore ? `${totalScore} Poin` : 'Skor resep lawan dirahasiakan sampai akhir game'}
         >
-          {totalScore}
+          {displayedScore}
         </motion.div>
       </div>
 
