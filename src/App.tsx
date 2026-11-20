@@ -35,7 +35,7 @@ export const App: React.FC = () => {
       {/* 2. MAIN CENTER ARENA: LEFT PLAYERS | WOODEN BOARD | RIGHT PLAYERS */}
       <main className="flex-1 flex flex-col lg:flex-row items-center lg:items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full max-w-7xl mx-auto px-2 sm:px-4 py-1">
         {/* Left Side Players */}
-        <aside className="flex flex-row lg:flex-col gap-3 justify-center items-center flex-shrink-0 order-2 lg:order-1">
+        <aside className="w-full lg:w-auto flex flex-row lg:flex-col gap-2.5 sm:gap-3 justify-center items-center flex-shrink-0 order-2 lg:order-1 overflow-x-auto pb-1 px-1">
           {leftPlayers.map(({ player, index }) => (
             <PlayerSideCard
               key={player.id}
@@ -49,12 +49,12 @@ export const App: React.FC = () => {
         </aside>
 
         {/* Center: Wooden Cutting Board Market */}
-        <section className="flex-1 flex justify-center w-full order-1 lg:order-2">
+        <section className="flex-1 flex justify-center w-full order-1 lg:order-2 px-1">
           <MarketCuttingBoard />
         </section>
 
         {/* Right Side Players */}
-        <aside className="flex flex-row lg:flex-col gap-3 justify-center items-center flex-shrink-0 order-3">
+        <aside className="w-full lg:w-auto flex flex-row lg:flex-col gap-2.5 sm:gap-3 justify-center items-center flex-shrink-0 order-3 overflow-x-auto pb-1 px-1">
           {rightPlayers.map(({ player, index }) => (
             <PlayerSideCard
               key={player.id}

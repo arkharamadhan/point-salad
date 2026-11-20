@@ -293,3 +293,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   clearError: () => set({ errorMessage: null }),
 }));
 
+if (typeof window !== 'undefined') {
+  (window as any).__gameStore = useGameStore;
+}
+

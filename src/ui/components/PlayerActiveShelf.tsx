@@ -86,11 +86,11 @@ export const PlayerActiveShelf: React.FC = () => {
         )}
       </div>
 
-      {/* 2. Active Player Point Plates Shelf (Tray in light green) */}
-      <div className="w-full bg-[#8BC34A] border-t-4 border-[#7CB342] rounded-t-3xl pt-6 pb-4 px-4 sm:px-6 shadow-[0_-6px_20px_rgba(0,0,0,0.12)]">
-        <div className="max-w-5xl mx-auto flex flex-col gap-2">
+      {/* 2. Active Player Point Plates Shelf (Tray in light green, wraps 4 per row downwards) */}
+      <div className="w-full bg-[#8BC34A] border-t-4 border-[#7CB342] rounded-t-3xl pt-8 sm:pt-9 pb-5 px-2 sm:px-4 md:px-6 shadow-[0_-6px_20px_rgba(0,0,0,0.12)] overflow-visible">
+        <div className="max-w-5xl mx-auto flex flex-col gap-2 overflow-visible">
           {/* Header indicator inside shelf */}
-          <div className="flex items-center justify-between text-white text-xs font-black font-fredoka px-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between text-white text-xs font-black font-fredoka px-2 gap-1 text-center sm:text-left">
             <span className="flex items-center gap-1.5 drop-shadow">
               <span>🥗</span>
               <span>
@@ -104,26 +104,27 @@ export const PlayerActiveShelf: React.FC = () => {
             </span>
           </div>
 
-          {/* Row of Plates owned by active player (drag up to return supported) */}
-          <div className="flex items-center justify-center gap-4 sm:gap-6 overflow-x-auto py-2 px-1 min-h-[105px]">
+          {/* Grid of Plates owned by active player (Max 4 per row, wraps downwards) */}
+          <div className="grid grid-cols-4 gap-x-2 sm:gap-x-4 md:gap-x-6 gap-y-7 sm:gap-y-9 justify-items-center max-w-sm sm:max-w-md md:max-w-xl mx-auto pt-5 pb-3 px-1 overflow-visible">
             {activePlayer.scoringCards.length > 0 ? (
               activePlayer.scoringCards.map((card) => {
                 const liveScore = cardScoresMap.get(card.id) ?? 0;
                 return (
-                  <PlateView
-                    key={card.id}
-                    card={card}
-                    size="shelf"
-                    showFlipArrow={true}
-                    liveScore={liveScore}
-                    onFlip={() => flipCard(card.id)}
-                    onDragToMarket={canUndo ? () => undoCurrentTurnAction() : undefined}
-                    className="flex-shrink-0"
-                  />
+                  <div key={card.id} className="w-full flex justify-center overflow-visible">
+                    <PlateView
+                      card={card}
+                      size="shelf"
+                      showFlipArrow={true}
+                      liveScore={liveScore}
+                      onFlip={() => flipCard(card.id)}
+                      onDragToMarket={canUndo ? () => undoCurrentTurnAction() : undefined}
+                      className="overflow-visible"
+                    />
+                  </div>
                 );
               })
             ) : (
-              <div className="text-center text-white/90 font-fredoka text-xs sm:text-sm py-2">
+              <div className="col-span-4 text-center text-white/90 font-fredoka text-xs sm:text-sm py-4">
                 🥗 Belum ada piring resep poin. Ambil piring dari meja pasar di atas!
               </div>
             )}

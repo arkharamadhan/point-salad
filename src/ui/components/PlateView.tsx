@@ -76,7 +76,7 @@ export const PlateView: React.FC<PlateViewProps> = ({
 
   const plateSizeClasses =
     size === 'shelf'
-      ? 'w-20 h-20 sm:w-24 sm:h-24 md:w-26 md:h-26'
+      ? 'w-[72px] h-[72px] sm:w-20 sm:h-20 md:w-24 md:h-24'
       : 'w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32';
 
   return (
@@ -92,20 +92,22 @@ export const PlateView: React.FC<PlateViewProps> = ({
       {showFlipArrow && (
         <div
           onClick={onFlip ? handleFlip : undefined}
-          className={`absolute -top-4 sm:-top-5 -left-1 sm:left-0 z-20 flex items-center gap-1 ${
+          className={`absolute ${
+            size === 'shelf' ? '-top-3 sm:-top-3.5 -left-0.5' : '-top-4 sm:-top-5 -left-1 sm:left-0'
+          } z-20 flex items-center gap-0.5 sm:gap-1 ${
             onFlip ? 'cursor-pointer group hover:scale-115 active:scale-95 transition-transform' : ''
           }`}
           title={onFlip ? 'Klik untuk membalik resep ini menjadi sayur' : `Sisi balik: ${card.resource}`}
         >
           {/* Flip Vegetable Icon (Prominent & Clear, matching reference) */}
           <div className="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)] transition-transform group-hover:rotate-6">
-            <VeggieIcon resource={card.resource} size={size === 'shelf' ? 24 : 30} />
+            <VeggieIcon resource={card.resource} size={size === 'shelf' ? 22 : 30} />
           </div>
 
           {/* Arched Arrow curving into the plate */}
           <svg
-            width={size === 'shelf' ? 20 : 26}
-            height={size === 'shelf' ? 18 : 22}
+            width={size === 'shelf' ? 18 : 26}
+            height={size === 'shelf' ? 16 : 22}
             viewBox="0 0 32 26"
             fill="none"
             className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] -ml-0.5"
@@ -131,10 +133,10 @@ export const PlateView: React.FC<PlateViewProps> = ({
 
       {/* Top-Right: Live Point Score Badge (if in player shelf) */}
       {typeof liveScore === 'number' && (
-        <div className="absolute -top-2.5 -right-2 z-20">
+        <div className="absolute -top-2 -right-1 sm:-top-2.5 sm:-right-2 z-20">
           <ScallopBadge
             value={liveScore > 0 ? `${liveScore}` : `${liveScore}`}
-            size={28}
+            size={size === 'shelf' ? 22 : 28}
             badgeBg={liveScore > 0 ? '#689F38' : liveScore < 0 ? '#D32F2F' : '#757575'}
           />
         </div>
@@ -145,7 +147,7 @@ export const PlateView: React.FC<PlateViewProps> = ({
         onClick={handleClick}
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
-        className={`rounded-full bg-white transition-shadow duration-200 border-[2.5px] border-stone-200/90 shadow-[0_6px_16px_rgba(0,0,0,0.12),inset_0_2px_4px_rgba(0,0,0,0.06)] flex items-center justify-center p-1.5 relative overflow-hidden ${plateSizeClasses} ${
+        className={`rounded-full bg-white transition-shadow duration-200 border-[2.5px] border-stone-200/90 shadow-[0_6px_16px_rgba(0,0,0,0.12),inset_0_2px_4px_rgba(0,0,0,0.06)] flex items-center justify-center p-1 relative overflow-hidden ${plateSizeClasses} ${
           isSelectable ? 'cursor-pointer hover:shadow-[0_10px_24px_rgba(0,0,0,0.2)]' : ''
         } ${isSelected ? 'ring-4 ring-emerald-500 scale-105' : ''}`}
       >
@@ -153,8 +155,8 @@ export const PlateView: React.FC<PlateViewProps> = ({
         <div className="absolute inset-0 rounded-full border border-[#D5C2A5]/35 pointer-events-none" />
 
         {/* Soft inner bowl gradient/depth */}
-        <div className="w-full h-full rounded-full border border-stone-100 flex items-center justify-center p-0.5 bg-gradient-to-b from-stone-50 via-white to-stone-100 shadow-inner">
-          <PointBowlRenderer scoringId={card.scoringId} />
+        <div className="w-full h-full rounded-full border border-stone-100 flex items-center justify-center p-0.5 bg-gradient-to-b from-stone-50 via-white to-stone-100 shadow-inner overflow-hidden">
+          <PointBowlRenderer scoringId={card.scoringId} size={size} />
         </div>
       </div>
     </motion.div>
