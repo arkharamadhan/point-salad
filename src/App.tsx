@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGameStore } from './ui/store/gameStore';
 import { GameTopBar } from './ui/components/GameTopBar';
 import { MarketCuttingBoard } from './ui/components/MarketCuttingBoard';
@@ -8,13 +8,37 @@ import { EndGameModal } from './ui/components/EndGameModal';
 import { SettingsModal } from './ui/components/SettingsModal';
 import { PlayerRecipesModal } from './ui/components/PlayerRecipesModal';
 import { MainMenu } from './ui/components/MainMenu';
+import { VeggieIcon } from './ui/components/icons/SpiceIcon';
 import { useKeyboardNav } from './ui/hooks/useKeyboardNav';
+import { BgmPlayer } from './ui/sound/bgmPlayer';
 
 export const App: React.FC = () => {
   // Activate keyboard navigation
   useKeyboardNav();
 
-  const { screen, gameState, setSettingsOpen } = useGameStore();
+  const { screen, gameState, setSettingsOpen, soundEnabled, musicEnabled } = useGameStore();
+
+  // Sync background music with sound & music settings
+  useEffect(() => {
+    BgmPlayer.setEnabled(soundEnabled && musicEnabled);
+  }, [soundEnabled, musicEnabled]);
+
+  // Unlock Web Audio BGM on first user gesture & pause when tab is hidden
+  useEffect(() => {
+    const handleUnlock = () => BgmPlayer.unlock();
+    const handleVisibility = () => BgmPlayer.setTabHidden(document.hidden);
+
+    window.addEventListener('pointerdown', handleUnlock, { passive: true });
+    window.addEventListener('keydown', handleUnlock, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('pointerdown', handleUnlock);
+      window.removeEventListener('keydown', handleUnlock);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      BgmPlayer.setEnabled(false);
+    };
+  }, []);
 
   if (screen === 'menu') {
     return <MainMenu />;
@@ -23,7 +47,7 @@ export const App: React.FC = () => {
   const { players, currentTurnPlayerIndex, phase } = gameState;
   const isGameOver = phase === 'game_over';
 
-  // Split players into left and right columns:
+  // Split players into left and right columns for desktop:
   // Left: Player 1 (idx 0), Player 3 (idx 2)
   // Right: Player 2 (idx 1), Player 4 (idx 3)
   const leftPlayers = [0, 2]
@@ -35,14 +59,53 @@ export const App: React.FC = () => {
     .map((idx) => ({ player: players[idx], index: idx }));
 
   return (
-    <div className="min-h-screen veggie-table-bg text-stone-900 flex flex-col justify-between relative overflow-x-hidden font-fredoka">
-      {/* 1. TOP NAVIGATION CONTROLS */}
-      <GameTopBar />
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden kitchen-table-bg text-stone-900 flex flex-col justify-between relative overflow-x-hidden font-fredoka">
+      {/* Decorative Warm Kitchen Table Accents (non-interactive, fills empty space gently) */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
+        {/* Soft warm spotlight behind the cutting board */}
+        <div className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[420px] rounded-full bg-amber-100/55 blur-3xl" />
 
-      {/* 2. MAIN CENTER ARENA: LEFT PLAYERS | WOODEN BOARD | RIGHT PLAYERS */}
-      <main className="flex-1 flex flex-col lg:flex-row items-center lg:items-center justify-center gap-3 sm:gap-4 md:gap-6 w-full max-w-7xl mx-auto px-2 sm:px-4 py-1">
-        {/* Left Side Players */}
-        <aside className="w-full lg:w-auto flex flex-row lg:flex-col gap-2.5 sm:gap-3 justify-center items-center flex-shrink-0 order-2 lg:order-1 overflow-x-auto pb-1 px-1">
+        {/* Subtle corner botanical / veggie garnishes on desktop */}
+        <div className="hidden lg:block absolute top-16 left-5 opacity-20 -rotate-12">
+          <VeggieIcon resource="selada" size={76} />
+        </div>
+        <div className="hidden lg:block absolute top-20 right-6 opacity-20 rotate-12">
+          <VeggieIcon resource="tomat" size={68} />
+        </div>
+        <div className="hidden lg:block absolute bottom-44 left-8 opacity-18 rotate-15">
+          <VeggieIcon resource="wortel" size={72} />
+        </div>
+        <div className="hidden lg:block absolute bottom-44 right-8 opacity-18 -rotate-15">
+          <VeggieIcon resource="paprika" size={70} />
+        </div>
+      </div>
+
+      {/* 1. TOP NAVIGATION CONTROLS */}
+      <div className="relative z-20 flex-shrink-0">
+        <GameTopBar />
+      </div>
+
+      {/* 1B. MOBILE COMPACT PLAYER STRIP (Always visible above cutting board on mobile/tablet) */}
+      <div className="relative z-10 lg:hidden w-full max-w-xl mx-auto px-2.5 pb-1.5 flex-shrink-0">
+        <div className={`grid gap-2 ${players.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          {players.map((player, index) => (
+            <PlayerSideCard
+              key={player.id}
+              player={player}
+              playerIndex={index}
+              allPlayers={players}
+              isActiveTurn={index === currentTurnPlayerIndex && !isGameOver}
+              isGameOver={isGameOver}
+              compact={true}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 2. MAIN CENTER ARENA: LEFT PLAYERS | BIG WOODEN CUTTING BOARD | RIGHT PLAYERS */}
+      <main className="relative z-10 flex-1 min-h-0 flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-5 xl:gap-7 w-full max-w-[1380px] mx-auto px-2.5 sm:px-4 py-1">
+        {/* Desktop Left Side Players */}
+        <aside className="hidden lg:flex flex-col gap-3 justify-center items-center flex-shrink-0">
           {leftPlayers.map(({ player, index }) => (
             <PlayerSideCard
               key={player.id}
@@ -56,12 +119,12 @@ export const App: React.FC = () => {
         </aside>
 
         {/* Center: Wooden Cutting Board Market */}
-        <section className="flex-1 flex justify-center w-full order-1 lg:order-2 px-1">
+        <section className="flex-1 flex justify-center items-center w-full">
           <MarketCuttingBoard />
         </section>
 
-        {/* Right Side Players */}
-        <aside className="w-full lg:w-auto flex flex-row lg:flex-col gap-2.5 sm:gap-3 justify-center items-center flex-shrink-0 order-3 overflow-x-auto pb-1 px-1">
+        {/* Desktop Right Side Players */}
+        <aside className="hidden lg:flex flex-col gap-3 justify-center items-center flex-shrink-0">
           {rightPlayers.map(({ player, index }) => (
             <PlayerSideCard
               key={player.id}
@@ -76,11 +139,11 @@ export const App: React.FC = () => {
       </main>
 
       {/* 3. BOTTOM: INSTRUCTION PILL & ACTIVE PLAYER'S POINT PLATES SHELF */}
-      <footer className="w-full relative mt-auto">
+      <footer className="w-full relative z-20 flex-shrink-0 mt-auto">
         <PlayerActiveShelf />
       </footer>
 
-      {/* Bottom-Left Floating Undo / Settings Button (matching reference image) */}
+      {/* Bottom-Left Floating Undo / Settings Button */}
       <button
         type="button"
         onClick={() => {

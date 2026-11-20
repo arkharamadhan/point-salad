@@ -34,11 +34,16 @@ export function getDrawPileIndex(piles: readonly Card[][], preferredPileIndex: n
 }
 
 /**
- * Pure market refill following RULES.md Section 4:
- * Refill order: Pile 0, 1, then 2.
- * Within each pile: Refill Resource slots first (slot 0 then 1), then Scoring slot.
- * If pile is empty, draw from largest remaining pile (lowest index tiebreak).
- * If all piles are empty, slot remains empty (null).
+ * Pure market refill following authentic Point Salad rules:
+ * Refill order: Column 0, 1, then 2.
+ * Within each column:
+ * - When a veggie (resource) slot is empty, the face-up scoring card (plate) at the top
+ *   of that same column flips over and drops down into the veggie slot, and the next card
+ *   from that column's pile is revealed as the new scoring card.
+ * - If that column's scoring slot & pile are empty, draw from the largest remaining pile
+ *   (lowest index tiebreak).
+ * - Finally, if the scoring slot is empty, reveal a new card from that pile (or largest remaining pile).
+ * - If all piles are empty, remaining empty slots stay null.
  */
 export function refillMarket(currentMarket: MarketState): MarketState {
   // Deep clone piles and slots so the operation is strictly pure
@@ -50,41 +55,51 @@ export function refillMarket(currentMarket: MarketState): MarketState {
   const scoringSlots: (Card | null)[] = [...currentMarket.scoringSlots];
   const resourceSlots: (Card | null)[] = [...currentMarket.resourceSlots];
 
-  // Helper to draw a single card
-  const drawCard = (pileIdx: number): Card | null => {
+  // Helper to draw a single card from pileIdx or largest remaining pile
+  const drawFromPile = (pileIdx: number): Card | null => {
     const targetPile = getDrawPileIndex(piles, pileIdx);
     if (targetPile === -1) {
       return null;
     }
-    const card = piles[targetPile].shift();
-    return card ?? null;
+    return piles[targetPile].shift() ?? null;
   };
 
-  // Iterate pile by pile: 0, 1, 2
-  for (let p = 0; p < 3; p++) {
-    // 1. First Resource slot of pile p
-    const resSlot1 = p * 2;
+  // Helper to refill a veggie slot in column `col`:
+  // The face-up scoring card in `col` drops down into the veggie slot first!
+  const dropToResourceSlot = (col: number): Card | null => {
+    if (scoringSlots[col] !== null) {
+      const droppedCard = scoringSlots[col]!;
+      scoringSlots[col] = piles[col].length > 0 ? (piles[col].shift() ?? null) : null;
+      return droppedCard;
+    }
+    return drawFromPile(col);
+  };
+
+  // Iterate column by column: 0, 1, 2
+  for (let col = 0; col < 3; col++) {
+    // 1. First Resource slot of column `col`
+    const resSlot1 = col * 2;
     if (resourceSlots[resSlot1] === null) {
-      const drawn = drawCard(p);
-      if (drawn) {
-        resourceSlots[resSlot1] = drawn;
+      const dropped = dropToResourceSlot(col);
+      if (dropped) {
+        resourceSlots[resSlot1] = dropped;
       }
     }
 
-    // 2. Second Resource slot of pile p
-    const resSlot2 = p * 2 + 1;
+    // 2. Second Resource slot of column `col`
+    const resSlot2 = col * 2 + 1;
     if (resourceSlots[resSlot2] === null) {
-      const drawn = drawCard(p);
-      if (drawn) {
-        resourceSlots[resSlot2] = drawn;
+      const dropped = dropToResourceSlot(col);
+      if (dropped) {
+        resourceSlots[resSlot2] = dropped;
       }
     }
 
-    // 3. Scoring slot of pile p
-    if (scoringSlots[p] === null) {
-      const drawn = drawCard(p);
+    // 3. Scoring slot of column `col`
+    if (scoringSlots[col] === null) {
+      const drawn = drawFromPile(col);
       if (drawn) {
-        scoringSlots[p] = drawn;
+        scoringSlots[col] = drawn;
       }
     }
   }

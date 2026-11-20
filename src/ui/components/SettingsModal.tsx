@@ -9,7 +9,17 @@ interface PlayerConfig {
 }
 
 export const SettingsModal: React.FC = () => {
-  const { isSettingsOpen, setSettingsOpen, startNewGame, soundEnabled, toggleSound, lang, setLang } =
+  const {
+    isSettingsOpen,
+    setSettingsOpen,
+    startNewGame,
+    soundEnabled,
+    toggleSound,
+    musicEnabled,
+    toggleMusic,
+    lang,
+    setLang,
+  } =
     useGameStore();
 
   const [playerCount, setPlayerCount] = useState<number>(2);
@@ -228,7 +238,29 @@ export const SettingsModal: React.FC = () => {
           </div>
 
           {/* 4. Audio & Language */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-stone-950/50 border border-stone-800 rounded-xl p-3 flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-stone-300">Musik Latar</span>
+                <span className="text-[10px] text-stone-500">
+                  {soundEnabled && musicEnabled ? 'Aktif' : 'Mati'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={toggleMusic}
+                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
+                  soundEnabled && musicEnabled ? 'bg-amber-600' : 'bg-stone-800'
+                }`}
+              >
+                <div
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                    soundEnabled && musicEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
             <div className="bg-stone-950/50 border border-stone-800 rounded-xl p-3 flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-stone-300">Efek Suara</span>
@@ -239,7 +271,7 @@ export const SettingsModal: React.FC = () => {
               <button
                 type="button"
                 onClick={toggleSound}
-                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
                   soundEnabled ? 'bg-amber-600' : 'bg-stone-800'
                 }`}
               >
@@ -261,7 +293,7 @@ export const SettingsModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setLang(lang === 'id' ? 'en' : 'id')}
-                className="bg-stone-800 hover:bg-stone-700 text-xs font-bold px-2.5 py-1 rounded-lg text-amber-300"
+                className="bg-stone-800 hover:bg-stone-700 text-xs font-bold px-2.5 py-1 rounded-lg text-amber-300 cursor-pointer"
               >
                 {lang === 'id' ? 'ID' : 'EN'}
               </button>

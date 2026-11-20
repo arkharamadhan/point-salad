@@ -12,6 +12,10 @@ import {
   Play,
   Users,
   Sparkles,
+  Loader2,
+  UserPlus,
+  X,
+  Crown,
 } from 'lucide-react';
 import { useGameStore } from '../store/gameStore';
 import { VeggieIcon } from './icons/SpiceIcon';
@@ -45,15 +49,6 @@ const BG_DECOR_VEGGIES: {
   { resource: 'kubis', size: 90, className: 'bottom-[8%] right-[6%] sm:right-[11%]', rotate: 15, duration: 6.5, delay: 0.6 },
 ];
 
-function generateRoomCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
-
 export const MainMenu: React.FC = () => {
   const {
     lang,
@@ -62,7 +57,18 @@ export const MainMenu: React.FC = () => {
     toggleSound,
     startNewGame,
     setScreen,
-    setRoomCode,
+    roomCode,
+    mpRole,
+    mpStatus,
+    mpError,
+    mpLobbyPlayers,
+    openOnlineRoom,
+    joinOnlineRoom,
+    addLobbyBot,
+    removeLobbyPlayer,
+    startOnlineGame,
+    leaveOnlineRoom,
+    clearMpError,
   } = useGameStore();
 
   const [view, setView] = useState<MenuView>('home');
@@ -72,26 +78,42 @@ export const MainMenu: React.FC = () => {
   const [botCount, setBotCount] = useState<number>(1);
   const [botDifficulty, setBotDifficulty] = useState<'easy' | 'greedy'>('greedy');
 
-  // Open Room state
-  const [createdCode, setCreatedCode] = useState<string>(() => generateRoomCode());
+  // Copy feedback
   const [copied, setCopied] = useState<boolean>(false);
 
   // Join Room state
   const [inputCode, setInputCode] = useState<string>('');
-  const [joinStatus, setJoinStatus] = useState<string | null>(null);
+  const [localJoinError, setLocalJoinError] = useState<string | null>(null);
 
   const isId = lang === 'id';
 
-  const handleOpenRoomView = () => {
+  const handleBackToHome = () => {
     Sound.cardSelect(soundEnabled);
-    setCreatedCode(generateRoomCode());
+    if (mpRole !== 'none') {
+      leaveOnlineRoom();
+    } else {
+      clearMpError();
+    }
+    setLocalJoinError(null);
+    setView('home');
+  };
+
+  const handleOpenRoomClick = () => {
+    Sound.cardSelect(soundEnabled);
+    clearMpError();
     setCopied(false);
     setView('open-room');
   };
 
+  const handleCreateRoomNow = () => {
+    Sound.confirmAction(soundEnabled);
+    openOnlineRoom(playerName.trim() || (isId ? 'Host' : 'Host'));
+  };
+
   const handleCopyCode = async () => {
+    if (!roomCode) return;
     try {
-      await navigator.clipboard.writeText(createdCode);
+      await navigator.clipboard.writeText(roomCode);
       setCopied(true);
       Sound.confirmAction(soundEnabled);
       setTimeout(() => setCopied(false), 2000);
@@ -102,7 +124,7 @@ export const MainMenu: React.FC = () => {
 
   const handleStartBotGame = () => {
     Sound.confirmAction(soundEnabled);
-    const botNames = ['Bot Tomat', 'Bot Wortel', 'Bot Kubis', 'Bot Paprika', 'Bot Selada'];
+    const botNames = ['Bot Tomat', 'Bot Wortel', 'Bot Kubis'];
     const players = [
       {
         id: 'p1',
@@ -117,30 +139,8 @@ export const MainMenu: React.FC = () => {
       })),
     ];
 
-    setRoomCode(null);
     startNewGame({
       players,
-      seed: Math.floor(Math.random() * 1000000),
-    });
-    setScreen('game');
-  };
-
-  const handleStartRoomDemo = (code: string) => {
-    Sound.confirmAction(soundEnabled);
-    setRoomCode(code);
-    startNewGame({
-      players: [
-        {
-          id: 'p1',
-          name: playerName.trim() || (isId ? 'Pemain 1' : 'Player 1'),
-          isBot: false,
-        },
-        {
-          id: 'p2',
-          name: isId ? 'Pemain 2' : 'Player 2',
-          isBot: false,
-        },
-      ],
       seed: Math.floor(Math.random() * 1000000),
     });
     setScreen('game');
@@ -150,16 +150,20 @@ export const MainMenu: React.FC = () => {
     e.preventDefault();
     const cleaned = inputCode.trim().toUpperCase();
     if (cleaned.length < 4) {
-      setJoinStatus(
+      setLocalJoinError(
         isId
           ? 'Masukkan kode room minimal 4 karakter.'
           : 'Please enter a room code (at least 4 characters).'
       );
       return;
     }
-    setJoinStatus(null);
-    handleStartRoomDemo(cleaned);
+    setLocalJoinError(null);
+    Sound.confirmAction(soundEnabled);
+    joinOnlineRoom(cleaned, playerName.trim() || (isId ? 'Pemain 2' : 'Player 2'));
   };
+
+  const isHostLobbyActive = view === 'open-room' && mpRole === 'host';
+  const isGuestLobbyActive = view === 'join-room' && mpRole === 'guest' && mpStatus === 'connected';
 
   return (
     <div className="min-h-screen veggie-table-bg text-stone-900 flex flex-col justify-between relative overflow-hidden font-fredoka select-none">
@@ -193,11 +197,22 @@ export const MainMenu: React.FC = () => {
       <header className="w-full flex items-center justify-end gap-2 p-4 z-20">
         <button
           type="button"
-          onClick={() => {
-            toggleSound();
-          }}
-          className="w-10 h-10 rounded-xl bg-white/85 hover:bg-white text-[#23583A] border border-stone-300 flex items-center justify-center shadow-sm transition active:scale-95 cursor-pointer"
-          title={soundEnabled ? 'Matikan Suara' : 'Nyalakan Suara'}
+          onClick={() => toggleSound()}
+          className={`w-10 h-10 rounded-xl border flex items-center justify-center shadow-sm transition active:scale-95 cursor-pointer ${
+            soundEnabled
+              ? 'bg-white/85 hover:bg-white text-[#23583A] border-stone-300'
+              : 'bg-stone-200/90 hover:bg-stone-200 text-stone-500 border-stone-300'
+          }`}
+          title={
+            soundEnabled
+              ? isId
+                ? 'Matikan Musik & Suara'
+                : 'Mute Music & Sound'
+              : isId
+                ? 'Nyalakan Musik & Suara'
+                : 'Unmute Music & Sound'
+          }
+          aria-label={soundEnabled ? 'Mute audio' : 'Unmute audio'}
         >
           {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
         </button>
@@ -212,7 +227,7 @@ export const MainMenu: React.FC = () => {
       </header>
 
       {/* Center Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-10 z-10">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-8 z-10">
         {/* Game Logo / Title */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
@@ -295,6 +310,16 @@ export const MainMenu: React.FC = () => {
             <VeggieIcon resource="kubis" size={24} />
           </div>
 
+          {/* Global Multiplayer Disconnect/Error Banner */}
+          {mpError && view === 'home' && (
+            <div className="mb-3 px-3 py-2 rounded-xl bg-red-50 border border-red-300 text-red-700 text-xs font-bold flex items-center justify-between gap-2">
+              <span>{mpError}</span>
+              <button type="button" onClick={clearMpError} className="cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           <AnimatePresence mode="wait">
             {/* HOME VIEW */}
             {view === 'home' && (
@@ -311,6 +336,7 @@ export const MainMenu: React.FC = () => {
                   type="button"
                   onClick={() => {
                     Sound.cardSelect(soundEnabled);
+                    clearMpError();
                     setView('bot');
                   }}
                   className="relative overflow-hidden w-full group flex items-center gap-4 p-4 rounded-2xl bg-[#2E7D32] hover:bg-[#256628] active:scale-[0.98] text-white border-b-4 border-[#1B5E20] shadow-md transition-all cursor-pointer text-left"
@@ -336,7 +362,7 @@ export const MainMenu: React.FC = () => {
                 {/* 2. Open Room */}
                 <button
                   type="button"
-                  onClick={handleOpenRoomView}
+                  onClick={handleOpenRoomClick}
                   className="relative overflow-hidden w-full group flex items-center gap-4 p-4 rounded-2xl bg-[#D97706] hover:bg-[#B45309] active:scale-[0.98] text-white border-b-4 border-[#92400E] shadow-md transition-all cursor-pointer text-left"
                 >
                   <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform z-10">
@@ -344,12 +370,12 @@ export const MainMenu: React.FC = () => {
                   </div>
                   <div className="flex-1 z-10 pr-8">
                     <div className="text-lg sm:text-xl font-black leading-tight">
-                      {isId ? 'Open Room' : 'Open Room'}
+                      Open Room
                     </div>
                     <div className="text-xs text-amber-100 font-medium">
                       {isId
-                        ? 'Buat ruangan baru & bagikan kode ke pacar/teman'
-                        : 'Create a room & share the code with friends'}
+                        ? 'Buat ruangan online & bagikan kode ke pacar/teman'
+                        : 'Create an online room & share the code'}
                     </div>
                   </div>
                   <div className="pointer-events-none absolute -right-2 -bottom-2 opacity-25 group-hover:opacity-45 group-hover:scale-110 group-hover:rotate-6 transition-all">
@@ -362,7 +388,8 @@ export const MainMenu: React.FC = () => {
                   type="button"
                   onClick={() => {
                     Sound.cardSelect(soundEnabled);
-                    setJoinStatus(null);
+                    clearMpError();
+                    setLocalJoinError(null);
                     setView('join-room');
                   }}
                   className="relative overflow-hidden w-full group flex items-center gap-4 p-4 rounded-2xl bg-[#23583A] hover:bg-[#1B462E] active:scale-[0.98] text-white border-b-4 border-[#143522] shadow-md transition-all cursor-pointer text-left"
@@ -376,8 +403,8 @@ export const MainMenu: React.FC = () => {
                     </div>
                     <div className="text-xs text-emerald-100 font-medium">
                       {isId
-                        ? 'Gabung ke room yang sudah dibuat'
-                        : 'Join an existing room with a code'}
+                        ? 'Gabung ke room online yang sudah dibuat'
+                        : 'Join an existing online room with a code'}
                     </div>
                   </div>
                   <div className="pointer-events-none absolute -right-2 -bottom-2 opacity-25 group-hover:opacity-45 group-hover:scale-110 group-hover:-rotate-6 transition-all">
@@ -400,7 +427,7 @@ export const MainMenu: React.FC = () => {
                 <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
                   <button
                     type="button"
-                    onClick={() => setView('home')}
+                    onClick={handleBackToHome}
                     className="p-1.5 rounded-lg hover:bg-stone-200/70 text-stone-700 cursor-pointer"
                   >
                     <ArrowLeft className="w-5 h-5" />
@@ -410,7 +437,6 @@ export const MainMenu: React.FC = () => {
                   </h2>
                 </div>
 
-                {/* Player Name */}
                 <div>
                   <label className="block text-xs font-bold text-stone-600 uppercase mb-1">
                     {isId ? 'Nama Kamu' : 'Your Name'}
@@ -425,18 +451,17 @@ export const MainMenu: React.FC = () => {
                   />
                 </div>
 
-                {/* Bot Count */}
                 <div>
                   <label className="block text-xs font-bold text-stone-600 uppercase mb-1.5">
                     {isId ? 'Jumlah Bot' : 'Number of Bots'}
                   </label>
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {[1, 2, 3, 4, 5].map((count) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {[1, 2, 3].map((count) => (
                       <button
                         key={count}
                         type="button"
                         onClick={() => setBotCount(count)}
-                        className={`py-2 rounded-xl font-bold text-xs sm:text-sm border-2 transition cursor-pointer ${
+                        className={`py-2 rounded-xl font-bold text-sm border-2 transition cursor-pointer ${
                           botCount === count
                             ? 'bg-[#2E7D32] border-[#1B5E20] text-white shadow'
                             : 'bg-white border-stone-300 text-stone-700 hover:border-stone-400'
@@ -448,7 +473,6 @@ export const MainMenu: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Bot Difficulty */}
                 <div>
                   <label className="block text-xs font-bold text-stone-600 uppercase mb-1.5">
                     {isId ? 'Tingkat Kesulitan' : 'Bot Difficulty'}
@@ -490,7 +514,7 @@ export const MainMenu: React.FC = () => {
               </motion.div>
             )}
 
-            {/* OPEN ROOM VIEW */}
+            {/* OPEN ROOM VIEW (REAL ONLINE P2P LOBBY) */}
             {view === 'open-room' && (
               <motion.div
                 key="open-room"
@@ -503,71 +527,177 @@ export const MainMenu: React.FC = () => {
                 <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
                   <button
                     type="button"
-                    onClick={() => setView('home')}
+                    onClick={handleBackToHome}
                     className="p-1.5 rounded-lg hover:bg-stone-200/70 text-stone-700 cursor-pointer"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
                   <h2 className="text-lg font-black text-[#B45309]">
-                    {isId ? 'Open Room' : 'Open Room'}
+                    Open Room Online
                   </h2>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-stone-600 uppercase mb-1">
-                    {isId ? 'Nama Kamu' : 'Your Name'}
-                  </label>
-                  <input
-                    type="text"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    maxLength={18}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-stone-300 focus:border-[#D97706] focus:outline-none font-bold text-stone-800"
-                  />
-                </div>
+                {!isHostLobbyActive ? (
+                  <>
+                    <div>
+                      <label className="block text-xs font-bold text-stone-600 uppercase mb-1">
+                        {isId ? 'Nama Kamu (Host)' : 'Your Name (Host)'}
+                      </label>
+                      <input
+                        type="text"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                        maxLength={18}
+                        placeholder={isId ? 'Masukkan nama...' : 'Enter name...'}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-stone-300 focus:border-[#D97706] focus:outline-none font-bold text-stone-800"
+                      />
+                    </div>
 
-                {/* Room Code Box */}
-                <div className="bg-amber-50 border-2 border-dashed border-amber-400 rounded-2xl p-4 text-center">
-                  <div className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">
-                    {isId ? 'Kode Room Kamu' : 'Your Room Code'}
-                  </div>
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-3xl font-black tracking-[0.2em] text-[#23583A]">
-                      {createdCode}
-                    </span>
                     <button
                       type="button"
-                      onClick={handleCopyCode}
-                      className="p-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition active:scale-95 cursor-pointer"
-                      title={isId ? 'Salin Kode' : 'Copy Code'}
+                      onClick={handleCreateRoomNow}
+                      className="w-full py-3.5 rounded-2xl bg-[#D97706] hover:bg-[#B45309] active:scale-[0.98] text-white font-black text-base border-b-4 border-[#92400E] shadow-md flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                      <DoorOpen className="w-5 h-5" />
+                      {isId ? 'Buat Room Sekarang' : 'Create Room Now'}
                     </button>
-                  </div>
-                  <p className="text-[11px] text-amber-700 mt-2 flex items-center justify-center gap-1">
-                    <Users className="w-3.5 h-3.5" />
-                    {isId
-                      ? 'Bagikan kode ini ke pacar/teman untuk bergabung'
-                      : 'Share this code with your partner/friends to join'}
-                  </p>
-                </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Room Code Box */}
+                    <div className="bg-amber-50 border-2 border-dashed border-amber-400 rounded-2xl p-3.5 text-center">
+                      <div className="text-[11px] font-bold text-amber-800 uppercase tracking-wider mb-1">
+                        {isId ? 'Kode Room Online Kamu' : 'Your Online Room Code'}
+                      </div>
+                      {mpStatus === 'connecting' ? (
+                        <div className="flex items-center justify-center gap-2 py-2 text-amber-700 font-bold text-sm">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>{isId ? 'Menyiapkan room...' : 'Creating room...'}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-3">
+                          <span className="text-3xl font-black tracking-[0.2em] text-[#23583A]">
+                            {roomCode}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleCopyCode}
+                            className="p-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition active:scale-95 cursor-pointer"
+                            title={isId ? 'Salin Kode' : 'Copy Code'}
+                          >
+                            {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                          </button>
+                        </div>
+                      )}
+                      <p className="text-[11px] text-amber-700 mt-1.5 flex items-center justify-center gap-1">
+                        <Users className="w-3.5 h-3.5" />
+                        {isId
+                          ? 'Kirim kode ini ke pacar/teman untuk masuk'
+                          : 'Share this code with your partner/friends'}
+                      </p>
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleStartRoomDemo(createdCode)}
-                  className="w-full py-3.5 rounded-2xl bg-[#D97706] hover:bg-[#B45309] active:scale-[0.98] text-white font-black text-base border-b-4 border-[#92400E] shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Play className="w-5 h-5 fill-current" />
-                  {isId ? 'Masuk ke Room' : 'Enter Room'}
-                </button>
+                    {mpError && (
+                      <div className="px-3 py-2 rounded-xl bg-red-50 border border-red-300 text-red-700 text-xs font-bold text-center">
+                        {mpError}
+                      </div>
+                    )}
+
+                    {/* Live Players List */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-stone-600 uppercase">
+                          {isId ? 'Pemain di Room' : 'Players in Room'} ({mpLobbyPlayers.length}/4)
+                        </span>
+                        {mpLobbyPlayers.length < 4 && mpStatus === 'connected' && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              Sound.cardSelect(soundEnabled);
+                              addLobbyBot();
+                            }}
+                            className="text-xs font-bold text-[#2E7D32] hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <UserPlus className="w-3.5 h-3.5" />
+                            {isId ? '+ Tambah Bot' : '+ Add Bot'}
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        {mpLobbyPlayers.map((p) => (
+                          <div
+                            key={p.peerId}
+                            className="flex items-center justify-between px-3 py-2 rounded-xl bg-white border border-stone-200 shadow-2xs"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-base">
+                                {p.isHost ? (
+                                  <Crown className="w-4 h-4 text-amber-500" />
+                                ) : p.isBot ? (
+                                  '🤖'
+                                ) : (
+                                  '🥗'
+                                )}
+                              </span>
+                              <span className="font-bold text-sm text-stone-800 truncate">
+                                {p.name}
+                              </span>
+                              {p.isHost && (
+                                <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                                  HOST
+                                </span>
+                              )}
+                            </div>
+                            {!p.isHost && (
+                              <button
+                                type="button"
+                                onClick={() => removeLobbyPlayer(p.peerId)}
+                                className="text-stone-400 hover:text-red-500 p-1 cursor-pointer"
+                                title="Keluarkan"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+
+                        {mpLobbyPlayers.length < 2 && mpStatus === 'connected' && (
+                          <div className="px-3 py-2.5 rounded-xl border-2 border-dashed border-stone-300 text-center text-xs font-bold text-stone-500 flex items-center justify-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                            {isId
+                              ? 'Menunggu pacar/teman masuk...'
+                              : 'Waiting for players to join...'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={mpLobbyPlayers.length < 2 || mpStatus !== 'connected'}
+                      onClick={() => {
+                        Sound.confirmAction(soundEnabled);
+                        startOnlineGame();
+                      }}
+                      className={`w-full py-3.5 rounded-2xl font-black text-base border-b-4 shadow-md flex items-center justify-center gap-2 transition-all ${
+                        mpLobbyPlayers.length >= 2 && mpStatus === 'connected'
+                          ? 'bg-[#2E7D32] hover:bg-[#256628] active:scale-[0.98] text-white border-[#1B5E20] cursor-pointer'
+                          : 'bg-stone-300 text-stone-500 border-stone-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <Play className="w-5 h-5 fill-current" />
+                      {isId ? 'Mulai Permainan' : 'Start Game'}
+                    </button>
+                  </>
+                )}
               </motion.div>
             )}
 
-            {/* JOIN ROOM VIEW */}
+            {/* JOIN ROOM VIEW (REAL ONLINE P2P GUEST) */}
             {view === 'join-room' && (
-              <motion.form
+              <motion.div
                 key="join-room"
-                onSubmit={handleJoinSubmit}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -577,7 +707,7 @@ export const MainMenu: React.FC = () => {
                 <div className="flex items-center gap-2 pb-2 border-b border-stone-200">
                   <button
                     type="button"
-                    onClick={() => setView('home')}
+                    onClick={handleBackToHome}
                     className="p-1.5 rounded-lg hover:bg-stone-200/70 text-stone-700 cursor-pointer"
                   >
                     <ArrowLeft className="w-5 h-5" />
@@ -587,49 +717,115 @@ export const MainMenu: React.FC = () => {
                   </h2>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-stone-600 uppercase mb-1">
-                    {isId ? 'Nama Kamu' : 'Your Name'}
-                  </label>
-                  <input
-                    type="text"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    maxLength={18}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-stone-300 focus:border-[#23583A] focus:outline-none font-bold text-stone-800"
-                  />
-                </div>
+                {!isGuestLobbyActive ? (
+                  <form onSubmit={handleJoinSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-stone-600 uppercase mb-1">
+                        {isId ? 'Nama Kamu' : 'Your Name'}
+                      </label>
+                      <input
+                        type="text"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                        maxLength={18}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-stone-300 focus:border-[#23583A] focus:outline-none font-bold text-stone-800"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-stone-600 uppercase mb-1">
-                    {isId ? 'Kode Room' : 'Room Code'}
-                  </label>
-                  <input
-                    type="text"
-                    value={inputCode}
-                    onChange={(e) => {
-                      setInputCode(e.target.value.toUpperCase());
-                      if (joinStatus) setJoinStatus(null);
-                    }}
-                    maxLength={8}
-                    placeholder="CONTOH: A7K9P2"
-                    className="w-full px-4 py-3 rounded-xl bg-white border-2 border-stone-300 focus:border-[#23583A] focus:outline-none font-black text-center text-2xl tracking-[0.2em] text-[#23583A] uppercase"
-                  />
-                  {joinStatus && (
-                    <p className="text-xs font-bold text-red-600 mt-1.5 text-center">
-                      {joinStatus}
-                    </p>
-                  )}
-                </div>
+                    <div>
+                      <label className="block text-xs font-bold text-stone-600 uppercase mb-1">
+                        {isId ? 'Kode Room dari Host' : 'Room Code from Host'}
+                      </label>
+                      <input
+                        type="text"
+                        value={inputCode}
+                        onChange={(e) => {
+                          setInputCode(e.target.value.toUpperCase());
+                          if (localJoinError) setLocalJoinError(null);
+                          if (mpError) clearMpError();
+                        }}
+                        maxLength={8}
+                        placeholder="CONTOH: A7K9P2"
+                        className="w-full px-4 py-3 rounded-xl bg-white border-2 border-stone-300 focus:border-[#23583A] focus:outline-none font-black text-center text-2xl tracking-[0.2em] text-[#23583A] uppercase"
+                      />
+                      {(localJoinError || mpError) && (
+                        <p className="text-xs font-bold text-red-600 mt-1.5 text-center">
+                          {localJoinError ?? mpError}
+                        </p>
+                      )}
+                    </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-3.5 rounded-2xl bg-[#23583A] hover:bg-[#1B462E] active:scale-[0.98] text-white font-black text-base border-b-4 border-[#143522] shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <KeyRound className="w-5 h-5" />
-                  {isId ? 'Gabung Room' : 'Join Room'}
-                </button>
-              </motion.form>
+                    <button
+                      type="submit"
+                      disabled={mpStatus === 'connecting'}
+                      className="w-full py-3.5 rounded-2xl bg-[#23583A] hover:bg-[#1B462E] active:scale-[0.98] disabled:opacity-70 text-white font-black text-base border-b-4 border-[#143522] shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {mpStatus === 'connecting' ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>{isId ? 'Menghubungkan...' : 'Connecting...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="w-5 h-5" />
+                          <span>{isId ? 'Gabung Room' : 'Join Room'}</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                ) : (
+                  /* Guest Waiting Lobby */
+                  <div className="space-y-4">
+                    <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-3 text-center">
+                      <div className="text-[11px] font-bold text-emerald-700 uppercase">
+                        {isId ? 'Berhasil Masuk Room' : 'Connected to Room'}
+                      </div>
+                      <div className="text-2xl font-black tracking-[0.2em] text-[#23583A]">
+                        {roomCode}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="text-xs font-black text-stone-600 uppercase">
+                        {isId ? 'Pemain di Room' : 'Players in Room'} ({mpLobbyPlayers.length}/4)
+                      </div>
+                      {mpLobbyPlayers.map((p) => (
+                        <div
+                          key={p.peerId}
+                          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-stone-200 shadow-2xs"
+                        >
+                          <span className="text-base">
+                            {p.isHost ? (
+                              <Crown className="w-4 h-4 text-amber-500" />
+                            ) : p.isBot ? (
+                              '🤖'
+                            ) : (
+                              '🥗'
+                            )}
+                          </span>
+                          <span className="font-bold text-sm text-stone-800 truncate">
+                            {p.name}
+                          </span>
+                          {p.isHost && (
+                            <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                              HOST
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="py-3 px-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 font-bold text-xs flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                      <span>
+                        {isId
+                          ? 'Menunggu Host memulai permainan...'
+                          : 'Waiting for Host to start the game...'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
@@ -637,7 +833,7 @@ export const MainMenu: React.FC = () => {
 
       {/* Footer */}
       <footer className="w-full text-center py-3 text-xs font-bold text-stone-700/80 z-10">
-        Sayur Heryana • 2–6 {isId ? 'Pemain' : 'Players'}
+        Sayur Heryana • Online & Solo • 2–4 {isId ? 'Pemain' : 'Players'}
       </footer>
     </div>
   );

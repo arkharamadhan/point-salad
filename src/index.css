@@ -57,24 +57,37 @@
 
 /* Tatakan Kayu / Wooden Cutting Board Mat */
 .cutting-board {
-  background: #F4D7A7;
-  background-image: 
-    radial-gradient(ellipse at 75% 30%, rgba(255, 250, 240, 0.45) 0%, transparent 55%),
-    linear-gradient(180deg, #F9DEB5 0%, #F3CE98 45%, #E9BE82 100%);
-  border: 7px solid #C89D63;
+  background: #F4D5A0;
+  background-image:
+    radial-gradient(ellipse at 50% 25%, rgba(255, 250, 238, 0.52) 0%, transparent 60%),
+    linear-gradient(180deg, #F8DDB0 0%, #F1CA8E 50%, #E4B572 100%);
+  border: 6px solid #B68245;
+  border-bottom-width: 11px;
+  border-bottom-color: #9A6932;
   border-radius: 30px;
-  box-shadow: 
-    0 20px 48px -8px rgba(95, 50, 15, 0.28),
-    0 6px 14px -3px rgba(95, 50, 15, 0.16),
-    inset 0 3px 6px rgba(255, 255, 255, 0.75),
-    inset 0 -4px 10px rgba(180, 125, 60, 0.35);
+  box-shadow:
+    0 22px 46px -10px rgba(72, 38, 12, 0.42),
+    0 8px 16px -4px rgba(72, 38, 12, 0.24),
+    inset 0 3px 6px rgba(255, 255, 255, 0.78),
+    inset 0 -4px 10px rgba(155, 102, 42, 0.35);
 }
 
 .veggie-table-bg {
-  background-color: #FAF6ED;
-  background-image: radial-gradient(#E8DFC8 1.5px, transparent 1.5px), radial-gradient(#E8DFC8 1.5px, #FAF6ED 1.5px);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
+  background-color: #EFE5D1;
+  background-image:
+    radial-gradient(circle at 50% 42%, rgba(255, 252, 240, 0.7) 0%, rgba(226, 206, 172, 0.45) 55%, rgba(196, 168, 126, 0.6) 100%),
+    linear-gradient(90deg, rgba(164, 126, 78, 0.08) 50%, transparent 50%),
+    linear-gradient(rgba(164, 126, 78, 0.08) 50%, transparent 50%);
+  background-size: 100% 100%, 44px 44px, 44px 44px;
+}
+
+.kitchen-table-bg {
+  background-color: #EADBC0;
+  background-image:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 249, 236, 0.72) 0%, rgba(228, 204, 166, 0.35) 58%, rgba(173, 134, 86, 0.52) 100%),
+    linear-gradient(90deg, rgba(139, 90, 43, 0.075) 50%, transparent 50%),
+    linear-gradient(rgba(139, 90, 43, 0.075) 50%, transparent 50%);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
 }
 
 .tatakan-kayu {

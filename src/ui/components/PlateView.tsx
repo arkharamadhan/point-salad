@@ -76,8 +76,8 @@ export const PlateView: React.FC<PlateViewProps> = ({
 
   const plateSizeClasses =
     size === 'shelf'
-      ? 'w-[72px] h-[72px] sm:w-20 sm:h-20 md:w-24 md:h-24'
-      : 'w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32';
+      ? 'w-[74px] h-[74px] sm:w-[84px] sm:h-[84px]'
+      : 'w-[86px] h-[86px] sm:w-[104px] sm:h-[104px] lg:w-[116px] lg:h-[116px]';
 
   return (
     <motion.div

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { PlateView } from './PlateView';
 import { VeggieCharacter } from './VeggieCharacter';
@@ -13,10 +14,16 @@ export const MarketCuttingBoard: React.FC = () => {
     takeScoringMarket,
     takeScoringPile,
     soundEnabled,
+    lang,
+    mpRole,
+    mpMyPlayerIndex,
   } = useGameStore();
 
-  const { market, hasTakenMainActionThisTurn, phase } = gameState;
-  const isActionAllowed = phase !== 'game_over' && !hasTakenMainActionThisTurn;
+  const { market, hasTakenMainActionThisTurn, phase, players, currentTurnPlayerIndex } = gameState;
+  const isMyTurn =
+    mpRole === 'none' || (mpMyPlayerIndex !== null && currentTurnPlayerIndex === mpMyPlayerIndex);
+  const activePlayerName = players[currentTurnPlayerIndex]?.name ?? '';
+  const isActionAllowed = phase !== 'game_over' && !hasTakenMainActionThisTurn && isMyTurn;
 
   const totalCardsInPiles = market.piles.reduce((sum, p) => sum + p.length, 0);
 
@@ -32,10 +39,8 @@ export const MarketCuttingBoard: React.FC = () => {
 
   const handleVeggieDragToShelf = (slotIndex: number) => {
     if (!isActionAllowed) return;
-    // If not selected yet, select it
     if (!selectedResourceSlots.includes(slotIndex)) {
       selectResourceSlot(slotIndex);
-      // If that makes 2 selections, trigger confirm automatically
       const currentSelected = useGameStore.getState().selectedResourceSlots;
       const availableCount = market.resourceSlots.filter(Boolean).length;
       const allPilesEmpty = market.piles.every((p) => p.length === 0);
@@ -47,39 +52,61 @@ export const MarketCuttingBoard: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full max-w-xl md:max-w-2xl mx-auto cutting-board p-4 sm:p-6 md:p-7 select-none flex flex-col justify-between overflow-hidden">
-      {/* Organic Wood Grain Lines & Curves Overlay (matching reference image) */}
+    <div className="relative w-full max-w-[440px] sm:max-w-[540px] lg:max-w-[600px] xl:max-w-[650px] mx-auto cutting-board px-3.5 py-3.5 sm:px-6 sm:py-5 lg:px-7 lg:py-5 select-none flex flex-col justify-between overflow-hidden">
+      {/* Organic Wood Grain Lines & Juice Groove Overlay */}
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-70 overflow-hidden rounded-[24px]"
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-75 overflow-hidden rounded-[24px]"
         viewBox="0 0 600 400"
         preserveAspectRatio="none"
       >
-        {/* Inner subtle carved perimeter line */}
-        <rect x="8" y="8" width="584" height="384" rx="20" stroke="#DFB87F" strokeWidth="1.5" fill="none" strokeOpacity="0.7" />
+        {/* Recessed wooden juice groove */}
+        <rect
+          x="11"
+          y="11"
+          width="578"
+          height="378"
+          rx="18"
+          stroke="#BE8A4A"
+          strokeWidth="2.5"
+          fill="none"
+          strokeOpacity="0.55"
+        />
+        <rect
+          x="13"
+          y="13"
+          width="574"
+          height="374"
+          rx="16"
+          stroke="#FFF4DD"
+          strokeWidth="1.2"
+          fill="none"
+          strokeOpacity="0.55"
+        />
 
         {/* Natural Horizontal Wood Grain Waves */}
-        <path d="M 10 38 Q 160 55, 320 32 T 590 42" stroke="#C69658" strokeWidth="2" fill="none" strokeOpacity="0.8" />
-        <path d="M 15 65 Q 180 82, 340 58 T 585 70" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
-        <path d="M 10 115 Q 190 138, 360 108 T 590 120" stroke="#C69658" strokeWidth="2.2" fill="none" strokeOpacity="0.75" />
-        <path d="M 20 148 Q 210 172, 380 138 T 585 152" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.65" />
-        <path d="M 10 195 Q 170 220, 350 185 T 590 205" stroke="#C69658" strokeWidth="2" fill="none" strokeOpacity="0.8" />
-        <path d="M 15 240 Q 200 268, 380 230 T 585 250" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
-        <path d="M 10 288 Q 180 315, 360 278 T 590 298" stroke="#C69658" strokeWidth="2.2" fill="none" strokeOpacity="0.85" />
-        <path d="M 25 330 Q 220 355, 390 320 T 585 338" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.65" />
-        <path d="M 10 368 Q 190 388, 370 358 T 590 375" stroke="#C69658" strokeWidth="1.8" fill="none" strokeOpacity="0.7" />
+        <path d="M 10 42 Q 160 58, 320 35 T 590 45" stroke="#C69658" strokeWidth="2" fill="none" strokeOpacity="0.75" />
+        <path d="M 15 78 Q 180 94, 340 70 T 585 82" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.55" />
+        <path d="M 10 128 Q 190 150, 360 120 T 590 132" stroke="#C69658" strokeWidth="2.2" fill="none" strokeOpacity="0.7" />
+        <path d="M 20 165 Q 210 185, 380 154 T 585 168" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
+        <path d="M 10 212 Q 170 236, 350 202 T 590 220" stroke="#C69658" strokeWidth="2" fill="none" strokeOpacity="0.75" />
+        <path d="M 15 260 Q 200 284, 380 250 T 585 268" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.55" />
+        <path d="M 10 306 Q 180 330, 360 295 T 590 314" stroke="#C69658" strokeWidth="2.2" fill="none" strokeOpacity="0.8" />
+        <path d="M 25 352 Q 220 374, 390 342 T 585 358" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
 
-        {/* Prominent Tree Growth Rings / Curves on the Right Side (as in game reference) */}
-        <path d="M 440 10 C 515 50, 565 130, 535 220 C 505 295, 435 340, 360 370" stroke="#BD8947" strokeWidth="2.5" fill="none" strokeOpacity="0.85" />
-        <path d="M 465 10 C 535 60, 580 140, 550 225 C 525 290, 460 330, 395 355" stroke="#DBB278" strokeWidth="1.8" fill="none" strokeOpacity="0.75" />
-        <path d="M 490 10 C 555 70, 595 150, 565 230 C 545 285, 485 320, 430 340" stroke="#BD8947" strokeWidth="2" fill="none" strokeOpacity="0.8" />
-        <path d="M 520 15 C 575 80, 605 160, 580 235 C 565 275, 515 305, 465 325" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
+        {/* Tree Growth Curves on the Right */}
+        <path d="M 445 10 C 520 50, 568 130, 538 220 C 508 295, 438 340, 365 370" stroke="#BD8947" strokeWidth="2.4" fill="none" strokeOpacity="0.78" />
+        <path d="M 472 10 C 540 60, 582 140, 554 225 C 528 290, 464 330, 400 355" stroke="#DBB278" strokeWidth="1.6" fill="none" strokeOpacity="0.7" />
+        <path d="M 500 10 C 560 70, 598 150, 568 230 C 548 285, 488 320, 434 340" stroke="#BD8947" strokeWidth="2" fill="none" strokeOpacity="0.72" />
 
-        {/* Small subtle wood whorl/knot on left */}
-        <ellipse cx="140" cy="125" rx="14" ry="7" stroke="#BD8947" strokeWidth="1.8" fill="none" strokeOpacity="0.7" transform="rotate(-8 140 125)" />
-        <ellipse cx="140" cy="125" rx="8" ry="4" stroke="#DBB278" strokeWidth="1.2" fill="none" strokeOpacity="0.6" transform="rotate(-8 140 125)" />
+        {/* Subtle wood knot */}
+        <ellipse cx="128" cy="128" rx="14" ry="7" stroke="#BD8947" strokeWidth="1.8" fill="none" strokeOpacity="0.65" transform="rotate(-8 128 128)" />
+        <ellipse cx="128" cy="128" rx="8" ry="4" stroke="#DBB278" strokeWidth="1.2" fill="none" strokeOpacity="0.55" transform="rotate(-8 128 128)" />
       </svg>
 
-      {/* Top-Right Deck Count Badge (pepet di pojok kanan atas persis sesuai referensi) */}
+      {/* Top-Left Cutting Board Handle Slot Accent */}
+      <div className="pointer-events-none absolute top-2.5 left-3.5 z-10 w-8 h-3 rounded-full bg-[#A8753A]/45 border border-[#8E5F29]/40 shadow-inner" />
+
+      {/* Top-Right Deck Count Badge */}
       <button
         type="button"
         onClick={
@@ -90,36 +117,49 @@ export const MarketCuttingBoard: React.FC = () => {
               }
             : undefined
         }
-        className={`absolute top-0 right-0 z-20 bg-[#C88448] text-white font-black font-fredoka text-xs sm:text-sm px-3 py-1.5 rounded-bl-2xl rounded-tr-[24px] shadow-sm border-l border-b border-[#B06E35] flex items-center gap-1.5 transition-transform ${
+        className={`absolute top-0 right-0 z-20 bg-[#B66E34] text-white font-black font-fredoka text-xs sm:text-sm px-3.5 py-1.5 rounded-bl-2xl rounded-tr-[22px] shadow-md border-l-2 border-b-2 border-[#945624] flex items-center gap-1.5 transition-transform ${
           isActionAllowed && totalCardsInPiles > 0
-            ? 'cursor-pointer hover:bg-[#B77338] active:scale-95'
+            ? 'cursor-pointer hover:bg-[#A05E29] active:scale-95'
             : 'opacity-70'
         }`}
-        title="Sisa kartu di tumpukan dek (klik untuk ambil buta)"
+        title={
+          lang === 'id'
+            ? 'Sisa kartu di tumpukan dek (klik untuk ambil buta)'
+            : 'Remaining deck cards (click for blind draw)'
+        }
       >
         <span>🂠</span>
         <span>{totalCardsInPiles}</span>
       </button>
 
-      {/* 1. TOP ROW: 3 WHITE CERAMIC PLATES (with drag and drop to shelf support) */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 justify-items-center mb-3 sm:mb-4 pt-1 z-10">
+      {/* 1. TOP ROW: 3 WHITE CERAMIC PLATES */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 justify-items-center mb-2.5 sm:mb-3.5 pt-2 z-10">
         {[0, 1, 2].map((colIndex) => {
           const scoringCard = market.scoringSlots[colIndex];
           return (
-            <PlateView
-              key={colIndex}
-              card={scoringCard}
-              showFlipArrow={true}
-              isSelectable={isActionAllowed}
-              onClick={isActionAllowed ? () => handleTakeScoringMarket(colIndex) : undefined}
-              onDragToShelf={isActionAllowed ? () => handleTakeScoringMarket(colIndex) : undefined}
-            />
+            <motion.div
+              key={scoringCard?.id ?? `plate-empty-${colIndex}`}
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+            >
+              <PlateView
+                card={scoringCard}
+                showFlipArrow={true}
+                isSelectable={isActionAllowed}
+                onClick={isActionAllowed ? () => handleTakeScoringMarket(colIndex) : undefined}
+                onDragToShelf={isActionAllowed ? () => handleTakeScoringMarket(colIndex) : undefined}
+              />
+            </motion.div>
           );
         })}
       </div>
 
+      {/* Subtle carved divider between plates and fresh veggies */}
+      <div className="w-[88%] mx-auto h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#B68245]/45 to-transparent mb-2 sm:mb-3 z-10" />
+
       {/* 2. MIDDLE ROW: 3 STANDALONE VEGETABLES (ROW 1) */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 justify-items-center mb-2 sm:mb-3 z-10">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 justify-items-center mb-1.5 sm:mb-2.5 z-10">
         {[0, 1, 2].map((colIndex) => {
           const slotIndex = colIndex * 2;
           const resCard = market.resourceSlots[slotIndex];
@@ -127,6 +167,7 @@ export const MarketCuttingBoard: React.FC = () => {
           return (
             <VeggieCharacter
               key={slotIndex}
+              cardKey={resCard?.id ?? `empty-${slotIndex}`}
               resource={resCard?.resource}
               isSelectable={isActionAllowed && !!resCard}
               isSelected={selectedResourceSlots.includes(slotIndex)}
@@ -136,14 +177,13 @@ export const MarketCuttingBoard: React.FC = () => {
               onDragToShelf={
                 isActionAllowed && resCard ? () => handleVeggieDragToShelf(slotIndex) : undefined
               }
-              size={56}
             />
           );
         })}
       </div>
 
       {/* 3. BOTTOM ROW: 3 STANDALONE VEGETABLES (ROW 2) */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 justify-items-center mb-2 z-10">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 justify-items-center mb-1.5 z-10">
         {[0, 1, 2].map((colIndex) => {
           const slotIndex = colIndex * 2 + 1;
           const resCard = market.resourceSlots[slotIndex];
@@ -151,6 +191,7 @@ export const MarketCuttingBoard: React.FC = () => {
           return (
             <VeggieCharacter
               key={slotIndex}
+              cardKey={resCard?.id ?? `empty-${slotIndex}`}
               resource={resCard?.resource}
               isSelectable={isActionAllowed && !!resCard}
               isSelected={selectedResourceSlots.includes(slotIndex)}
@@ -160,15 +201,20 @@ export const MarketCuttingBoard: React.FC = () => {
               onDragToShelf={
                 isActionAllowed && resCard ? () => handleVeggieDragToShelf(slotIndex) : undefined
               }
-              size={56}
             />
           );
         })}
       </div>
 
-      {/* BOTTOM BOARD INSTRUCTION TEXT (matching reference image) */}
-      <p className="text-center font-black text-xs sm:text-sm text-[#9C6D38] font-fredoka tracking-wide drop-shadow-sm select-none mt-1 z-10">
-        Take 1 point plate or 2 veggies
+      {/* BOTTOM BOARD INSTRUCTION TEXT */}
+      <p className="text-center font-black text-[11px] sm:text-xs lg:text-sm text-[#855726] font-fredoka tracking-wide drop-shadow-xs select-none mt-0.5 z-10">
+        {!isMyTurn && phase !== 'game_over'
+          ? lang === 'id'
+            ? `⏳ Menunggu giliran ${activePlayerName}...`
+            : `⏳ Waiting for ${activePlayerName}'s turn...`
+          : lang === 'id'
+          ? 'Ambil 1 piring resep atau 2 sayur segar'
+          : 'Take 1 point plate or 2 fresh veggies'}
       </p>
     </div>
   );
