@@ -211,21 +211,13 @@ export const PointBowlRenderer: React.FC<PointBowlRendererProps> = ({ scoringId 
       const params = condition.params as MajorityParams;
       const isMost = params.mode === 'most';
       return (
-        <div className="flex flex-col items-center justify-center gap-0.5 w-full py-0.5">
-          <div className="flex items-center gap-1.5">
-            <ScallopBadge value={params.points} size={28} badgeBg={isMost ? '#FB8C00' : '#5E35B1'} />
-            <span className="text-[#7CB342] font-black text-base select-none">/</span>
-            <VeggieIcon resource={params.resource} size={26} />
-          </div>
-          <span
-            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border tracking-wider mt-0.5 font-fredoka ${
-              isMost
-                ? 'bg-amber-100 text-amber-900 border-amber-300'
-                : 'bg-purple-100 text-purple-900 border-purple-300'
-            }`}
-          >
-            {isMost ? 'TERBANYAK' : 'TERSEDIKIT'}
+        <div className="flex items-center justify-center gap-1 w-full py-0.5">
+          <span className="text-[10px] font-black uppercase text-[#0284C7] font-fredoka tracking-tighter">
+            {isMost ? 'MOST' : 'FEWEST'}
           </span>
+          <VeggieIcon resource={params.resource} size={24} />
+          <span className="text-stone-400 font-black text-xs">=</span>
+          <ScallopBadge value={params.points} size={26} badgeBg="#7CB342" />
         </div>
       );
     }
