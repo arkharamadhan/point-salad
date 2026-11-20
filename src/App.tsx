@@ -3,6 +3,7 @@ import { TurnHeader } from './ui/components/TurnHeader';
 import { MarketBoard } from './ui/components/MarketBoard';
 import { PlayerTableau } from './ui/components/PlayerTableau';
 import { EndGameModal } from './ui/components/EndGameModal';
+import { SettingsModal } from './ui/components/SettingsModal';
 
 export const App: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ export const App: React.FC = () => {
       </div>
 
       <EndGameModal />
+      <SettingsModal />
 
       {/* Footer */}
       <footer className="mt-8 pt-4 border-t border-stone-800 text-center text-[11px] text-stone-500 font-medium">

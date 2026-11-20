@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '../store/gameStore';
 
 export const TurnHeader: React.FC = () => {
-  const { gameState, startNewGame, lang, setLang, errorMessage, clearError } = useGameStore();
+  const { gameState, setSettingsOpen, lang, setLang, errorMessage, clearError, isBotThinking } = useGameStore();
   const { turnCount, players, currentTurnPlayerIndex, log } = gameState;
   const activePlayer = players[currentTurnPlayerIndex];
 
@@ -35,12 +35,13 @@ export const TurnHeader: React.FC = () => {
             {lang === 'id' ? '🇮🇩 ID' : '🇬🇧 EN'}
           </button>
 
-          {/* New Game Button */}
+          {/* Settings Button */}
           <button
-            onClick={() => startNewGame()}
-            className="px-3 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-xs font-semibold text-stone-200 transition-colors shadow"
+            onClick={() => setSettingsOpen(true)}
+            className="px-3 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 active:bg-stone-900 text-xs font-semibold text-stone-200 transition-colors shadow flex items-center gap-1.5"
           >
-            Game Baru
+            <span>⚙️</span>
+            <span>Pengaturan</span>
           </button>
         </div>
       </div>
@@ -53,9 +54,16 @@ export const TurnHeader: React.FC = () => {
             <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
           </span>
           <div className="text-center sm:text-left">
-            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-widest font-cinzel">
-              GILIRAN {turnCount}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-amber-400 uppercase tracking-widest font-cinzel">
+                GILIRAN {turnCount}
+              </span>
+              {activePlayer?.isBot && (
+                <span className="bg-indigo-900/60 text-indigo-300 border border-indigo-700 text-[10px] px-1.5 py-0.2 rounded font-bold">
+                  {isBotThinking ? '🤖 Bot Sedang Berpikir...' : '🤖 Bot'}
+                </span>
+              )}
+            </div>
             <h2 className="text-base sm:text-lg font-black text-stone-100">
               Sekarang giliran:{' '}
               <span className="text-amber-300 font-bold underline decoration-amber-500 decoration-2">

@@ -5,6 +5,7 @@ import {
   initializeGame,
   gameReducer,
   SetupOptions,
+  createBot,
 } from '../../engine';
 
 interface GameStoreState {
@@ -12,6 +13,9 @@ interface GameStoreState {
   selectedResourceSlots: number[];
   lang: 'id' | 'en';
   errorMessage: string | null;
+  soundEnabled: boolean;
+  isSettingsOpen: boolean;
+  isBotThinking: boolean;
 
   // Actions
   startNewGame: (options?: Partial<SetupOptions>) => void;
@@ -21,14 +25,17 @@ interface GameStoreState {
   takeScoringPile: (pileIndex: number) => void;
   flipCard: (cardId: string) => void;
   endTurn: () => void;
+  executeBotTurnIfNeeded: () => void;
   setLang: (lang: 'id' | 'en') => void;
+  toggleSound: () => void;
+  setSettingsOpen: (open: boolean) => void;
   clearError: () => void;
 }
 
 const defaultSetup: SetupOptions = {
   players: [
-    { id: 'p1', name: 'Pemain 1' },
-    { id: 'p2', name: 'Pemain 2' },
+    { id: 'p1', name: 'Pemain 1', isBot: false },
+    { id: 'p2', name: 'Bot Pintar', isBot: true, botDifficulty: 'greedy' },
   ],
   seed: Math.floor(Math.random() * 1000000),
 };
@@ -38,11 +45,14 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   selectedResourceSlots: [],
   lang: 'id',
   errorMessage: null,
+  soundEnabled: true,
+  isSettingsOpen: false,
+  isBotThinking: false,
 
   startNewGame: (options) => {
     const players = options?.players ?? [
-      { id: 'p1', name: 'Pemain 1' },
-      { id: 'p2', name: 'Pemain 2' },
+      { id: 'p1', name: 'Pemain 1', isBot: false },
+      { id: 'p2', name: 'Bot Pintar', isBot: true, botDifficulty: 'greedy' },
     ];
     const seed = options?.seed ?? Math.floor(Math.random() * 1000000);
 
@@ -55,12 +65,19 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       gameState: newState,
       selectedResourceSlots: [],
       errorMessage: null,
+      isSettingsOpen: false,
+      isBotThinking: false,
     });
+
+    // Check if initial starting player is a bot
+    setTimeout(() => {
+      get().executeBotTurnIfNeeded();
+    }, 500);
   },
 
   selectResourceSlot: (slotIndex) => {
-    const { gameState, selectedResourceSlots } = get();
-    if (gameState.phase === 'game_over') return;
+    const { gameState, selectedResourceSlots, isBotThinking } = get();
+    if (gameState.phase === 'game_over' || isBotThinking) return;
     if (gameState.hasTakenMainActionThisTurn) return;
 
     // Check if slot has card
@@ -96,8 +113,8 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   confirmTakeResources: () => {
-    const { gameState, selectedResourceSlots, lang } = get();
-    if (gameState.hasTakenMainActionThisTurn) return;
+    const { gameState, selectedResourceSlots, lang, isBotThinking } = get();
+    if (gameState.hasTakenMainActionThisTurn || isBotThinking) return;
 
     try {
       const action: GameAction = {
@@ -116,8 +133,8 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   takeScoringMarket: (slotIndex) => {
-    const { gameState, lang } = get();
-    if (gameState.hasTakenMainActionThisTurn) return;
+    const { gameState, lang, isBotThinking } = get();
+    if (gameState.hasTakenMainActionThisTurn || isBotThinking) return;
 
     try {
       const action: GameAction = {
@@ -136,8 +153,8 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   takeScoringPile: (pileIndex) => {
-    const { gameState, lang } = get();
-    if (gameState.hasTakenMainActionThisTurn) return;
+    const { gameState, lang, isBotThinking } = get();
+    if (gameState.hasTakenMainActionThisTurn || isBotThinking) return;
 
     try {
       const action: GameAction = {
@@ -156,7 +173,9 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   flipCard: (cardId) => {
-    const { gameState, lang } = get();
+    const { gameState, lang, isBotThinking } = get();
+    if (isBotThinking) return;
+
     try {
       const action: GameAction = {
         type: 'FLIP_CARD',
@@ -173,7 +192,9 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   endTurn: () => {
-    const { gameState, lang } = get();
+    const { gameState, lang, isBotThinking } = get();
+    if (isBotThinking) return;
+
     try {
       const action: GameAction = {
         type: 'END_TURN',
@@ -184,11 +205,66 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         selectedResourceSlots: [],
         errorMessage: null,
       });
+
+      // Trigger bot if next player is bot
+      setTimeout(() => {
+        get().executeBotTurnIfNeeded();
+      }, 500);
     } catch (err: any) {
       set({ errorMessage: err?.message ?? 'Tidak dapat mengakhiri giliran' });
     }
   },
 
+  executeBotTurnIfNeeded: () => {
+    const { gameState, lang, isBotThinking } = get();
+    if (gameState.phase === 'game_over' || isBotThinking) return;
+
+    const activePlayer = gameState.players[gameState.currentTurnPlayerIndex];
+    if (!activePlayer || !activePlayer.isBot) return;
+
+    set({ isBotThinking: true });
+
+    try {
+      const bot = createBot(activePlayer.botDifficulty ?? 'greedy');
+      const actions = bot.planTurn(gameState, gameState.currentTurnPlayerIndex);
+
+      // Execute bot actions sequentially with gentle delay
+      let currentState = gameState;
+      let actionIdx = 0;
+
+      const executeNextAction = () => {
+        if (actionIdx >= actions.length) {
+          set({ isBotThinking: false });
+          // If the subsequent player is also a bot, trigger it
+          const nextActivePlayer = currentState.players[currentState.currentTurnPlayerIndex];
+          if (nextActivePlayer && nextActivePlayer.isBot && currentState.phase !== 'game_over') {
+            setTimeout(() => {
+              get().executeBotTurnIfNeeded();
+            }, 600);
+          }
+          return;
+        }
+
+        const action = actions[actionIdx];
+        currentState = gameReducer(currentState, action, lang);
+        actionIdx++;
+        set({ gameState: currentState });
+
+        setTimeout(executeNextAction, 400);
+      };
+
+      setTimeout(executeNextAction, 500);
+    } catch (err: any) {
+      set({
+        isBotThinking: false,
+        errorMessage: err?.message ?? 'Bot mengalami kesalahan.',
+      });
+    }
+  },
+
   setLang: (lang) => set({ lang }),
+  toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
+  setSettingsOpen: (open) => set({ isSettingsOpen: open }),
   clearError: () => set({ errorMessage: null }),
 }));
+

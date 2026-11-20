@@ -5,3 +5,4 @@ export * from './market';
 export * from './actions';
 export * from './scoring';
 export * from './endgame';
+export * from './bot';
