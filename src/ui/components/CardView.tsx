@@ -1,7 +1,10 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card } from '../../engine/types';
 import { SCORING_CONDITIONS_MAP } from '../../engine/scoring';
 import { SpiceIcon, SPICE_INFO } from './icons/SpiceIcon';
+import { Sound } from '../sound/soundEffects';
+import { useGameStore } from '../store/gameStore';
 
 export interface CardViewProps {
   card?: Card | null;
@@ -16,6 +19,7 @@ export interface CardViewProps {
   canFlip?: boolean;
   className?: string;
   lang?: 'id' | 'en';
+  keyboardBadge?: string;
 }
 
 export const CardView: React.FC<CardViewProps> = ({
@@ -31,17 +35,37 @@ export const CardView: React.FC<CardViewProps> = ({
   canFlip = false,
   className = '',
   lang = 'id',
+  keyboardBadge,
 }) => {
+  const { soundEnabled } = useGameStore();
+
+  const handleClick = () => {
+    if (onClick) {
+      Sound.cardSelect(soundEnabled);
+      onClick();
+    }
+  };
+
+  const handleFlip = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onFlip) {
+      Sound.cardFlip(soundEnabled);
+      onFlip();
+    }
+  };
+
   // Punggung kartu / Draw Pile Back
   if (side === 'back' || !card) {
     return (
-      <div
-        onClick={onClick}
+      <motion.div
+        whileHover={isSelectable ? { scale: 1.03, y: -4 } : {}}
+        whileTap={isSelectable ? { scale: 0.97 } : {}}
+        onClick={handleClick}
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
-        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all duration-200 card-shadow ${
+        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all card-shadow ${
           isSelectable
-            ? 'cursor-pointer hover:-translate-y-1 hover:ring-2 hover:ring-amber-500 hover:card-shadow-hover'
+            ? 'cursor-pointer hover:ring-2 hover:ring-amber-500'
             : ''
         } ${isSelected ? 'card-selected-glow ring-2 ring-emerald-500' : ''} ${className}`}
         style={{
@@ -49,6 +73,12 @@ export const CardView: React.FC<CardViewProps> = ({
           border: '2px solid #5A3A26',
         }}
       >
+        {keyboardBadge && (
+          <span className="absolute -top-2 -left-2 z-20 bg-stone-900 border border-stone-700 text-amber-300 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow">
+            {keyboardBadge}
+          </span>
+        )}
+
         <div className="w-full h-full rounded-lg border border-amber-900/60 flex flex-col items-center justify-between p-2 relative overflow-hidden">
           {/* Subtle geometric mandala pattern */}
           <div className="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
@@ -80,7 +110,7 @@ export const CardView: React.FC<CardViewProps> = ({
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -91,21 +121,29 @@ export const CardView: React.FC<CardViewProps> = ({
   // SISI REMPAH (Resource Side)
   if (side === 'resource') {
     return (
-      <div
-        onClick={onClick}
+      <motion.div
+        whileHover={isSelectable ? { scale: 1.04, y: -4 } : {}}
+        whileTap={isSelectable ? { scale: 0.96 } : {}}
+        onClick={handleClick}
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
-        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all duration-200 card-shadow paper-texture text-stone-900 flex flex-col justify-between border-2 ${
-          isSelected ? 'card-selected-glow ring-2 ring-emerald-500 scale-[1.02]' : ''
+        className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all card-shadow paper-texture text-stone-900 flex flex-col justify-between border-2 ${
+          isSelected ? 'card-selected-glow ring-2 ring-emerald-500 scale-[1.03]' : ''
         } ${
           isSelectable
-            ? 'cursor-pointer hover:-translate-y-1.5 hover:card-shadow-hover hover:border-emerald-600'
+            ? 'cursor-pointer hover:border-emerald-600'
             : ''
         } ${className}`}
         style={{
           borderColor: isSelected ? '#10B981' : spiceInfo.color,
         }}
       >
+        {keyboardBadge && (
+          <span className="absolute -top-2 -left-2 z-20 bg-stone-900 border border-stone-700 text-emerald-400 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow">
+            {keyboardBadge}
+          </span>
+        )}
+
         {/* Top corner: Mini icon + Name */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
@@ -120,7 +158,7 @@ export const CardView: React.FC<CardViewProps> = ({
         {/* Center: Large Distinct Graphic */}
         <div className="flex flex-col items-center justify-center my-auto py-1">
           <div
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center p-2 shadow-inner transition-transform group-hover:scale-105"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center p-2 shadow-inner"
             style={{ backgroundColor: spiceInfo.bgColor }}
           >
             <SpiceIcon resource={card.resource} size={54} />
@@ -140,27 +178,35 @@ export const CardView: React.FC<CardViewProps> = ({
             {card.scoringId}
           </span>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   // SISI SKOR (Scoring Side)
   return (
-    <div
-      onClick={onClick}
+    <motion.div
+      whileHover={isSelectable ? { scale: 1.04, y: -4 } : {}}
+      whileTap={isSelectable ? { scale: 0.96 } : {}}
+      onClick={handleClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all duration-200 card-shadow paper-texture text-stone-900 flex flex-col justify-between border-2 ${
-        isSelected ? 'card-selected-glow ring-2 ring-emerald-500 scale-[1.02]' : ''
+      className={`relative w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl p-2 select-none transition-all card-shadow paper-texture text-stone-900 flex flex-col justify-between border-2 ${
+        isSelected ? 'card-selected-glow ring-2 ring-emerald-500 scale-[1.03]' : ''
       } ${
         isSelectable
-          ? 'cursor-pointer hover:-translate-y-1.5 hover:card-shadow-hover hover:border-amber-600'
+          ? 'cursor-pointer hover:border-amber-600'
           : ''
       } ${className}`}
       style={{
         borderColor: isSelected ? '#10B981' : '#8C3820',
       }}
     >
+      {keyboardBadge && (
+        <span className="absolute -top-2 -left-2 z-20 bg-stone-900 border border-stone-700 text-amber-300 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow">
+          {keyboardBadge}
+        </span>
+      )}
+
       {/* Top Header Banner */}
       <div className="flex items-center justify-between pb-1 border-b border-stone-200">
         <div className="flex items-center gap-1">
@@ -208,17 +254,14 @@ export const CardView: React.FC<CardViewProps> = ({
 
         {canFlip && onFlip && (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onFlip();
-            }}
-            className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow transition-colors flex items-center gap-0.5"
+            onClick={handleFlip}
+            className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow transition-colors flex items-center gap-0.5 cursor-pointer"
             title="Balik kartu ini menjadi Rempah secara permanen"
           >
             <span>🔄</span> Balik
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

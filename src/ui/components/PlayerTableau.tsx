@@ -4,10 +4,16 @@ import { evaluatePlayerScore } from '../../engine/scoring';
 import { useGameStore } from '../store/gameStore';
 import { CardView } from './CardView';
 import { SpiceIcon, SPICE_INFO } from './icons/SpiceIcon';
+import { Sound } from '../sound/soundEffects';
 
 export const PlayerTableau: React.FC = () => {
-  const { gameState, flipCard, endTurn, lang } = useGameStore();
+  const { gameState, flipCard, endTurn, lang, soundEnabled } = useGameStore();
   const { players, currentTurnPlayerIndex, hasTakenMainActionThisTurn, phase } = gameState;
+
+  const handleEndTurn = () => {
+    Sound.turnEnd(soundEnabled);
+    endTurn();
+  };
 
   const activePlayer = players[currentTurnPlayerIndex];
   if (!activePlayer) return null;
@@ -109,8 +115,8 @@ export const PlayerTableau: React.FC = () => {
 
             {hasTakenMainActionThisTurn && !isGameOver && (
               <button
-                onClick={endTurn}
-                className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2"
+                onClick={handleEndTurn}
+                className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer"
               >
                 <span>Selesai Giliran</span>
                 <span>➔</span>

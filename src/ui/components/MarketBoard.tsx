@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CardView } from './CardView';
+import { Sound } from '../sound/soundEffects';
 
 export const MarketBoard: React.FC = () => {
   const {
@@ -11,7 +12,23 @@ export const MarketBoard: React.FC = () => {
     takeScoringMarket,
     takeScoringPile,
     lang,
+    soundEnabled,
   } = useGameStore();
+
+  const handleConfirmResources = () => {
+    Sound.confirmAction(soundEnabled);
+    confirmTakeResources();
+  };
+
+  const handleTakeScoringMarket = (slotIndex: number) => {
+    Sound.cardDraw(soundEnabled);
+    takeScoringMarket(slotIndex);
+  };
+
+  const handleTakeScoringPile = (pileIndex: number) => {
+    Sound.cardDraw(soundEnabled);
+    takeScoringPile(pileIndex);
+  };
 
   const { market, hasTakenMainActionThisTurn, phase } = gameState;
   const isActionAllowed = phase !== 'game_over' && !hasTakenMainActionThisTurn;
@@ -38,8 +55,8 @@ export const MarketBoard: React.FC = () => {
           <div className="flex items-center gap-2">
             {canConfirmResources ? (
               <button
-                onClick={confirmTakeResources}
-                className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition-all transform hover:scale-105 flex items-center gap-1.5"
+                onClick={handleConfirmResources}
+                className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition-all transform hover:scale-105 flex items-center gap-1.5 cursor-pointer"
               >
                 <span>✓</span> Ambil {selectedResourceSlots.length} Rempah Terpilih
               </button>
@@ -91,7 +108,7 @@ export const MarketBoard: React.FC = () => {
                       side="back"
                       pileCount={pile.length}
                       isSelectable={isActionAllowed}
-                      onClick={isActionAllowed ? () => takeScoringPile(pileIndex) : undefined}
+                      onClick={isActionAllowed ? () => handleTakeScoringPile(pileIndex) : undefined}
                       className="hover:border-amber-400"
                     />
                   ) : (
@@ -109,8 +126,9 @@ export const MarketBoard: React.FC = () => {
                       card={scoringCard}
                       side="scoring"
                       lang={lang}
+                      keyboardBadge={`[${pileIndex + 1}]`}
                       isSelectable={isActionAllowed}
-                      onClick={isActionAllowed ? () => takeScoringMarket(pileIndex) : undefined}
+                      onClick={isActionAllowed ? () => handleTakeScoringMarket(pileIndex) : undefined}
                     />
                   ) : (
                     <div className="w-28 h-40 sm:w-32 sm:h-44 md:w-36 md:h-52 rounded-xl border-2 border-dashed border-stone-800 flex items-center justify-center text-xs text-stone-600 font-mono">
@@ -132,6 +150,7 @@ export const MarketBoard: React.FC = () => {
                       card={resCard1}
                       side="resource"
                       lang={lang}
+                      keyboardBadge={['Q', 'E', 'T'][pileIndex]}
                       isSelectable={isActionAllowed}
                       isSelected={selectedResourceSlots.includes(resSlotIndex1)}
                       onClick={isActionAllowed ? () => selectResourceSlot(resSlotIndex1) : undefined}
@@ -148,6 +167,7 @@ export const MarketBoard: React.FC = () => {
                       card={resCard2}
                       side="resource"
                       lang={lang}
+                      keyboardBadge={['W', 'R', 'Y'][pileIndex]}
                       isSelectable={isActionAllowed}
                       isSelected={selectedResourceSlots.includes(resSlotIndex2)}
                       onClick={isActionAllowed ? () => selectResourceSlot(resSlotIndex2) : undefined}
@@ -162,6 +182,16 @@ export const MarketBoard: React.FC = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Keyboard Shortcut Banner */}
+      <div className="mt-4 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-500">
+        <span className="flex items-center gap-1.5">
+          <span>⌨️</span>
+          <span>
+            Shortcut Keyboard: Tekan <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[1-3]</kbd> untuk Skor, <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[Q-Y]</kbd> untuk Rempah, <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[Spasi / Enter]</kbd> untuk Konfirmasi.
+          </span>
+        </span>
       </div>
     </div>
   );

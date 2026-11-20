@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { useGameStore } from '../store/gameStore';
+import { Sound } from '../sound/soundEffects';
 
 export const EndGameModal: React.FC = () => {
-  const { gameState, startNewGame } = useGameStore();
+  const { gameState, startNewGame, soundEnabled } = useGameStore();
   const { phase, finalScores } = gameState;
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (phase === 'game_over') {
+      Sound.winFanfare(soundEnabled);
+      try {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.55 },
+        });
+      } catch {
+        // safe fallback
+      }
+    }
+  }, [phase, soundEnabled]);
 
   if (phase !== 'game_over' || !finalScores) return null;
 
