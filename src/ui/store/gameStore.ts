@@ -10,6 +10,8 @@ import {
 } from '../../engine';
 
 interface GameStoreState {
+  screen: 'menu' | 'game';
+  roomCode: string | null;
   gameState: GameState;
   selectedResourceSlots: number[];
   lang: 'id' | 'en';
@@ -22,6 +24,8 @@ interface GameStoreState {
   shelfViewingPlayerIndex: number | null;
 
   // Actions
+  setScreen: (screen: 'menu' | 'game') => void;
+  setRoomCode: (code: string | null) => void;
   startNewGame: (options?: Partial<SetupOptions>) => void;
   selectResourceSlot: (slotIndex: number) => void;
   confirmTakeResources: () => void;
@@ -50,6 +54,8 @@ const defaultSetup: SetupOptions = {
 export const useGameStore = create<GameStoreState>()(
   persist(
     (set, get) => ({
+      screen: 'menu',
+      roomCode: null,
       gameState: initializeGame(defaultSetup),
       selectedResourceSlots: [],
       lang: 'id',
@@ -60,6 +66,9 @@ export const useGameStore = create<GameStoreState>()(
       turnSnapshot: null,
       inspectedPlayerIndex: null,
       shelfViewingPlayerIndex: null,
+
+      setScreen: (screen) => set({ screen }),
+      setRoomCode: (roomCode) => set({ roomCode }),
 
       startNewGame: (options) => {
         const players = options?.players ?? [

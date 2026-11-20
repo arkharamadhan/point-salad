@@ -159,7 +159,7 @@ export const PointBowlRenderer: React.FC<PointBowlRendererProps> = ({ scoringId,
 
           <div className="flex items-center justify-center gap-0.5 bg-stone-100/90 px-1 py-0.5 rounded-md border border-stone-200 mt-0.5 max-w-[90%]">
             {params.set.map((res, idx) => (
-              <React.Fragment key={res}>
+              <React.Fragment key={`${res}-${idx}`}>
                 {idx > 0 && <span className="text-[8px] font-black text-stone-400">+</span>}
                 <VeggieIcon resource={res} size={smallIconSize} />
               </React.Fragment>
@@ -218,7 +218,13 @@ export const PointBowlRenderer: React.FC<PointBowlRendererProps> = ({ scoringId,
           <span className="text-[8px] sm:text-[9.5px] font-black uppercase text-[#0284C7] font-fredoka tracking-tighter">
             {isMost ? 'MOST' : 'FEWEST'}
           </span>
-          <VeggieIcon resource={params.resource} size={iconSize} />
+          {params.resource === 'all' ? (
+            <span className="text-[7.5px] sm:text-[8.5px] font-black bg-stone-100 text-stone-700 px-1 py-0.5 rounded border border-stone-200">
+              TOTAL
+            </span>
+          ) : (
+            <VeggieIcon resource={params.resource} size={iconSize} />
+          )}
           <span className="text-stone-400 font-black text-[10px]">=</span>
           <ScallopBadge value={params.points} size={badgeSize} badgeBg="#7CB342" />
         </div>

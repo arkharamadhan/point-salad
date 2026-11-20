@@ -11,6 +11,7 @@ import {
   PerTypeAtLeastParams,
   PlayerState,
   ResourceCounts,
+  ResourceId,
   ALL_RESOURCES,
 } from '../types';
 
@@ -28,18 +29,23 @@ export function evaluatePerItem(resources: ResourceCounts, params: PerItemParams
 
 /**
  * 2. perSet:
- * points * count of complete sets. Complete set = min(count of each resource in the set).
+ * points * count of complete sets. Complete set = min(floor(resources[res] / requiredCount)).
  */
 export function evaluatePerSet(resources: ResourceCounts, params: PerSetParams): number {
   if (params.set.length === 0) return 0;
-  let minCount = Infinity;
+  const requiredCounts: Partial<Record<ResourceId, number>> = {};
   for (const res of params.set) {
-    const count = resources[res] ?? 0;
-    if (count < minCount) {
-      minCount = count;
+    requiredCounts[res] = (requiredCounts[res] ?? 0) + 1;
+  }
+  let minSets = Infinity;
+  for (const [res, req] of Object.entries(requiredCounts) as [ResourceId, number][]) {
+    const available = resources[res] ?? 0;
+    const setsForThisRes = Math.floor(available / req);
+    if (setsForThisRes < minSets) {
+      minSets = setsForThisRes;
     }
   }
-  return (minCount === Infinity ? 0 : minCount) * params.points;
+  return (minSets === Infinity ? 0 : minSets) * params.points;
 }
 
 /**
@@ -75,17 +81,19 @@ export function evaluatePerDistinctSet(
 
 /**
  * 4. parity:
- * evenPoints if count is even (0 is even), oddPoints if count is odd.
+ * evenPoints if count is even, oddPoints if count is odd.
+ * Per official Point Salad rules: count of 0 is NOT counted as even (scores 0 points).
  */
 export function evaluateParity(resources: ResourceCounts, params: ParityParams): number {
   const count = resources[params.resource] ?? 0;
+  if (count === 0) return 0;
   const isEven = count % 2 === 0;
   return isEven ? params.evenPoints : params.oddPoints;
 }
 
 /**
  * 5. majority:
- * Compared across all players in the game.
+ * Compared across all players in the game (for a specific resource or total of all veggies).
  * mode 'most': highest count.
  * mode 'least': lowest count (0 is valid and counts).
  * Ties split points evenly, rounded down: Math.floor(points / tieCount).
@@ -100,7 +108,12 @@ export function evaluateMajority(
     return { score: 0, tieCount: 0, isWinner: false };
   }
 
-  const counts = allPlayers.map((p) => p.resources[params.resource] ?? 0);
+  const counts = allPlayers.map((p) => {
+    if (params.resource === 'all') {
+      return ALL_RESOURCES.reduce((sum, r) => sum + (p.resources[r] ?? 0), 0);
+    }
+    return p.resources[params.resource] ?? 0;
+  });
   const targetCount = counts[targetPlayerIndex];
 
   if (params.mode === 'most') {

@@ -7,13 +7,19 @@ import { PlayerActiveShelf } from './ui/components/PlayerActiveShelf';
 import { EndGameModal } from './ui/components/EndGameModal';
 import { SettingsModal } from './ui/components/SettingsModal';
 import { PlayerRecipesModal } from './ui/components/PlayerRecipesModal';
+import { MainMenu } from './ui/components/MainMenu';
 import { useKeyboardNav } from './ui/hooks/useKeyboardNav';
 
 export const App: React.FC = () => {
   // Activate keyboard navigation
   useKeyboardNav();
 
-  const { gameState, setSettingsOpen } = useGameStore();
+  const { screen, gameState, setSettingsOpen } = useGameStore();
+
+  if (screen === 'menu') {
+    return <MainMenu />;
+  }
+
   const { players, currentTurnPlayerIndex, phase } = gameState;
   const isGameOver = phase === 'game_over';
 

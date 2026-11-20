@@ -84,12 +84,21 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     });
     expect(score).toBe(8);
 
-    // If one ingredient is missing, score is 0
-    const scoreMissing = evaluatePerSet(res, {
-      set: ['wortel', 'bawang'],
-      points: 4,
+    // Multi-same veggie set: 2 selada for 5 pts
+    const resSelada: ResourceCounts = {
+      wortel: 0,
+      paprika: 0,
+      tomat: 0,
+      bawang: 0,
+      kubis: 0,
+      selada: 5,
+    };
+    const scorePair = evaluatePerSet(resSelada, {
+      set: ['selada', 'selada'],
+      points: 5,
     });
-    expect(scoreMissing).toBe(0);
+    // floor(5 / 2) = 2 sets * 5 pts = 10 pts
+    expect(scorePair).toBe(10);
   });
 
   it('3. evaluatePerDistinctSet computes max disjoint sets using RULES.md formula', () => {
@@ -122,10 +131,18 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     expect(scoreSix).toBe(12); // 2 sets * 6 pts = 12
   });
 
-  it('4. evaluateParity handles even (including 0) and odd points', () => {
+  it('4. evaluateParity handles even and odd points (0 counts as 0 points, not even)', () => {
+    const resZero: ResourceCounts = {
+      ...createEmptyResourceCounts(),
+      wortel: 0, // 0 is not even -> scores 0
+    };
+    expect(
+      evaluateParity(resZero, { resource: 'wortel', evenPoints: 7, oddPoints: 3 })
+    ).toBe(0);
+
     const resEven: ResourceCounts = {
       ...createEmptyResourceCounts(),
-      wortel: 0, // 0 is even
+      wortel: 4, // 4 is even -> 7 pts
     };
     expect(
       evaluateParity(resEven, { resource: 'wortel', evenPoints: 7, oddPoints: 3 })
@@ -133,14 +150,14 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
     const resOdd: ResourceCounts = {
       ...createEmptyResourceCounts(),
-      wortel: 3,
+      wortel: 3, // 3 is odd -> 3 pts
     };
     expect(
       evaluateParity(resOdd, { resource: 'wortel', evenPoints: 7, oddPoints: 3 })
     ).toBe(3);
   });
 
-  it('5. evaluateMajority handles most, least, ties (split points rounded down), and 0 counts', () => {
+  it('5. evaluateMajority handles most, least, ties (split points rounded down), and total veggies (resource: "all")', () => {
     const p1 = makePlayer('p1', 'Alice', { wortel: 5, bawang: 0 });
     const p2 = makePlayer('p2', 'Bob', { wortel: 5, bawang: 0 });
     const p3 = makePlayer('p3', 'Charlie', { wortel: 2, bawang: 3 });
@@ -180,6 +197,16 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
       points: 8,
     });
     expect(resP3Least.score).toBe(0);
+
+    // Majority with resource: 'all' (total sayur terbanyak: p1=5, p2=5, p3=5 -> 3-way tie)
+    const resTotal = evaluateMajority(0, players, {
+      resource: 'all',
+      mode: 'most',
+      points: 10,
+    });
+    expect(resTotal.score).toBe(3); // 10 / 3 = 3
+    expect(resTotal.isWinner).toBe(true);
+    expect(resTotal.tieCount).toBe(3);
   });
 
   it('6. evaluatePerTypeAtLeast scores points for each type reaching threshold', () => {

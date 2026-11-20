@@ -1,41 +1,41 @@
 # 🥗 Panen Sayur (Point Salad) — Digital Card Game
 
-Sebuah adaptasi digital permainan kartu *"veggie drafting"* cepat yang terinspirasi dari mekanik **Point Salad** untuk 2–4 pemain (mode Hot-Seat lokal + Bot AI). Dibangun dari nol menggunakan arsitektur modern berstandar tinggi: **Pure TypeScript Game Engine (zero UI dependencies)** dipadukan dengan **React 19, Tailwind CSS, Zustand, dan Framer Motion**.
+Sebuah adaptasi digital permainan kartu *"veggie drafting"* cepat yang terinspirasi dari mekanik resmi **Point Salad** untuk 2–6 pemain (mode Hot-Seat lokal + Bot AI + Room). Dibangun dari nol menggunakan arsitektur modern berstandar tinggi: **Pure TypeScript Game Engine (zero UI dependencies)** dipadukan dengan **React 19, Tailwind CSS, Zustand, dan Framer Motion**.
 
-Setiap kartu memiliki **DUA sisi**:
-1. **Sisi Sayur (Resource Side)**: 1 dari 6 jenis sayur (Tomat, Wortel, Paprika, Selada, Bawang, Kubis) dengan palet warna cerah, motif halftone, piring konsentris putih, dan ilustrasi kartun yang imut.
+Setiap kartu memiliki **DUA sisi (bolak-balik)**:
+1. **Sisi Sayur (Resource Side)**: 1 dari 6 jenis sayuran (Tomat, Wortel, Paprika, Selada, Bawang, Kubis) dengan palet warna cerah, motif halftone, piring konsentris putih, dan ilustrasi kartun yang imut.
 2. **Sisi Skor (Point Side)**: Kondisi penilaian skor dengan latar hijau limau, tab segitiga di pojok penunjuk jenis sayur di baliknya, dan mangkuk salad putih dengan lencana angka bergigi (*scalloped badges*).
 
 ---
 
 ## 🎮 Mekanik & Aturan Permainan (`RULES.md`)
 
-### 1. Pasar Bersama (Shared Market)
-- Pasar terdiri dari **3 kartu skor terbuka** (diambil dari puncak 3 tumpukan tertutup) + **6 kartu sayur terbuka** (2 kartu per kolom tumpukan).
-- Jumlah kartu yang dimainkan disesuaikan secara otomatis berdasarkan jumlah pemain:
-  - **2 Pemain**: 60 kartu (10 kartu per jenis sayur).
-  - **3 Pemain**: 72 kartu (12 kartu per jenis sayur).
-  - **4 Pemain**: 90 kartu (15 kartu per jenis sayur, seluruh dek).
+### 1. Dek 108 Kartu & Penyiapan (Setup)
+- Total terdapat **108 kartu bolak-balik** (18 kartu untuk setiap dari 6 jenis sayuran) dengan **108 kondisi resep poin unik** yang terbagi dalam 5 kategori:
+  1. **Poin Per Sayur** (+2 per jenis, kombinasi +1/+1, atau +2/+1/-2).
+  2. **Kumpulan Set / Resep** (paket sayur tertentu atau set lengkap 6 jenis sayur).
+  3. **Paling Banyak / Paling Sedikit** (adu mayoritas sayur tertentu atau total seluruh sayur).
+  4. **Ganjil / Genap** (angka 0 bernilai 0 / tidak genap).
+  5. **Variasi / Jenis Sayur** (minimal 2 tiap sayur, jumlah sayur kosong, tumpukan terbanyak).
+
+- Jumlah kartu yang dimainkan disesuaikan secara otomatis berdasarkan jumlah pemain (2–6 pemain):
+  - **2 Pemain**: 36 kartu (6 per jenis sayur, 12 kartu per tumpukan).
+  - **3 Pemain**: 54 kartu (9 per jenis sayur, 18 kartu per tumpukan).
+  - **4 Pemain**: 72 kartu (12 per jenis sayur, 24 kartu per tumpukan).
+  - **5 Pemain**: 90 kartu (15 per jenis sayur, 30 kartu per tumpukan).
+  - **6 Pemain**: 108 kartu (18 per jenis sayur, seluruh dek dipakai).
 
 ### 2. Giliran Pemain
 Pada setiap giliran, pemain wajib melakukan **SALAH SATU** aksi utama:
-- **Aksi A — Ambil 2 Kartu Sayur**: Memilih kombinasi 2 kartu sayur mana saja dari 6 kartu yang terbuka di pasar. (Jika hanya tersisa 1 sayur di pasar dan tumpukan kosong, pemain diperbolehkan mengambil 1 kartu tersebut).
-- **Aksi B — Ambil 1 Kartu Skor**: Memilih 1 kartu skor dari pasar (3 kartu terbuka) **ATAU** mengambil kartu teratas dari salah satu tumpukan tertutup (buta).
+- **Aksi A — Ambil 2 Kartu Sayur**: Memilih 2 kartu sayur mana saja dari 6 sayur yang terbuka di atas talenan pasar.
+- **Aksi B — Ambil 1 Kartu Resep Poin**: Memilih 1 kartu resep poin dari 3 piring resep yang terbuka di pasar.
 
-### 3. Aksi Bebas (Free Action) — Balik Kartu Skor
-- Sekali atau beberapa kali pada gilirannya, pemain dapat **membalik kartu skor** yang dimilikinya menjadi sisi sayurnya secara permanen.
-- *Catatan Penting*: Kartu sayur yang sudah diambil atau dibalik **tidak pernah bisa** dibalik kembali menjadi kartu skor.
+### 3. Aksi Bebas (Free Action) — Balik Resep Jadi Sayur
+- Kapan saja pada gilirannya, pemain dapat **membalik kartu resep poin** yang dimilikinya menjadi sisi sayurnya secara permanen dengan mengeklik ikon sayur di sudut kartu resep.
+- *Catatan*: Kartu sayur yang sudah diambil atau dibalik **tidak pernah bisa** dibalik kembali menjadi kartu resep poin.
 
-### 4. Pengisian Ulang Pasar (Refill Mechanics)
-- Pasar langsung diisi ulang setelah aksi pengambilan:
-  - Urutan pengisian tumpukan: **Tumpukan 1 ➔ Tumpukan 2 ➔ Tumpukan 3**.
-  - Slot sayur yang kosong diisi terlebih dahulu dari tumpukannya masing-masing. Jika tumpukannya kosong, diisi dari tumpukan lain yang memiliki kartu terbanyak (jika seimbang, gunakan tumpukan bernomor terkecil).
-  - Slot skor yang kosong diisi dari puncak tumpukannya masing-masing.
-
-### 5. Akhir Permainan & Penentu Kemenangan (Tiebreakers)
-Permainan berakhir seketika ketika:
-1. Pasar benar-benar kosong saat giliran baru akan dimulai.
-2. Pemain aktif tidak memiliki aksi legal yang dapat dilakukan.
+### 4. Akhir Permainan & Penentu Kemenangan (Tiebreakers)
+Permainan berakhir seketika ketika seluruh pasar kosong atau tidak ada aksi legal yang dapat dilakukan pemain.
 
 **Tingkat Penentu Pemenang (4-Tier Tiebreakers):**
 1. **Total Skor Tertinggi**.
@@ -50,118 +50,19 @@ Permainan berakhir seketika ketika:
 ```
 src/
 ├── data/
-│   └── cards.json              # 90 data kartu resmi (sumber kebenaran tunggal)
+│   └── cards.json              # 108 data kartu resmi (sumber kebenaran tunggal)
 ├── engine/                     # PURE GAME ENGINE (Zero React / Zero DOM imports)
 │   ├── actions.ts              # Immutable reducer (gameReducer & executeAction)
-│   ├── evaluators.ts           # 10 fungsi murni evaluator kondisi skor
+│   ├── evaluators.ts           # Evaluator murni 5 kategori formula kondisi skor
 │   ├── scoring.ts              # Registry & kalkulator skor pemain & tiebreaker
-│   ├── setup.ts                # Inisialisasi permainan, pemilahan dek per jumlah pemain
+│   ├── setup.ts                # Inisialisasi permainan 2–6 pemain, pemilahan dek per pemain
 │   ├── market.ts               # Logika penataan & pengisian ulang pasar (RULES.md)
 │   ├── endgame.ts              # Deteksi akhir permainan, aksi legal & ranking akhir
 │   ├── rng.ts                  # Mulberry32 deterministic PRNG (reproducible seed)
 │   ├── types.ts                # TypeScript interfaces & types lengkap
-│   └── bot/                    # AI Bot System
-│       ├── interface.ts        # Kontrak BotAI (planTurn)
-│       ├── greedyBot.ts        # GreedyBot (pencari skor optimal & simulasi balik kartu) + EasyBot
-│       └── index.ts
+│   └── bot/                    # AI Bot System (GreedyBot & EasyBot)
 └── ui/                         # REACT UI LAYER
-    ├── components/
-    │   ├── CardView.tsx        # Render kartu autentik Point Salad (Veggie & Point side)
-    │   ├── PointBowlRenderer.tsx # Render visual mangkuk salad & lencana poin bergigi
-    │   ├── MarketBoard.tsx     # Papan pasar bersama interaktif
-    │   ├── PlayerTableau.tsx   # Area kartu & inventaris sayur pemain aktif
-    │   ├── TurnHeader.tsx      # Header giliran, status bot, & tombol pengaturan
-    │   ├── SettingsModal.tsx   # Modal pengaturan jumlah pemain, bot, seed & audio
-    │   ├── EndGameModal.tsx    # Modal penyerahan piala juara & rincian skor lengkap
-    │   └── icons/
-    │       └── SpiceIcon.tsx   # Ikon SVG kartun imut sayuran (Color-blind safe)
-    ├── sound/
-    │   └── soundEffects.ts     # Efek suara sintetis prosedural (Web Audio API)
-    ├── store/
-    │   └── gameStore.ts        # State management Zustand terintegrasi engine
-    └── App.tsx
+    ├── components/             # Komponen visual (Talenan Pasar, Shelf Resep, Modal, dsb.)
+    ├── sound/                  # Audio efek sintetis Web Audio API
+    └── store/                  # State management Zustand dengan persistensi localStorage
 ```
-
----
-
-## 🎨 Desain Kartu & Aksesibilitas
-
-Desain visual kartu dirancang khusus agar presisi menyerupai kartu asli **Point Salad**:
-- **Sisi Sayur**: Latar belakang warna sayur dengan tekstur titik halftone, piring konsentris putih dengan cincin berwarna, ilustrasi sayur kartun dengan bayangan lantai dan kilau specular, teks nama sayur di sudut atas & bawah terbalik, serta lencana bulat mini.
-- **Sisi Skor**: Latar belakang hijau limau (`#7CB342`), tab segitiga di sudut atas-kiri dan bawah-kanan sesuai warna sayur di sisi baliknya, teks lengkung "POINT" di atas dan "SALAD" di bawah, serta mangkuk salad putih dengan **lencana angka bergigi (*scallop rosette*)** dan garis miring hijau limau.
-- **Color-Blind Safe**: Setiap jenis sayur dilengkapi bentuk geometris unik selain warna (Tomat = Lingkaran, Wortel = Segitiga, Paprika = Kotak, Selada = Bintang, Bawang = Belah Ketupat, Kubis = Segienam).
-- **Aksesibilitas Keyboard**: Navigasi keyboard penuh menggunakan `[1] - [3]` untuk kartu skor, `[Q] - [Y]` untuk kartu sayur, dan `[Spasi] / [Enter]` untuk konfirmasi.
-
----
-
-## 🧪 Pengujian & Simulasi Keseimbangan (Unit Tests)
-
-Proyek ini memiliki cakupan unit test **>95%** pada seluruh modul game engine menggunakan **Vitest**:
-- ✅ Evaluasi seluruh 10 tipe formula penilaian kartu (`perItem`, `perSet`, `perDistinctSet`, `parity`, `majority`, `perTypeAtLeast`, `perMissingType`, `perPairAny`, `maxStack`, `balanced`).
-- ✅ Validasi transisi giliran & reducer immutability.
-- ✅ Validasi aturan pengisian ulang pasar dan prioritas tumpukan saat habis.
-- ✅ Validasi deteksi akhir permainan dan penentuan juara 4 tingkat.
-- ✅ Bot AI test (GreedyBot & EasyBot).
-
-Jalankan test:
-```bash
-npm test
-```
-
-Periksa cakupan kode:
-```bash
-npm run test:coverage
-```
-
-### Simulasi Keseimbangan (300+ Automated Games)
-Tersedia skrip simulasi otomatis bot vs bot untuk menguji kestabilan engine dan distribusi kartu:
-```bash
-npm run simulate
-```
-*Hasil simulasi 300 game menunjukkan engine berjalan 100% deterministik tanpa eror, dengan durasi rata-rata 52 giliran dan distribusi draf seimbang merata di seluruh 6 sayur.*
-
----
-
-## 🚀 Menjalankan Secara Lokal
-
-Pastikan Node.js 18+ telah terpasang:
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Jalankan mode pengembangan
-npm run dev
-
-# 3. Build untuk produksi
-npm run build
-
-# 4. Preview hasil build produksi
-npm run preview
-```
-
----
-
-## 🌐 Panduan Deploy (Static Hosting)
-
-Aplikasi ini dikompilasi menjadi bundel statis murni di folder `dist/` dan siap di-deploy ke penyedia hosting statis mana pun tanpa server backend:
-
-### 1. Vercel
-Konfigurasi `vercel.json` sudah disediakan:
-```bash
-npx vercel
-```
-
-### 2. Netlify
-Konfigurasi `netlify.toml` sudah disediakan:
-```bash
-npx netlify deploy --prod --dir=dist
-```
-
-### 3. GitHub Pages
-Alur kerja GitHub Actions `.github/workflows/deploy.yml` telah disertakan. Cukup aktifkan **GitHub Pages** di tab Settings repositori (pilih sumber **GitHub Actions**).
-
----
-
-## 📜 Lisensi
-Lisensi MIT. Dibuat dengan presisi untuk pengalaman bermain kartu digital terbaik! 🥗

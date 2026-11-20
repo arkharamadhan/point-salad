@@ -18,6 +18,8 @@ export const SettingsModal: React.FC = () => {
     { id: 'p2', name: 'Bot Pintar', isBot: true, botDifficulty: 'greedy' },
     { id: 'p3', name: 'Pemain 3', isBot: true, botDifficulty: 'easy' },
     { id: 'p4', name: 'Pemain 4', isBot: true, botDifficulty: 'easy' },
+    { id: 'p5', name: 'Pemain 5', isBot: true, botDifficulty: 'easy' },
+    { id: 'p6', name: 'Pemain 6', isBot: true, botDifficulty: 'easy' },
   ]);
 
   const [useCustomSeed, setUseCustomSeed] = useState<boolean>(false);
@@ -91,24 +93,27 @@ export const SettingsModal: React.FC = () => {
             <label className="text-xs font-bold text-stone-400 uppercase tracking-wider block mb-2 font-fredoka">
               Jumlah Pemain ({playerCount} Pemain)
             </label>
-            <div className="grid grid-cols-3 gap-3">
-              {[2, 3, 4].map((count) => (
-                <button
-                  key={count}
-                  type="button"
-                  onClick={() => handlePlayerCountChange(count)}
-                  className={`py-2.5 rounded-xl font-bold text-sm transition-all border ${
-                    playerCount === count
-                      ? 'bg-amber-600 border-amber-400 text-white shadow-lg'
-                      : 'bg-stone-950/60 border-stone-800 text-stone-400 hover:border-stone-700'
-                  }`}
-                >
-                  {count} Pemain
-                  <span className="block text-[10px] font-normal opacity-80">
-                    {count === 2 ? '60 Kartu' : count === 3 ? '72 Kartu' : '90 Kartu'}
-                  </span>
-                </button>
-              ))}
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {[2, 3, 4, 5, 6].map((count) => {
+                const cardCount = count * 18;
+                return (
+                  <button
+                    key={count}
+                    type="button"
+                    onClick={() => handlePlayerCountChange(count)}
+                    className={`py-2 rounded-xl font-bold text-xs sm:text-sm transition-all border ${
+                      playerCount === count
+                        ? 'bg-amber-600 border-amber-400 text-white shadow-lg'
+                        : 'bg-stone-950/60 border-stone-800 text-stone-400 hover:border-stone-700'
+                    }`}
+                  >
+                    {count} Pemain
+                    <span className="block text-[10px] font-normal opacity-80">
+                      {cardCount} Kartu
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

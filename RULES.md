@@ -1,148 +1,98 @@
-# PANEN SAYUR — Aturan Permainan (v1.0)
+# PANEN SAYUR (POINT SALAD) — Aturan Permainan (v2.0)
 
-> Judul kerja. Game kartu drafting cepat untuk 2–4 pemain, sekitar 20 menit.
-> File ini adalah **sumber kebenaran tunggal** untuk logika game. Data kartu ada di `cards.json`.
-> Jangan menambah atau mengubah aturan di luar dokumen ini. Jika ada yang ambigu, tanyakan, jangan menebak.
+> Adaptasi digital resmi Point Salad. Game kartu drafting cepat untuk 2–6 pemain, sekitar 15–25 menit.
+> File ini adalah **sumber kebenaran tunggal** untuk logika game. Data kartu ada di `cards.json` dan `src/data/cards.json`.
 
 ---
 
 ## 1. Ringkasan
 
-Setiap kartu punya **dua sisi**:
+Setiap kartu punya **dua sisi (bolak-balik)**:
 
-- **Sisi Skor**: berisi satu kondisi penghitungan poin (misalnya "+3 poin per Wortel, -1 poin per Selada").
-- **Sisi Sayur**: berisi satu dari 6 jenis sayur.
+- **Sisi Sayur**: berisi salah satu dari 6 jenis sayuran (Wortel, Selada, Bawang, Paprika, Tomat, Kubis).
+- **Sisi Skor (Resep / Syarat Poin)**: berisi satu kondisi penghitungan poin unik. Di sudut kartu poin terdapat ikon indikator kecil yang menunjukkan jenis sayur apa yang ada di baliknya.
 
-Pemain mengumpulkan kartu dari pasar bersama. Kartu bisa dipakai sebagai **kartu skor** (sisi skor menghadap atas) atau sebagai **sayur** (sisi sayur menghadap atas). Di akhir game, setiap kartu skor dihitung berdasarkan sayur yang berhasil dikumpulkan pemain. Poin tertinggi menang.
+Pemain mengumpulkan kartu dari pasar bersama di atas talenan. Kartu bisa diambil sebagai **kartu resep poin** (sisi poin menghadap atas) atau sebagai **sayuran** (sisi sayur menghadap atas). Di akhir game, setiap kartu poin dihitung berdasarkan jumlah sayuran yang berhasil dikumpulkan pemain. Pemain dengan total poin tertinggi menang.
 
-## 2. Komponen
+## 2. Komponen Kartu (Total 108 Kartu)
 
-- **90 kartu** (lihat `cards.json`): 30 kondisi skor berbeda, masing-masing 3 salinan.
-- **6 jenis sayur**, masing-masing 15 kartu: Wortel, Paprika, Tomat, Bawang, Kubis, Selada.
-- Setiap kartu mempunyai tepat satu jenis sayur di sisi sayurnya. Ketiga salinan dari satu kondisi skor selalu punya jenis sayur yang berbeda.
+### 1. Sisi Sayuran (Total 108 Sisi)
+Terdiri dari 6 jenis sayuran, masing-masing berjumlah tepat 18 kartu:
+- **Wortel (Carrot)**: 18 kartu
+- **Selada (Lettuce)**: 18 kartu
+- **Bawang (Onion)**: 18 kartu
+- **Paprika (Pepper)**: 18 kartu
+- **Tomat (Tomato)**: 18 kartu
+- **Kubis (Cabbage)**: 18 kartu
 
-## 3. Persiapan
+*(Catatan: Di pojok kartu poin selalu ada ikon kecil yang menunjukkan sayur apa yang ada di balik kartu tersebut).*
 
-1. **Sesuaikan jumlah kartu dengan jumlah pemain.** Buang secara acak (berdasarkan sisi sayurnya) sejumlah kartu dari tiap jenis sayur:
+### 2. Sisi Kartu Poin / Resep (108 Syarat Unik)
+Semua 108 sisi poin memiliki kombinasi aturan yang berbeda-beda, terbagi dalam 5 kategori:
+1. **Poin Per Sayur (`perItem`)**: Mendapatkan (atau minus) poin dari setiap jumlah sayur tertentu.
+   - Contoh: +2 poin tiap Wortel; +1 Tomat & +1 Bawang; atau +2 Paprika, +1 Kubis, tapi -2 Tomat.
+2. **Kumpulan Set / Resep (`perSet`, `perDistinctSet`)**: Mendapatkan poin jika berhasil mengumpulkan kombinasi sayur tertentu.
+   - Contoh: +5 poin tiap 2 Selada; +8 poin tiap 3 Wortel; +8 poin untuk paket (1 Wortel + 1 Paprika + 1 Bawang); atau +12 poin jika punya lengkap semua 6 jenis sayur berbeda.
+3. **Paling Banyak / Paling Sedikit (`majority`)**: Mengadu jumlah sayur dengan pemain lain di akhir game.
+   - Contoh: +10 poin untuk pemilik Tomat terbanyak; +7 poin untuk pemilik Paprika tersedikit; atau +10 poin untuk total sayur terbanyak. (Jika terjadi seri, poin dibagi rata dan dibulatkan ke bawah).
+4. **Ganjil / Genap (`parity`)**: Dihitung dari total sayur jenis tertentu (**angka 0 tidak dihitung genap, bernilai 0**).
+   - Contoh: +7 poin jika jumlah Bawang genap; +3 poin jika jumlah Wortel ganjil.
+5. **Variasi / Jenis Sayur (`perTypeAtLeast`, `perMissingType`, `perPairAny`, `maxStack`, `balanced`)**: Dihitung dari keberagaman sayur yang dimiliki atau tidak dimiliki sama sekali.
+   - Contoh: +5 poin untuk setiap jenis sayur yang dimiliki minimal 2; +5 poin untuk setiap jenis sayur yang tidak dimiliki sama sekali (jumlah 0); x2 per kartu di tumpukan sayur terbanyak.
 
-   | Pemain | Buang per jenis sayur | Total kartu dipakai | Isi tiap tumpukan |
-   |--------|------------------------|---------------------|-------------------|
-   | 2      | 5                      | 60                  | 20                |
-   | 3      | 3                      | 72                  | 24                |
-   | 4      | 0                      | 90                  | 30                |
+## 3. Persiapan Permainan (Setup)
 
-   Kartu yang dibuang tidak dipakai dan tidak diketahui siapa pun selama permainan.
-2. Kocok kartu yang dipakai, lalu bagi menjadi **3 tumpukan tertutup** (Tumpukan 1, 2, 3) berukuran sama.
-3. Setiap tumpukan memiliki **3 slot pasar** di sebelahnya:
-   - **1 slot Skor**: kartu ditampilkan dengan **sisi skor** menghadap atas.
-   - **2 slot Sayur**: kartu ditampilkan dengan **sisi sayur** menghadap atas.
-4. Isi semua slot: untuk setiap tumpukan, ambil kartu teratas ke slot Skor, lalu 2 kartu berikutnya ke slot Sayur (total 9 kartu di pasar).
-5. Tentukan pemain pertama secara acak. Giliran berjalan searah jarum jam.
+Sebelum mulai, jumlah kartu yang dipakai harus disesuaikan dengan jumlah pemain (ambil rata dari tiap jenis sayur):
 
-Setiap pemain punya **area pribadi** (tableau) dengan dua bagian: **Kartu Skor** dan **Sayur**.
+| Jumlah Pemain | Buang per Jenis Sayur | Total Kartu Dipakai | Jumlah Kartu per Tumpukan (3 Tumpukan) |
+|:---:|:---:|:---:|:---:|
+| **2 Pemain** | Buang 12 per jenis (72 dibuang) | **36 kartu** (6 per jenis) | **12 kartu** per tumpukan |
+| **3 Pemain** | Buang 9 per jenis (54 dibuang) | **54 kartu** (9 per jenis) | **18 kartu** per tumpukan |
+| **4 Pemain** | Buang 6 per jenis (36 dibuang) | **72 kartu** (12 per jenis) | **24 kartu** per tumpukan |
+| **5 Pemain** | Buang 3 per jenis (18 dibuang) | **90 kartu** (15 per jenis) | **30 kartu** per tumpukan |
+| **6 Pemain** | Buang 0 per jenis (0 dibuang) | **108 kartu** (18 per jenis / semua) | **36 kartu** per tumpukan |
 
-## 4. Giliran
+Kartu yang dibuang disingkirkan secara acak dari permainan tanpa dilihat.
 
-Pada gilirannya, pemain **harus** melakukan **tepat satu** dari dua aksi:
+### Langkah Penataan Pasar:
+1. Kocok kartu yang dipakai, lalu bagi rata menjadi **3 tumpukan tertutup** (Tumpukan 1, 2, 3).
+2. Dari setiap tumpukan:
+   - Ambil 1 kartu teratas dan letakkan di **slot Poin** (sisi resep/poin terbuka menghadap atas).
+   - Ambil 2 kartu berikutnya dan letakkan di **slot Pasar Sayur** (sisi sayur terbuka menghadap atas).
+   - Pasar kini berisi **3 piring resep poin** dan **6 sayuran segar** di atas talenan kayu.
+3. Tentukan pemain pertama secara acak. Giliran berjalan bergantian.
 
-### Aksi A — Ambil Sayur
-Ambil **2 kartu** dari slot Sayur di pasar (boleh dua kartu dari tumpukan yang sama, boleh dari tumpukan berbeda). Kartu masuk ke bagian Sayur pemain dengan sisi sayur menghadap atas.
+## 4. Alur Giliran (Turn Flow)
 
-### Aksi B — Ambil Kartu Skor
-Ambil **1 kartu** dengan salah satu cara:
-- dari slot Skor di pasar, atau
-- dari **atas tumpukan tertutup** mana pun (diambil buta; pemain melihat sisi skornya saat mengambil).
+Pada gilirannya, pemain **wajib** melakukan **salah satu** dari dua aksi utama:
 
-Kartu masuk ke bagian Kartu Skor pemain dengan sisi skor menghadap atas.
+### Aksi A — Ambil Sayuran
+Ambil **2 kartu** dari slot sayur di pasar (boleh dari tumpukan yang sama atau berbeda). Kartu masuk ke inventaris sayuran pemain.
 
-### Membalik kartu (bebas)
-Selama gilirannya sendiri, sebelum atau sesudah aksi utama, pemain boleh **membalik** kartu skor miliknya sendiri menjadi kartu sayur (jumlahnya bebas, termasuk nol).
-- Pembalikan **permanen**. Kartu yang sudah dibalik tidak bisa dikembalikan menjadi kartu skor.
-- Kartu yang dibalik **tidak lagi menghasilkan skor**, tetapi dihitung sebagai 1 sayur sesuai jenis di sisi sayurnya.
-- Kartu sayur yang sudah diambil dari pasar tidak bisa dibalik menjadi kartu skor.
-- Membalik kartu bukan aksi utama dan tidak boleh menggantikan Aksi A atau B.
+### Aksi B — Ambil Kartu Resep Poin
+Ambil **1 kartu resep poin** dari salah satu dari 3 slot resep yang terbuka di pasar.
 
-### Isi ulang pasar
-Setelah aksi selesai (dan setelah semua pembalikan), isi ulang slot kosong dengan urutan: Tumpukan 1, 2, lalu 3; dalam tiap tumpukan isi slot Sayur dulu, kemudian slot Skor.
-- Kartu teratas tumpukan itu ditarik ke slot yang kosong, dengan sisi yang sesuai jenis slot-nya.
-- **Jika tumpukan itu sudah habis**, ambil kartu teratas dari **tumpukan terbesar** yang masih ada. Jika ada beberapa yang terbesar, pilih bernomor paling kecil.
-- Jika **semua** tumpukan habis, slot yang kosong dibiarkan kosong.
+### Aksi Bebas (Free Action) — Membalik Resep Jadi Sayur
+Selama gilirannya (sebelum atau setelah aksi utama), pemain boleh **membalik kartu resep poin** miliknya menjadi kartu sayur:
+- Pembalikan bersifat **permanen**. Kartu yang sudah dibalik tidak bisa diubah kembali menjadi resep poin.
+- Kartu yang dibalik **tidak lagi menghasilkan skor**, melainkan dihitung sebagai 1 sayuran sesuai ikon di sisi baliknya.
+- Kartu sayur yang diambil dari pasar tidak bisa dibalik menjadi kartu resep poin.
 
-## 5. Akhir Permainan
+### Pengisian Ulang Pasar (Refill)
+Setelah aksi pemain selesai:
+1. Slot sayur yang kosong diisi ulang dari tumpukan kolomnya masing-masing. Jika tumpukan tersebut habis, isi dari tumpukan lain yang memiliki sisa kartu terbanyak.
+2. Slot resep poin yang kosong diisi ulang dari puncak tumpukannya.
+3. Jika seluruh tumpukan habis, slot yang kosong dibiarkan kosong.
 
-Permainan berakhir **saat sebuah giliran akan dimulai dan pasar kosong total** (semua tumpukan habis dan semua slot Skor dan Sayur kosong).
+## 5. Akhir Permainan & Penentuan Juara
 
-Kasus khusus saat tumpukan sudah habis:
-- Jika slot Sayur hanya berisi 1 kartu, pemain boleh melakukan Aksi A dengan mengambil **1 kartu** saja.
-- Jika tidak ada kartu Sayur yang tersisa tetapi masih ada slot Skor terisi, pemain hanya bisa melakukan Aksi B.
-- Jika pemain tidak punya aksi legal sama sekali, permainan berakhir.
-- Pemain **tidak boleh** melewatkan giliran jika punya aksi legal.
+Permainan berakhir seketika saat sebuah giliran akan dimulai dan **pasar kosong total** (seluruh tumpukan dan slot di pasar habis), atau pemain tidak memiliki aksi legal yang tersisa.
 
-Kartu yang tersisa di pasar saat game berakhir tidak dihitung.
+### Penghitungan Skor Akhir:
+Skor setiap pemain adalah penjumlahan skor dari seluruh kartu resep poin miliknya yang belum dibalik, dihitung berdasarkan total inventaris sayuran yang dikumpulkan (termasuk sayur hasil pembalikan resep). Sayuran tidak "terpakai habis" oleh suatu resep; sayuran yang sama dapat dihitung berulang kali untuk setiap kartu resep yang relevan.
 
-## 6. Penghitungan Skor
-
-Setiap pemain menghitung semua **kartu skor yang belum dibalik** miliknya, berdasarkan **jumlah sayur** miliknya:
-
-```
-jumlah[jenis] = banyak kartu sayur jenis itu di bagian Sayur pemain
-              + banyak kartu yang sudah dibalik dengan sisi sayur jenis itu
-```
-
-Skor akhir pemain = jumlah poin dari seluruh kartu skornya (boleh negatif). Semua kartu skor dihitung bersamaan; tidak ada sayur yang "habis terpakai" oleh satu kartu skor, jadi sayur yang sama dihitung ulang oleh tiap kartu skor.
-
-### Tipe kondisi skor
-
-Detail parameter tiap kartu ada di `cards.json` pada `scoringConditions`. Tipe yang digunakan:
-
-| Tipe | Cara hitung |
-|------|-------------|
-| `perItem` | Jumlahkan poin x jumlah sayur untuk tiap jenis yang tertulis (poin boleh negatif). |
-| `perSet` | Poin x jumlah set lengkap; jumlah set = nilai terkecil dari jumlah tiap jenis dalam set. |
-| `perDistinctSet` | Poin x jumlah set berisi N jenis berbeda yang bisa dibentuk. Satu kartu sayur hanya masuk satu set. Jumlah set maksimum m adalah bilangan bulat terbesar dengan sum(min(jumlah_i, m)) >= N x m. |
-| `parity` | Jumlah jenis tertentu genap (0 dianggap genap) memberi poin genap; ganjil memberi poin ganjil. |
-| `majority` | Dibandingkan antar semua pemain. `most`: jumlah terbanyak; `least`: jumlah tersedikit (0 sah dan sering menang). Pemain yang seri membagi poin rata, dibulatkan ke bawah. |
-| `perTypeAtLeast` | Poin untuk tiap jenis sayur yang jumlahnya mencapai ambang batas. |
-| `perMissingType` | Poin untuk tiap jenis sayur yang jumlahnya 0. |
-| `perPairAny` | Poin x total pasangan sejenis (jumlah per jenis dibagi 2, dibulatkan ke bawah, dijumlahkan). |
-| `maxStack` | Poin x jumlah terbesar di antara keenam jenis sayur. |
-| `balanced` | Poin penuh jika selisih jumlah terbesar dan terkecil (dari 6 jenis, termasuk yang 0) tidak lebih dari batas; selain itu 0. |
-
-### Penentu pemenang
-
-1. Skor total tertinggi menang.
-2. Jika seri: pemain dengan **lebih banyak total kartu sayur** (termasuk yang dibalik).
-3. Jika masih seri: pemain dengan **lebih banyak kartu skor belum dibalik**.
-4. Jika masih seri: **menang bersama**.
-
-## 7. Contoh Singkat
-
-Pemain punya sayur: Wortel 4, Paprika 2, Tomat 3, Bawang 0, Kubis 5, Selada 1, dan dua kartu skor:
-- "+3 per Wortel, -1 per Selada" → 4x3 - 1x1 = **11**
-- "4 poin per set Wortel + Paprika" → min(4, 2) = 2 set → **8**
-
-Skor total = **19**.
-
-## 8. Catatan untuk Implementasi Digital
-
-Bagian ini menetapkan keputusan agar tidak ada tebakan:
-
-- **Informasi tersembunyi**: urutan tumpukan tertutup tidak boleh bocor ke UI mana pun; pada Aksi B dari tumpukan, kartu baru terungkap setelah dipilih.
-- **Determinisme**: pengocokan memakai RNG ber-seed agar game bisa diulang. Pembuangan kartu saat setup juga memakai RNG yang sama.
-- **Pembalikan** hanya boleh dilakukan oleh pemain yang sedang giliran dan tidak mengubah giliran.
-- **Pratinjau skor** di UI boleh menampilkan skor berjalan, tetapi `majority` harus dihitung terhadap kondisi pemain lain saat ini dan diberi tanda "sementara".
-- **Urutan isi ulang pasar** harus persis seperti pada Bagian 4 agar hasil deterministik.
-- **Kartu dibuang** (setup 2 dan 3 pemain) tidak muncul di UI.
-- **Kartu skor negatif** itu sah. Tidak ada batas bawah skor total.
-- **Nilai poin belum diseimbangkan lewat playtest.** Sediakan skrip simulasi (bot vs bot, ribuan game) untuk melihat sebaran skor sebelum nilai di `cards.json` dianggap final. Angka poin hanya ada di data, jadi menyetel ulang tidak perlu mengubah kode engine.
-- **Desain visual** tidak diatur di sini. Dokumen ini hanya aturan logika.
-
-## 9. Glosarium
-
-| Istilah | Arti |
-|---------|------|
-| Pasar | 3 slot Skor + 6 slot Sayur yang terbuka di tengah meja. |
-| Kartu skor | Kartu yang sisi skornya menghadap atas di area pemain. |
-| Sayur | Kartu yang sisi sayurnya menghadap atas, atau kartu skor yang sudah dibalik. |
-| Tumpukan | Satu dari 3 deretan kartu tertutup. |
-| Balik | Mengubah kartu skor milikmu menjadi sayur secara permanen. |
+### Penentu Seri (Tiebreakers):
+1. Total skor tertinggi.
+2. Jika imbang, pemain dengan **total kartu sayur terbanyak**.
+3. Jika masih imbang, pemain dengan **kartu resep belum dibalik terbanyak**.
+4. Jika tetap imbang, kemenangan dibagi bersama (shared win).

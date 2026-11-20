@@ -44,7 +44,7 @@ export interface ParityParams {
 }
 
 export interface MajorityParams {
-  resource: ResourceId;
+  resource: ResourceId | 'all';
   mode: 'most' | 'least';
   points: number;
 }

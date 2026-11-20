@@ -28,37 +28,40 @@ export function createEmptyResourceCounts(): ResourceCounts {
  */
 export function initializeGame(options: SetupOptions): GameState {
   const playerCount = options.players.length;
-  if (playerCount < 2 || playerCount > 4) {
-    throw new Error(`Invalid player count: ${playerCount}. Must be between 2 and 4.`);
+  if (playerCount < 2 || playerCount > 6) {
+    throw new Error(`Invalid player count: ${playerCount}. Must be between 2 and 6.`);
   }
 
   const seed = options.seed ?? Math.floor(Math.random() * 1000000);
   const rng = createRNG(seed);
 
-  // Raw cards from cards.json
+  // Raw cards from cards.json (108 cards, 18 per resource)
   const rawCards: Card[] = cardsData.cards.map((c) => ({
     id: c.id,
     resource: c.resource as ResourceId,
     scoringId: c.scoring,
   }));
 
-  if (rawCards.length !== 90) {
-    throw new Error(`Expected 90 cards in cards.json, found ${rawCards.length}`);
+  if (rawCards.length !== 108) {
+    throw new Error(`Expected 108 cards in cards.json, found ${rawCards.length}`);
   }
 
-  // 1. Remove cards per resource according to player count
-  // 2 players: remove 5 per resource (30 removed, 60 used)
-  // 3 players: remove 3 per resource (18 removed, 72 used)
-  // 4 players: remove 0 per resource (0 removed, 90 used)
-  const removePerResource = playerCount === 2 ? 5 : playerCount === 3 ? 3 : 0;
+  // 1. Remove cards per resource according to player count:
+  // 2 players: keep 6 per resource (12 removed, 36 used)
+  // 3 players: keep 9 per resource (9 removed, 54 used)
+  // 4 players: keep 12 per resource (6 removed, 72 used)
+  // 5 players: keep 15 per resource (3 removed, 90 used)
+  // 6 players: keep 18 per resource (0 removed, 108 used)
+  const keptPerResource = playerCount * 3;
+  const removePerResource = 18 - keptPerResource;
 
   const usedCards: Card[] = [];
   const discardedCards: Card[] = [];
 
   for (const resource of ALL_RESOURCES) {
     const resourceCards = rawCards.filter((c) => c.resource === resource);
-    if (resourceCards.length !== 15) {
-      throw new Error(`Expected 15 cards for resource ${resource}, found ${resourceCards.length}`);
+    if (resourceCards.length !== 18) {
+      throw new Error(`Expected 18 cards for resource ${resource}, found ${resourceCards.length}`);
     }
     const shuffledResourceCards = shuffle(resourceCards, rng);
     const discarded = shuffledResourceCards.slice(0, removePerResource);
@@ -71,7 +74,7 @@ export function initializeGame(options: SetupOptions): GameState {
   const fullyShuffledCards = shuffle(usedCards, rng);
 
   // Divide into 3 equal draw piles
-  const expectedTotalCards = playerCount === 2 ? 60 : playerCount === 3 ? 72 : 90;
+  const expectedTotalCards = playerCount * 18;
   if (fullyShuffledCards.length !== expectedTotalCards) {
     throw new Error(`Mismatch in used cards: expected ${expectedTotalCards}, got ${fullyShuffledCards.length}`);
   }
