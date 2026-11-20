@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   GameAction,
   GameState,
@@ -17,6 +18,8 @@ interface GameStoreState {
   isSettingsOpen: boolean;
   isBotThinking: boolean;
   turnSnapshot: GameState | null;
+  inspectedPlayerIndex: number | null;
+  shelfViewingPlayerIndex: number | null;
 
   // Actions
   startNewGame: (options?: Partial<SetupOptions>) => void;
@@ -31,6 +34,8 @@ interface GameStoreState {
   setLang: (lang: 'id' | 'en') => void;
   toggleSound: () => void;
   setSettingsOpen: (open: boolean) => void;
+  setInspectedPlayerIndex: (index: number | null) => void;
+  setShelfViewingPlayerIndex: (index: number | null) => void;
   clearError: () => void;
 }
 
@@ -42,42 +47,48 @@ const defaultSetup: SetupOptions = {
   seed: Math.floor(Math.random() * 1000000),
 };
 
-export const useGameStore = create<GameStoreState>((set, get) => ({
-  gameState: initializeGame(defaultSetup),
-  selectedResourceSlots: [],
-  lang: 'id',
-  errorMessage: null,
-  soundEnabled: true,
-  isSettingsOpen: false,
-  isBotThinking: false,
-  turnSnapshot: null,
-
-  startNewGame: (options) => {
-    const players = options?.players ?? [
-      { id: 'p1', name: 'Pemain 1', isBot: false },
-      { id: 'p2', name: 'Bot Pintar', isBot: true, botDifficulty: 'greedy' },
-    ];
-    const seed = options?.seed ?? Math.floor(Math.random() * 1000000);
-
-    const newState = initializeGame({
-      players,
-      seed,
-    });
-
-    set({
-      gameState: newState,
+export const useGameStore = create<GameStoreState>()(
+  persist(
+    (set, get) => ({
+      gameState: initializeGame(defaultSetup),
       selectedResourceSlots: [],
+      lang: 'id',
       errorMessage: null,
+      soundEnabled: true,
       isSettingsOpen: false,
       isBotThinking: false,
       turnSnapshot: null,
-    });
+      inspectedPlayerIndex: null,
+      shelfViewingPlayerIndex: null,
 
-    // Check if initial starting player is a bot
-    setTimeout(() => {
-      get().executeBotTurnIfNeeded();
-    }, 500);
-  },
+      startNewGame: (options) => {
+        const players = options?.players ?? [
+          { id: 'p1', name: 'Pemain 1', isBot: false },
+          { id: 'p2', name: 'Bot Pintar', isBot: true, botDifficulty: 'greedy' },
+        ];
+        const seed = options?.seed ?? Math.floor(Math.random() * 1000000);
+
+        const newState = initializeGame({
+          players,
+          seed,
+        });
+
+        set({
+          gameState: newState,
+          selectedResourceSlots: [],
+          errorMessage: null,
+          isSettingsOpen: false,
+          isBotThinking: false,
+          turnSnapshot: null,
+          inspectedPlayerIndex: null,
+          shelfViewingPlayerIndex: null,
+        });
+
+        // Check if initial starting player is a bot
+        setTimeout(() => {
+          get().executeBotTurnIfNeeded();
+        }, 500);
+      },
 
   selectResourceSlot: (slotIndex) => {
     const { gameState, selectedResourceSlots, isBotThinking } = get();
@@ -215,30 +226,31 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     });
   },
 
-  endTurn: () => {
-    const { gameState, lang, isBotThinking } = get();
-    if (isBotThinking) return;
+      endTurn: () => {
+        const { gameState, lang, isBotThinking } = get();
+        if (isBotThinking) return;
 
-    try {
-      const action: GameAction = {
-        type: 'END_TURN',
-      };
-      const nextState = gameReducer(gameState, action, lang);
-      set({
-        gameState: nextState,
-        turnSnapshot: null,
-        selectedResourceSlots: [],
-        errorMessage: null,
-      });
+        try {
+          const action: GameAction = {
+            type: 'END_TURN',
+          };
+          const nextState = gameReducer(gameState, action, lang);
+          set({
+            gameState: nextState,
+            turnSnapshot: null,
+            selectedResourceSlots: [],
+            shelfViewingPlayerIndex: null,
+            errorMessage: null,
+          });
 
-      // Trigger bot if next player is bot
-      setTimeout(() => {
-        get().executeBotTurnIfNeeded();
-      }, 500);
-    } catch (err: any) {
-      set({ errorMessage: err?.message ?? 'Tidak dapat mengakhiri giliran' });
-    }
-  },
+          // Trigger bot if next player is bot
+          setTimeout(() => {
+            get().executeBotTurnIfNeeded();
+          }, 500);
+        } catch (err: any) {
+          set({ errorMessage: err?.message ?? 'Tidak dapat mengakhiri giliran' });
+        }
+      },
 
   executeBotTurnIfNeeded: () => {
     const { gameState, lang, isBotThinking } = get();
@@ -287,11 +299,26 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     }
   },
 
-  setLang: (lang) => set({ lang }),
-  toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
-  setSettingsOpen: (open) => set({ isSettingsOpen: open }),
-  clearError: () => set({ errorMessage: null }),
-}));
+      setLang: (lang) => set({ lang }),
+      toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
+      setSettingsOpen: (open) => set({ isSettingsOpen: open }),
+      setInspectedPlayerIndex: (index) => set({ inspectedPlayerIndex: index }),
+      setShelfViewingPlayerIndex: (index) => set({ shelfViewingPlayerIndex: index }),
+      clearError: () => set({ errorMessage: null }),
+    }),
+    {
+      name: 'point-salad-game-state',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        gameState: state.gameState,
+        selectedResourceSlots: state.selectedResourceSlots,
+        lang: state.lang,
+        soundEnabled: state.soundEnabled,
+        turnSnapshot: state.turnSnapshot,
+      }),
+    }
+  )
+);
 
 if (typeof window !== 'undefined') {
   (window as any).__gameStore = useGameStore;

@@ -6,6 +6,7 @@ import { PlayerSideCard } from './ui/components/PlayerSideCard';
 import { PlayerActiveShelf } from './ui/components/PlayerActiveShelf';
 import { EndGameModal } from './ui/components/EndGameModal';
 import { SettingsModal } from './ui/components/SettingsModal';
+import { PlayerRecipesModal } from './ui/components/PlayerRecipesModal';
 import { useKeyboardNav } from './ui/hooks/useKeyboardNav';
 
 export const App: React.FC = () => {
@@ -94,6 +95,7 @@ export const App: React.FC = () => {
       {/* Modals */}
       <EndGameModal />
       <SettingsModal />
+      <PlayerRecipesModal />
     </div>
   );
 };

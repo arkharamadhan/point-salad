@@ -2,6 +2,7 @@ import React from 'react';
 import { PlayerState } from '../../engine/types';
 import { VeggieIcon } from './icons/SpiceIcon';
 import { evaluatePlayerScore } from '../../engine/scoring';
+import { useGameStore } from '../store/gameStore';
 
 interface PlayerSideCardProps {
   player: PlayerState;
@@ -27,6 +28,7 @@ export const PlayerSideCard: React.FC<PlayerSideCardProps> = ({
   isGameOver: _isGameOver,
   className = '',
 }) => {
+  const { setInspectedPlayerIndex, lang } = useGameStore();
   const colorTheme = PLAYER_COLORS[playerIndex % PLAYER_COLORS.length];
   const { totalScore } = evaluatePlayerScore(playerIndex, [...allPlayers]);
 
@@ -96,6 +98,28 @@ export const PlayerSideCard: React.FC<PlayerSideCardProps> = ({
             );
           })}
         </div>
+      </div>
+
+      {/* Footer: Resep Poin Milik Pemain & Tombol Intip Resep */}
+      <div className="px-3 py-1.5 bg-stone-100/90 border-t border-stone-200 flex items-center justify-between text-xs">
+        <span className="font-bold text-stone-700 font-fredoka flex items-center gap-1.5 text-[11px] sm:text-xs">
+          <span>🥗</span>
+          <span>
+            {player.scoringCards.length} {lang === 'id' ? 'Resep' : 'Recipes'}
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setInspectedPlayerIndex(playerIndex);
+          }}
+          className="bg-white hover:bg-emerald-50 active:scale-95 text-[#1B5E20] border border-[#2E7D32]/40 font-black px-2.5 py-0.5 sm:py-1 rounded-lg shadow-2xs font-fredoka flex items-center gap-1 transition-all cursor-pointer text-[11px] sm:text-xs hover:border-[#2E7D32]"
+          title={`Lihat kartu resep poin milik ${player.name}`}
+        >
+          <span>👀</span>
+          <span>{lang === 'id' ? 'Lihat' : 'Peek'}</span>
+        </button>
       </div>
     </div>
   );
