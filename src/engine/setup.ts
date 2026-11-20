@@ -14,12 +14,12 @@ export interface SetupOptions {
 
 export function createEmptyResourceCounts(): ResourceCounts {
   return {
-    jahe: 0,
-    kunyit: 0,
-    kayu_manis: 0,
-    cengkeh: 0,
-    pala: 0,
-    lada: 0,
+    wortel: 0,
+    jagung: 0,
+    tomat: 0,
+    terong: 0,
+    jamur: 0,
+    brokoli: 0,
   };
 }
 

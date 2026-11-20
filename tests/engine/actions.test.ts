@@ -97,7 +97,7 @@ describe('Game Reducer & Actions (RULES.md section 4)', () => {
     const state = createTestGame();
     const activePlayerIndex = state.currentTurnPlayerIndex;
 
-    const remainingCard: Card = { id: 'last_res', resource: 'jahe', scoringId: 'S01' };
+    const remainingCard: Card = { id: 'last_res', resource: 'wortel', scoringId: 'S01' };
     const endgameResourceState: GameState = {
       ...state,
       market: {
@@ -112,7 +112,7 @@ describe('Game Reducer & Actions (RULES.md section 4)', () => {
       slotIndices: [0],
     });
 
-    expect(nextState.players[activePlayerIndex].resources.jahe).toBe(1);
+    expect(nextState.players[activePlayerIndex].resources.wortel).toBe(1);
     expect(nextState.market.resourceSlots[0]).toBeNull();
   });
 
@@ -214,7 +214,7 @@ describe('Game Reducer & Actions (RULES.md section 4)', () => {
     const activePlayerIndex = state.currentTurnPlayerIndex;
 
     // Give player a scoring card
-    const cardToFlip: Card = { id: 'flip_target', resource: 'kunyit', scoringId: 'S02' };
+    const cardToFlip: Card = { id: 'flip_target', resource: 'jagung', scoringId: 'S02' };
     state.players[activePlayerIndex].scoringCards.push(cardToFlip);
 
     // Flipping non-existent card
@@ -234,7 +234,7 @@ describe('Game Reducer & Actions (RULES.md section 4)', () => {
     const player = stateFlipped.players[activePlayerIndex];
     expect(player.scoringCards.find((c) => c.id === 'flip_target')).toBeUndefined();
     expect(player.flippedCards.find((c) => c.id === 'flip_target')).toBeDefined();
-    expect(player.resources.kunyit).toBe(1);
+    expect(player.resources.jagung).toBe(1);
 
     // Main action still available
     expect(stateFlipped.hasTakenMainActionThisTurn).toBe(false);

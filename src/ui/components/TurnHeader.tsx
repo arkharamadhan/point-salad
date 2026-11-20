@@ -13,15 +13,15 @@ export const TurnHeader: React.FC = () => {
       {/* Top Navbar */}
       <div className="flex items-center justify-between py-2 border-b border-stone-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center font-bold text-white shadow-md font-cinzel">
-            PR
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center font-bold text-white shadow-md font-cinzel">
+            PS
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-extrabold text-amber-200 tracking-wider font-cinzel">
-              PASAR REMPAH
+            <h1 className="text-lg sm:text-xl font-extrabold text-emerald-200 tracking-wider font-cinzel">
+              PANEN SAYUR
             </h1>
             <p className="text-[10px] sm:text-xs text-stone-400">
-              Permainan Kartu Drafting Rempah Nusantara
+              Permainan Kartu Veggie Drafting Cepat
             </p>
           </div>
         </div>

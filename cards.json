@@ -1,6 +1,6 @@
 {
   "meta": {
-    "workingTitle": "Pasar Rempah",
+    "workingTitle": "Panen Sayur",
     "version": "1.0.0",
     "note": "Seluruh kondisi skor, nama, dan angka di file ini adalah desain orisinal. Angka poin belum diseimbangkan lewat playtest.",
     "totalCards": 90,
@@ -28,18 +28,18 @@
     "perDistinctSet": "points x m, m = bilangan bulat terbesar yang memenuhi sum(min(count_i, m)) >= size*m (set berisi size jenis berbeda).",
     "parity": "evenPoints jika jumlah resource genap (0 = genap), selain itu oddPoints.",
     "majority": "mode most/least dibandingkan antar semua pemain. Seri membagi points rata, dibulatkan ke bawah. Nol dihitung sebagai jumlah valid.",
-    "perTypeAtLeast": "points untuk setiap jenis rempah dengan count >= threshold.",
-    "perMissingType": "points untuk setiap jenis rempah dengan count == 0.",
-    "perPairAny": "points x sum(floor(count/2)) di seluruh jenis rempah.",
-    "maxStack": "pointsPerCard x count terbesar di antara 6 jenis rempah.",
+    "perTypeAtLeast": "points untuk setiap jenis sayur dengan count >= threshold.",
+    "perMissingType": "points untuk setiap jenis sayur dengan count == 0.",
+    "perPairAny": "points x sum(floor(count/2)) di seluruh jenis sayur.",
+    "maxStack": "pointsPerCard x count terbesar di antara 6 jenis sayur.",
     "balanced": "points jika (count terbesar - count terkecil) <= maxDifference, selain itu 0. Hitung semua 6 jenis, termasuk yang 0."
   },
   "resources": [
     {
-      "id": "jahe",
+      "id": "wortel",
       "name": {
-        "id": "Jahe",
-        "en": "Ginger"
+        "id": "Wortel",
+        "en": "Carrot"
       },
       "icon": {
         "shape": "circle",
@@ -47,10 +47,10 @@
       }
     },
     {
-      "id": "kunyit",
+      "id": "jagung",
       "name": {
-        "id": "Kunyit",
-        "en": "Turmeric"
+        "id": "Jagung",
+        "en": "Corn"
       },
       "icon": {
         "shape": "square",
@@ -58,10 +58,10 @@
       }
     },
     {
-      "id": "kayu_manis",
+      "id": "tomat",
       "name": {
-        "id": "Kayu Manis",
-        "en": "Cinnamon"
+        "id": "Tomat",
+        "en": "Tomato"
       },
       "icon": {
         "shape": "triangle",
@@ -69,10 +69,10 @@
       }
     },
     {
-      "id": "cengkeh",
+      "id": "terong",
       "name": {
-        "id": "Cengkeh",
-        "en": "Clove"
+        "id": "Terong",
+        "en": "Eggplant"
       },
       "icon": {
         "shape": "diamond",
@@ -80,10 +80,10 @@
       }
     },
     {
-      "id": "pala",
+      "id": "jamur",
       "name": {
-        "id": "Pala",
-        "en": "Nutmeg"
+        "id": "Jamur",
+        "en": "Mushroom"
       },
       "icon": {
         "shape": "hexagon",
@@ -91,10 +91,10 @@
       }
     },
     {
-      "id": "lada",
+      "id": "brokoli",
       "name": {
-        "id": "Lada",
-        "en": "Pepper"
+        "id": "Brokoli",
+        "en": "Broccoli"
       },
       "icon": {
         "shape": "star",
@@ -109,18 +109,18 @@
       "params": {
         "items": [
           {
-            "resource": "jahe",
+            "resource": "wortel",
             "points": 3
           },
           {
-            "resource": "lada",
+            "resource": "brokoli",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Jahe, -1 poin per Lada.",
-        "en": "+3 points per Ginger, -1 point per Pepper."
+        "id": "+3 poin per Wortel, -1 poin per Brokoli.",
+        "en": "+3 points per Carrot, -1 point per Broccoli."
       }
     },
     {
@@ -129,18 +129,18 @@
       "params": {
         "items": [
           {
-            "resource": "kunyit",
+            "resource": "jagung",
             "points": 3
           },
           {
-            "resource": "pala",
+            "resource": "jamur",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Kunyit, -1 poin per Pala.",
-        "en": "+3 points per Turmeric, -1 point per Nutmeg."
+        "id": "+3 poin per Jagung, -1 poin per Jamur.",
+        "en": "+3 points per Corn, -1 point per Mushroom."
       }
     },
     {
@@ -149,18 +149,18 @@
       "params": {
         "items": [
           {
-            "resource": "kayu_manis",
+            "resource": "tomat",
             "points": 3
           },
           {
-            "resource": "cengkeh",
+            "resource": "terong",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Kayu Manis, -1 poin per Cengkeh.",
-        "en": "+3 points per Cinnamon, -1 point per Clove."
+        "id": "+3 poin per Tomat, -1 poin per Terong.",
+        "en": "+3 points per Tomato, -1 point per Eggplant."
       }
     },
     {
@@ -169,18 +169,18 @@
       "params": {
         "items": [
           {
-            "resource": "cengkeh",
+            "resource": "terong",
             "points": 3
           },
           {
-            "resource": "jahe",
+            "resource": "wortel",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Cengkeh, -1 poin per Jahe.",
-        "en": "+3 points per Clove, -1 point per Ginger."
+        "id": "+3 poin per Terong, -1 poin per Wortel.",
+        "en": "+3 points per Eggplant, -1 point per Carrot."
       }
     },
     {
@@ -189,18 +189,18 @@
       "params": {
         "items": [
           {
-            "resource": "pala",
+            "resource": "jamur",
             "points": 3
           },
           {
-            "resource": "kayu_manis",
+            "resource": "tomat",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Pala, -1 poin per Kayu Manis.",
-        "en": "+3 points per Nutmeg, -1 point per Cinnamon."
+        "id": "+3 poin per Jamur, -1 poin per Tomat.",
+        "en": "+3 points per Mushroom, -1 point per Tomato."
       }
     },
     {
@@ -209,18 +209,18 @@
       "params": {
         "items": [
           {
-            "resource": "lada",
+            "resource": "brokoli",
             "points": 3
           },
           {
-            "resource": "kunyit",
+            "resource": "jagung",
             "points": -1
           }
         ]
       },
       "text": {
-        "id": "+3 poin per Lada, -1 poin per Kunyit.",
-        "en": "+3 points per Pepper, -1 point per Turmeric."
+        "id": "+3 poin per Brokoli, -1 poin per Jagung.",
+        "en": "+3 points per Broccoli, -1 point per Corn."
       }
     },
     {
@@ -228,14 +228,14 @@
       "type": "perSet",
       "params": {
         "set": [
-          "jahe",
-          "kunyit"
+          "wortel",
+          "jagung"
         ],
         "points": 4
       },
       "text": {
-        "id": "4 poin per set lengkap Jahe + Kunyit.",
-        "en": "4 points per complete set of Ginger + Turmeric."
+        "id": "4 poin per set lengkap Wortel + Jagung.",
+        "en": "4 points per complete set of Carrot + Corn."
       }
     },
     {
@@ -243,14 +243,14 @@
       "type": "perSet",
       "params": {
         "set": [
-          "kayu_manis",
-          "cengkeh"
+          "tomat",
+          "terong"
         ],
         "points": 4
       },
       "text": {
-        "id": "4 poin per set lengkap Kayu Manis + Cengkeh.",
-        "en": "4 points per complete set of Cinnamon + Clove."
+        "id": "4 poin per set lengkap Tomat + Terong.",
+        "en": "4 points per complete set of Tomato + Eggplant."
       }
     },
     {
@@ -258,14 +258,14 @@
       "type": "perSet",
       "params": {
         "set": [
-          "pala",
-          "lada"
+          "jamur",
+          "brokoli"
         ],
         "points": 4
       },
       "text": {
-        "id": "4 poin per set lengkap Pala + Lada.",
-        "en": "4 points per complete set of Nutmeg + Pepper."
+        "id": "4 poin per set lengkap Jamur + Brokoli.",
+        "en": "4 points per complete set of Mushroom + Broccoli."
       }
     },
     {
@@ -273,15 +273,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "jahe",
-          "kayu_manis",
-          "lada"
+          "wortel",
+          "tomat",
+          "brokoli"
         ],
         "points": 7
       },
       "text": {
-        "id": "7 poin per set lengkap Jahe + Kayu Manis + Lada.",
-        "en": "7 points per complete set of Ginger + Cinnamon + Pepper."
+        "id": "7 poin per set lengkap Wortel + Tomat + Brokoli.",
+        "en": "7 points per complete set of Carrot + Tomato + Broccoli."
       }
     },
     {
@@ -289,15 +289,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "kunyit",
-          "cengkeh",
-          "pala"
+          "jagung",
+          "terong",
+          "jamur"
         ],
         "points": 7
       },
       "text": {
-        "id": "7 poin per set lengkap Kunyit + Cengkeh + Pala.",
-        "en": "7 points per complete set of Turmeric + Clove + Nutmeg."
+        "id": "7 poin per set lengkap Jagung + Terong + Jamur.",
+        "en": "7 points per complete set of Corn + Eggplant + Mushroom."
       }
     },
     {
@@ -305,15 +305,15 @@
       "type": "perSet",
       "params": {
         "set": [
-          "jahe",
-          "cengkeh",
-          "lada"
+          "wortel",
+          "terong",
+          "brokoli"
         ],
         "points": 7
       },
       "text": {
-        "id": "7 poin per set lengkap Jahe + Cengkeh + Lada.",
-        "en": "7 points per complete set of Ginger + Clove + Pepper."
+        "id": "7 poin per set lengkap Wortel + Terong + Brokoli.",
+        "en": "7 points per complete set of Carrot + Eggplant + Broccoli."
       }
     },
     {
@@ -324,8 +324,8 @@
         "points": 2
       },
       "text": {
-        "id": "2 poin per set berisi 3 jenis rempah berbeda.",
-        "en": "2 points per set of 3 different spice types."
+        "id": "2 poin per set berisi 3 jenis sayur berbeda.",
+        "en": "2 points per set of 3 different veggie types."
       }
     },
     {
@@ -336,8 +336,8 @@
         "points": 3
       },
       "text": {
-        "id": "3 poin per set berisi 4 jenis rempah berbeda.",
-        "en": "3 points per set of 4 different spice types."
+        "id": "3 poin per set berisi 4 jenis sayur berbeda.",
+        "en": "3 points per set of 4 different veggie types."
       }
     },
     {
@@ -348,125 +348,125 @@
         "points": 6
       },
       "text": {
-        "id": "6 poin per set berisi 6 jenis rempah berbeda.",
-        "en": "6 points per set of 6 different spice types."
+        "id": "6 poin per set berisi 6 jenis sayur berbeda.",
+        "en": "6 points per set of 6 different veggie types."
       }
     },
     {
       "id": "S16",
       "type": "parity",
       "params": {
-        "resource": "jahe",
+        "resource": "wortel",
         "evenPoints": 7,
         "oddPoints": 3
       },
       "text": {
-        "id": "Jahe genap (0 dihitung genap): 7 poin. Jahe ganjil: 3 poin.",
-        "en": "Ginger even (0 counts as even): 7 points. Ginger odd: 3 points."
+        "id": "Wortel genap (0 dihitung genap): 7 poin. Wortel ganjil: 3 poin.",
+        "en": "Carrot even (0 counts as even): 7 points. Carrot odd: 3 points."
       }
     },
     {
       "id": "S17",
       "type": "parity",
       "params": {
-        "resource": "cengkeh",
+        "resource": "terong",
         "evenPoints": 3,
         "oddPoints": 7
       },
       "text": {
-        "id": "Cengkeh genap (0 dihitung genap): 3 poin. Cengkeh ganjil: 7 poin.",
-        "en": "Clove even (0 counts as even): 3 points. Clove odd: 7 points."
+        "id": "Terong genap (0 dihitung genap): 3 poin. Terong ganjil: 7 poin.",
+        "en": "Eggplant even (0 counts as even): 3 points. Eggplant odd: 7 points."
       }
     },
     {
       "id": "S18",
       "type": "parity",
       "params": {
-        "resource": "lada",
+        "resource": "brokoli",
         "evenPoints": 7,
         "oddPoints": 3
       },
       "text": {
-        "id": "Lada genap (0 dihitung genap): 7 poin. Lada ganjil: 3 poin.",
-        "en": "Pepper even (0 counts as even): 7 points. Pepper odd: 3 points."
+        "id": "Brokoli genap (0 dihitung genap): 7 poin. Brokoli ganjil: 3 poin.",
+        "en": "Broccoli even (0 counts as even): 7 points. Broccoli odd: 3 points."
       }
     },
     {
       "id": "S19",
       "type": "majority",
       "params": {
-        "resource": "jahe",
+        "resource": "wortel",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "Pemain dengan Jahe terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the most Ginger scores 10 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Wortel terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the most Carrot scores 10 points. Ties: points split evenly, rounded down."
       }
     },
     {
       "id": "S20",
       "type": "majority",
       "params": {
-        "resource": "kunyit",
+        "resource": "jagung",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "Pemain dengan Kunyit terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the most Turmeric scores 10 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Jagung terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the most Corn scores 10 points. Ties: points split evenly, rounded down."
       }
     },
     {
       "id": "S21",
       "type": "majority",
       "params": {
-        "resource": "kayu_manis",
+        "resource": "tomat",
         "mode": "most",
         "points": 10
       },
       "text": {
-        "id": "Pemain dengan Kayu Manis terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the most Cinnamon scores 10 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Tomat terbanyak mendapat 10 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the most Tomato scores 10 points. Ties: points split evenly, rounded down."
       }
     },
     {
       "id": "S22",
       "type": "majority",
       "params": {
-        "resource": "cengkeh",
+        "resource": "terong",
         "mode": "least",
         "points": 8
       },
       "text": {
-        "id": "Pemain dengan Cengkeh tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the fewest Clove scores 8 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Terong tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the fewest Eggplant scores 8 points. Ties: points split evenly, rounded down."
       }
     },
     {
       "id": "S23",
       "type": "majority",
       "params": {
-        "resource": "pala",
+        "resource": "jamur",
         "mode": "least",
         "points": 8
       },
       "text": {
-        "id": "Pemain dengan Pala tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the fewest Nutmeg scores 8 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Jamur tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the fewest Mushroom scores 8 points. Ties: points split evenly, rounded down."
       }
     },
     {
       "id": "S24",
       "type": "majority",
       "params": {
-        "resource": "lada",
+        "resource": "brokoli",
         "mode": "least",
         "points": 8
       },
       "text": {
-        "id": "Pemain dengan Lada tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
-        "en": "The player with the fewest Pepper scores 8 points. Ties: points split evenly, rounded down."
+        "id": "Pemain dengan Brokoli tersedikit mendapat 8 poin. Seri: poin dibagi rata, dibulatkan ke bawah.",
+        "en": "The player with the fewest Broccoli scores 8 points. Ties: points split evenly, rounded down."
       }
     },
     {
@@ -477,8 +477,8 @@
         "points": 3
       },
       "text": {
-        "id": "3 poin untuk setiap jenis rempah yang kamu miliki minimal 3.",
-        "en": "3 points for each spice type you have at least 3 of."
+        "id": "3 poin untuk setiap jenis sayur yang kamu miliki minimal 3.",
+        "en": "3 points for each veggie type you have at least 3 of."
       }
     },
     {
@@ -488,8 +488,8 @@
         "points": 6
       },
       "text": {
-        "id": "6 poin untuk setiap jenis rempah yang tidak kamu miliki sama sekali.",
-        "en": "6 points for each spice type you have none of."
+        "id": "6 poin untuk setiap jenis sayur yang tidak kamu miliki sama sekali.",
+        "en": "6 points for each veggie type you have none of."
       }
     },
     {
@@ -500,8 +500,8 @@
         "points": 5
       },
       "text": {
-        "id": "5 poin untuk setiap jenis rempah yang kamu miliki minimal 4.",
-        "en": "5 points for each spice type you have at least 4 of."
+        "id": "5 poin untuk setiap jenis sayur yang kamu miliki minimal 4.",
+        "en": "5 points for each veggie type you have at least 4 of."
       }
     },
     {
@@ -511,8 +511,8 @@
         "points": 1
       },
       "text": {
-        "id": "1 poin per pasang rempah sejenis (3 kartu = 1 pasang, 4 kartu = 2 pasang).",
-        "en": "1 point per pair of identical spices (3 cards = 1 pair, 4 cards = 2 pairs)."
+        "id": "1 poin per pasang sayur sejenis (3 kartu = 1 pasang, 4 kartu = 2 pasang).",
+        "en": "1 point per pair of identical veggies (3 cards = 1 pair, 4 cards = 2 pairs)."
       }
     },
     {
@@ -522,8 +522,8 @@
         "pointsPerCard": 2
       },
       "text": {
-        "id": "2 poin untuk setiap kartu di tumpukan jenis rempah terbanyakmu.",
-        "en": "2 points for each card in your largest spice stack."
+        "id": "2 poin untuk setiap kartu di tumpukan jenis sayur terbanyakmu.",
+        "en": "2 points for each card in your largest veggie stack."
       }
     },
     {
@@ -534,460 +534,460 @@
         "points": 12
       },
       "text": {
-        "id": "12 poin jika selisih antara jenis rempah terbanyak dan tersedikitmu paling banyak 2.",
-        "en": "12 points if the gap between your largest and smallest spice stack is at most 2."
+        "id": "12 poin jika selisih antara jenis sayur terbanyak dan tersedikitmu paling banyak 2.",
+        "en": "12 points if the gap between your largest and smallest veggie stack is at most 2."
       }
     }
   ],
   "cards": [
     {
       "id": "C001",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S01"
     },
     {
       "id": "C002",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S01"
     },
     {
       "id": "C003",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S01"
     },
     {
       "id": "C004",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S02"
     },
     {
       "id": "C005",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S02"
     },
     {
       "id": "C006",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S02"
     },
     {
       "id": "C007",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S03"
     },
     {
       "id": "C008",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S03"
     },
     {
       "id": "C009",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S03"
     },
     {
       "id": "C010",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S04"
     },
     {
       "id": "C011",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S04"
     },
     {
       "id": "C012",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S04"
     },
     {
       "id": "C013",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S05"
     },
     {
       "id": "C014",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S05"
     },
     {
       "id": "C015",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S05"
     },
     {
       "id": "C016",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S06"
     },
     {
       "id": "C017",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S06"
     },
     {
       "id": "C018",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S06"
     },
     {
       "id": "C019",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S07"
     },
     {
       "id": "C020",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S07"
     },
     {
       "id": "C021",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S07"
     },
     {
       "id": "C022",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S08"
     },
     {
       "id": "C023",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S08"
     },
     {
       "id": "C024",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S08"
     },
     {
       "id": "C025",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S09"
     },
     {
       "id": "C026",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S09"
     },
     {
       "id": "C027",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S09"
     },
     {
       "id": "C028",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S10"
     },
     {
       "id": "C029",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S10"
     },
     {
       "id": "C030",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S10"
     },
     {
       "id": "C031",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S11"
     },
     {
       "id": "C032",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S11"
     },
     {
       "id": "C033",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S11"
     },
     {
       "id": "C034",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S12"
     },
     {
       "id": "C035",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S12"
     },
     {
       "id": "C036",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S12"
     },
     {
       "id": "C037",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S13"
     },
     {
       "id": "C038",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S13"
     },
     {
       "id": "C039",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S13"
     },
     {
       "id": "C040",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S14"
     },
     {
       "id": "C041",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S14"
     },
     {
       "id": "C042",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S14"
     },
     {
       "id": "C043",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S15"
     },
     {
       "id": "C044",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S15"
     },
     {
       "id": "C045",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S15"
     },
     {
       "id": "C046",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S16"
     },
     {
       "id": "C047",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S16"
     },
     {
       "id": "C048",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S16"
     },
     {
       "id": "C049",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S17"
     },
     {
       "id": "C050",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S17"
     },
     {
       "id": "C051",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S17"
     },
     {
       "id": "C052",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S18"
     },
     {
       "id": "C053",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S18"
     },
     {
       "id": "C054",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S18"
     },
     {
       "id": "C055",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S19"
     },
     {
       "id": "C056",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S19"
     },
     {
       "id": "C057",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S19"
     },
     {
       "id": "C058",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S20"
     },
     {
       "id": "C059",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S20"
     },
     {
       "id": "C060",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S20"
     },
     {
       "id": "C061",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S21"
     },
     {
       "id": "C062",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S21"
     },
     {
       "id": "C063",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S21"
     },
     {
       "id": "C064",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S22"
     },
     {
       "id": "C065",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S22"
     },
     {
       "id": "C066",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S22"
     },
     {
       "id": "C067",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S23"
     },
     {
       "id": "C068",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S23"
     },
     {
       "id": "C069",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S23"
     },
     {
       "id": "C070",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S24"
     },
     {
       "id": "C071",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S24"
     },
     {
       "id": "C072",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S24"
     },
     {
       "id": "C073",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S25"
     },
     {
       "id": "C074",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S25"
     },
     {
       "id": "C075",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S25"
     },
     {
       "id": "C076",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S26"
     },
     {
       "id": "C077",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S26"
     },
     {
       "id": "C078",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S26"
     },
     {
       "id": "C079",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S27"
     },
     {
       "id": "C080",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S27"
     },
     {
       "id": "C081",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S27"
     },
     {
       "id": "C082",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S28"
     },
     {
       "id": "C083",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S28"
     },
     {
       "id": "C084",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S28"
     },
     {
       "id": "C085",
-      "resource": "pala",
+      "resource": "jamur",
       "scoring": "S29"
     },
     {
       "id": "C086",
-      "resource": "jahe",
+      "resource": "wortel",
       "scoring": "S29"
     },
     {
       "id": "C087",
-      "resource": "kayu_manis",
+      "resource": "tomat",
       "scoring": "S29"
     },
     {
       "id": "C088",
-      "resource": "lada",
+      "resource": "brokoli",
       "scoring": "S30"
     },
     {
       "id": "C089",
-      "resource": "kunyit",
+      "resource": "jagung",
       "scoring": "S30"
     },
     {
       "id": "C090",
-      "resource": "cengkeh",
+      "resource": "terong",
       "scoring": "S30"
     }
   ]

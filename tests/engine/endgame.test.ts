@@ -13,12 +13,12 @@ function makePlayer(
   flippedCards: Card[] = []
 ): PlayerState {
   const fullResources: ResourceCounts = {
-    jahe: 0,
-    kunyit: 0,
-    kayu_manis: 0,
-    cengkeh: 0,
-    pala: 0,
-    lada: 0,
+    wortel: 0,
+    jagung: 0,
+    tomat: 0,
+    terong: 0,
+    jamur: 0,
+    brokoli: 0,
     ...resources,
   };
   return {
@@ -75,7 +75,7 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
       market: {
         piles: [[], [], []],
         scoringSlots: [null, null, null],
-        resourceSlots: [{ id: 'r1', resource: 'jahe', scoringId: 'S01' }, null, null, null, null, null],
+        resourceSlots: [{ id: 'r1', resource: 'wortel', scoringId: 'S01' }, null, null, null, null, null],
       },
     };
     const actions = getLegalActions(singleResState);
@@ -120,11 +120,11 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
   describe('Tiebreaker Rules', () => {
     it('Level 1: Highest total score wins outright', () => {
       // P1 has 15 pts, P2 has 12 pts
-      const p1 = makePlayer('p1', 'Alice', { jahe: 5 }, [
-        { id: 'c1', resource: 'jahe', scoringId: 'S01' }, // 5*3 = 15 pts
+      const p1 = makePlayer('p1', 'Alice', { wortel: 5 }, [
+        { id: 'c1', resource: 'wortel', scoringId: 'S01' }, // 5*3 = 15 pts
       ]);
-      const p2 = makePlayer('p2', 'Bob', { jahe: 4 }, [
-        { id: 'c2', resource: 'jahe', scoringId: 'S01' }, // 4*3 = 12 pts
+      const p2 = makePlayer('p2', 'Bob', { wortel: 4 }, [
+        { id: 'c2', resource: 'wortel', scoringId: 'S01' }, // 4*3 = 12 pts
       ]);
 
       const scores = calculateFinalScores([p1, p2]);
@@ -138,11 +138,11 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
       // Both score 12 pts:
       // P1: 4 jahe * 3 = 12 pts (total resources = 4)
       // P2: 4 jahe * 3 = 12 pts + 2 kunyit (total resources = 6)
-      const p1 = makePlayer('p1', 'Alice', { jahe: 4 }, [
-        { id: 'c1', resource: 'jahe', scoringId: 'S01' },
+      const p1 = makePlayer('p1', 'Alice', { wortel: 4 }, [
+        { id: 'c1', resource: 'wortel', scoringId: 'S01' },
       ]);
-      const p2 = makePlayer('p2', 'Bob', { jahe: 4, kunyit: 2 }, [
-        { id: 'c2', resource: 'jahe', scoringId: 'S01' },
+      const p2 = makePlayer('p2', 'Bob', { wortel: 4, jagung: 2 }, [
+        { id: 'c2', resource: 'wortel', scoringId: 'S01' },
       ]);
 
       const scores = calculateFinalScores([p1, p2]);
@@ -157,14 +157,14 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
       // P1: 2 jahe, 2 kunyit (total 4 resources)
       // S01 (+3 jahe): 2*3 = 6 pts
       // S02 (+3 kunyit): 2*3 = 6 pts -> total 12 pts (2 unflipped cards)
-      const p1 = makePlayer('p1', 'Alice', { jahe: 2, kunyit: 2 }, [
-        { id: 'c1', resource: 'jahe', scoringId: 'S01' },
-        { id: 'c2', resource: 'kunyit', scoringId: 'S02' },
+      const p1 = makePlayer('p1', 'Alice', { wortel: 2, jagung: 2 }, [
+        { id: 'c1', resource: 'wortel', scoringId: 'S01' },
+        { id: 'c2', resource: 'jagung', scoringId: 'S02' },
       ]);
       // P2: 4 jahe (total 4 resources)
       // S01 (+3 jahe): 4*3 = 12 pts (1 unflipped card)
-      const p2 = makePlayer('p2', 'Bob', { jahe: 4 }, [
-        { id: 'c3', resource: 'jahe', scoringId: 'S01' },
+      const p2 = makePlayer('p2', 'Bob', { wortel: 4 }, [
+        { id: 'c3', resource: 'wortel', scoringId: 'S01' },
       ]);
 
       const scores = calculateFinalScores([p1, p2]);
@@ -179,11 +179,11 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
 
     it('Level 4: When score, resources, and scoring cards are all tied, shared victory', () => {
       // Exactly identical scores, resources, and cards count
-      const p1 = makePlayer('p1', 'Alice', { jahe: 4 }, [
-        { id: 'c1', resource: 'jahe', scoringId: 'S01' },
+      const p1 = makePlayer('p1', 'Alice', { wortel: 4 }, [
+        { id: 'c1', resource: 'wortel', scoringId: 'S01' },
       ]);
-      const p2 = makePlayer('p2', 'Bob', { jahe: 4 }, [
-        { id: 'c2', resource: 'jahe', scoringId: 'S01' },
+      const p2 = makePlayer('p2', 'Bob', { wortel: 4 }, [
+        { id: 'c2', resource: 'wortel', scoringId: 'S01' },
       ]);
 
       const scores = calculateFinalScores([p1, p2]);
@@ -228,7 +228,7 @@ describe('End Game Detection and Tiebreakers (RULES.md section 5 & 6)', () => {
       currentTurnPlayerIndex: 0,
       market: {
         piles: [[], [], []],
-        scoringSlots: [{ id: 'last_s', resource: 'jahe', scoringId: 'S01' }, null, null],
+        scoringSlots: [{ id: 'last_s', resource: 'wortel', scoringId: 'S01' }, null, null],
         resourceSlots: [null, null, null, null, null, null],
       },
     };

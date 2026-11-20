@@ -80,13 +80,13 @@ describe('Bot AI (Greedy & Easy Bots)', () => {
     // Give bot a scoring card that scores negative or 0, but flipping it into a resource helps another card!
     // Card 1: S07 (4 pts per complete set Jahe + Kunyit).
     // Bot currently has 1 Kunyit, 0 Jahe. Current score = 0.
-    // Card 2 in hand: S01 (+3 Jahe, -1 Lada) with resource side = 'jahe'.
+    // Card 2 in hand: S01 (+3 Jahe, -1 Lada) with resource side = 'wortel'.
     // If Bot flips Card 2 into Jahe, it now has 1 Jahe + 1 Kunyit -> 4 pts!
-    const cardS07: Card = { id: 'c_s07', resource: 'lada', scoringId: 'S07' };
-    const cardFlipTarget: Card = { id: 'c_flip', resource: 'jahe', scoringId: 'S01' };
+    const cardS07: Card = { id: 'c_s07', resource: 'brokoli', scoringId: 'S07' };
+    const cardFlipTarget: Card = { id: 'c_flip', resource: 'wortel', scoringId: 'S01' };
 
     state.players[botPlayerIdx].scoringCards = [cardS07, cardFlipTarget];
-    state.players[botPlayerIdx].resources.kunyit = 1;
+    state.players[botPlayerIdx].resources.jagung = 1;
 
     // Prior to flip: score is 0 (S07 has 0 sets, S01 has 0 jahe)
     const initialScore = evaluatePlayerScore(botPlayerIdx, state.players).totalScore;

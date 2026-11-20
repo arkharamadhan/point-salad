@@ -25,7 +25,7 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="mt-8 pt-4 border-t border-stone-800 text-center text-[11px] text-stone-500 font-medium">
-        Pasar Rempah — Permainan Kartu Veggie-Drafting Rempah Nusantara • Sesuai Aturan RULES.md & cards.json
+        Panen Sayur — Permainan Kartu Veggie-Drafting Segar • Sesuai Aturan RULES.md & cards.json
       </footer>
     </div>
   );

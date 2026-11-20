@@ -84,8 +84,8 @@ export function gameReducer(
 
       const logMsg =
         takenCards.length === 2
-          ? `${newActivePlayer.name} mengambil 2 kartu rempah (${takenCards[0].resource}, ${takenCards[1].resource}).`
-          : `${newActivePlayer.name} mengambil 1 kartu rempah terakhir (${takenCards[0].resource}).`;
+          ? `${newActivePlayer.name} mengambil 2 kartu sayur (${takenCards[0].resource}, ${takenCards[1].resource}).`
+          : `${newActivePlayer.name} mengambil 1 kartu sayur terakhir (${takenCards[0].resource}).`;
 
       return {
         ...state,
@@ -196,7 +196,7 @@ export function gameReducer(
       newActivePlayer.resources[flippedCard.resource] =
         (newActivePlayer.resources[flippedCard.resource] ?? 0) + 1;
 
-      const logMsg = `${newActivePlayer.name} membalik kartu skor (${flippedCard.scoringId}) menjadi rempah ${flippedCard.resource}.`;
+      const logMsg = `${newActivePlayer.name} membalik kartu skor (${flippedCard.scoringId}) menjadi sayur ${flippedCard.resource}.`;
 
       return {
         ...state,

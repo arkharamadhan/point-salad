@@ -42,18 +42,18 @@ function makePlayer(
 describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('1. evaluatePerItem handles positive, negative, and zero points', () => {
     const res: ResourceCounts = {
-      jahe: 4,
-      kunyit: 2,
-      kayu_manis: 0,
-      cengkeh: 0,
-      pala: 0,
-      lada: 1,
+      wortel: 4,
+      jagung: 2,
+      tomat: 0,
+      terong: 0,
+      jamur: 0,
+      brokoli: 1,
     };
     // S01: +3 jahe, -1 lada -> 4*3 - 1*1 = 11
     const score = evaluatePerItem(res, {
       items: [
-        { resource: 'jahe', points: 3 },
-        { resource: 'lada', points: -1 },
+        { resource: 'wortel', points: 3 },
+        { resource: 'brokoli', points: -1 },
       ],
     });
     expect(score).toBe(11);
@@ -61,8 +61,8 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     // Negative total is allowed
     const scoreNeg = evaluatePerItem(res, {
       items: [
-        { resource: 'jahe', points: 1 },
-        { resource: 'lada', points: -10 },
+        { resource: 'wortel', points: 1 },
+        { resource: 'brokoli', points: -10 },
       ],
     });
     expect(scoreNeg).toBe(-6);
@@ -70,23 +70,23 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
   it('2. evaluatePerSet computes points based on minimum count in set', () => {
     const res: ResourceCounts = {
-      jahe: 4,
-      kunyit: 2,
-      kayu_manis: 5,
-      cengkeh: 0,
-      pala: 0,
-      lada: 0,
+      wortel: 4,
+      jagung: 2,
+      tomat: 5,
+      terong: 0,
+      jamur: 0,
+      brokoli: 0,
     };
-    // S07: 4 pts per set (jahe + kunyit) -> min(4, 2) = 2 -> 8 pts
+    // S07: 4 pts per set (wortel + kunyit) -> min(4, 2) = 2 -> 8 pts
     const score = evaluatePerSet(res, {
-      set: ['jahe', 'kunyit'],
+      set: ['wortel', 'jagung'],
       points: 4,
     });
     expect(score).toBe(8);
 
     // If one ingredient is missing, score is 0
     const scoreMissing = evaluatePerSet(res, {
-      set: ['jahe', 'cengkeh'],
+      set: ['wortel', 'terong'],
       points: 4,
     });
     expect(scoreMissing).toBe(0);
@@ -95,12 +95,12 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('3. evaluatePerDistinctSet computes max disjoint sets using RULES.md formula', () => {
     // 3 different types, 2 pts each
     const res: ResourceCounts = {
-      jahe: 4,
-      kunyit: 2,
-      kayu_manis: 1,
-      cengkeh: 0,
-      pala: 0,
-      lada: 0,
+      wortel: 4,
+      jagung: 2,
+      tomat: 1,
+      terong: 0,
+      jamur: 0,
+      brokoli: 0,
     };
     // Distinct set of size 3:
     // m=1: min(4,1)+min(2,1)+min(1,1) = 3 >= 3*1 -> yes
@@ -111,12 +111,12 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
     // Size 6: 1 of each
     const allSix: ResourceCounts = {
-      jahe: 2,
-      kunyit: 2,
-      kayu_manis: 2,
-      cengkeh: 2,
-      pala: 2,
-      lada: 2,
+      wortel: 2,
+      jagung: 2,
+      tomat: 2,
+      terong: 2,
+      jamur: 2,
+      brokoli: 2,
     };
     const scoreSix = evaluatePerDistinctSet(allSix, { size: 6, points: 6 });
     expect(scoreSix).toBe(12); // 2 sets * 6 pts = 12
@@ -125,30 +125,30 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('4. evaluateParity handles even (including 0) and odd points', () => {
     const resEven: ResourceCounts = {
       ...createEmptyResourceCounts(),
-      jahe: 0, // 0 is even
+      wortel: 0, // 0 is even
     };
     expect(
-      evaluateParity(resEven, { resource: 'jahe', evenPoints: 7, oddPoints: 3 })
+      evaluateParity(resEven, { resource: 'wortel', evenPoints: 7, oddPoints: 3 })
     ).toBe(7);
 
     const resOdd: ResourceCounts = {
       ...createEmptyResourceCounts(),
-      jahe: 3,
+      wortel: 3,
     };
     expect(
-      evaluateParity(resOdd, { resource: 'jahe', evenPoints: 7, oddPoints: 3 })
+      evaluateParity(resOdd, { resource: 'wortel', evenPoints: 7, oddPoints: 3 })
     ).toBe(3);
   });
 
   it('5. evaluateMajority handles most, least, ties (split points rounded down), and 0 counts', () => {
-    const p1 = makePlayer('p1', 'Alice', { jahe: 5, cengkeh: 0 });
-    const p2 = makePlayer('p2', 'Bob', { jahe: 5, cengkeh: 0 });
-    const p3 = makePlayer('p3', 'Charlie', { jahe: 2, cengkeh: 3 });
+    const p1 = makePlayer('p1', 'Alice', { wortel: 5, terong: 0 });
+    const p2 = makePlayer('p2', 'Bob', { wortel: 5, terong: 0 });
+    const p3 = makePlayer('p3', 'Charlie', { wortel: 2, terong: 3 });
     const players = [p1, p2, p3];
 
     // Majority most: p1 and p2 tie with 5 jahe. Points = 10 / 2 = 5 each.
     const resP1Most = evaluateMajority(0, players, {
-      resource: 'jahe',
+      resource: 'wortel',
       mode: 'most',
       points: 10,
     });
@@ -158,7 +158,7 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
     // p3 does not have most
     const resP3Most = evaluateMajority(2, players, {
-      resource: 'jahe',
+      resource: 'wortel',
       mode: 'most',
       points: 10,
     });
@@ -167,7 +167,7 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
     // Majority least: p1 and p2 tie with 0 cengkeh. 0 is valid! Points = 8 / 2 = 4.
     const resP1Least = evaluateMajority(0, players, {
-      resource: 'cengkeh',
+      resource: 'terong',
       mode: 'least',
       points: 8,
     });
@@ -175,7 +175,7 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     expect(resP1Least.isWinner).toBe(true);
 
     const resP3Least = evaluateMajority(2, players, {
-      resource: 'cengkeh',
+      resource: 'terong',
       mode: 'least',
       points: 8,
     });
@@ -184,12 +184,12 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
   it('6. evaluatePerTypeAtLeast scores points for each type reaching threshold', () => {
     const res: ResourceCounts = {
-      jahe: 3,
-      kunyit: 4,
-      kayu_manis: 2,
-      cengkeh: 0,
-      pala: 5,
-      lada: 3,
+      wortel: 3,
+      jagung: 4,
+      tomat: 2,
+      terong: 0,
+      jamur: 5,
+      brokoli: 3,
     };
     // Threshold 3: jahe(3), kunyit(4), pala(5), lada(3) -> 4 types * 3 pts = 12
     const score = evaluatePerTypeAtLeast(res, { threshold: 3, points: 3 });
@@ -198,12 +198,12 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
   it('7. evaluatePerMissingType scores points for each type with count 0', () => {
     const res: ResourceCounts = {
-      jahe: 3,
-      kunyit: 0,
-      kayu_manis: 0,
-      cengkeh: 1,
-      pala: 0,
-      lada: 2,
+      wortel: 3,
+      jagung: 0,
+      tomat: 0,
+      terong: 1,
+      jamur: 0,
+      brokoli: 2,
     };
     // Missing types: kunyit, kayu_manis, pala -> 3 types * 6 pts = 18
     const score = evaluatePerMissingType(res, { points: 6 });
@@ -212,12 +212,12 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
   it('8. evaluatePerPairAny sums floor(count / 2) across all 6 types', () => {
     const res: ResourceCounts = {
-      jahe: 3, // 1 pair
-      kunyit: 4, // 2 pairs
-      kayu_manis: 1, // 0 pairs
-      cengkeh: 2, // 1 pair
-      pala: 5, // 2 pairs
-      lada: 0, // 0 pairs
+      wortel: 3, // 1 pair
+      jagung: 4, // 2 pairs
+      tomat: 1, // 0 pairs
+      terong: 2, // 1 pair
+      jamur: 5, // 2 pairs
+      brokoli: 0, // 0 pairs
     };
     // Total pairs = 1 + 2 + 0 + 1 + 2 + 0 = 6 pairs * 1 pt = 6
     const score = evaluatePerPairAny(res, { points: 1 });
@@ -226,12 +226,12 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 
   it('9. evaluateMaxStack scores pointsPerCard * largest count', () => {
     const res: ResourceCounts = {
-      jahe: 1,
-      kunyit: 2,
-      kayu_manis: 6,
-      cengkeh: 3,
-      pala: 4,
-      lada: 0,
+      wortel: 1,
+      jagung: 2,
+      tomat: 6,
+      terong: 3,
+      jamur: 4,
+      brokoli: 0,
     };
     // Max stack is kayu_manis with 6. 6 * 2 = 12
     const score = evaluateMaxStack(res, { pointsPerCard: 2 });
@@ -241,22 +241,22 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
   it('10. evaluateBalanced scores points if max - min <= maxDifference across all 6 types', () => {
     // Including 0s!
     const resUnbalanced: ResourceCounts = {
-      jahe: 3,
-      kunyit: 2,
-      kayu_manis: 3,
-      cengkeh: 2,
-      pala: 3,
-      lada: 0, // min is 0! max is 3. diff = 3 > 2 -> 0 pts
+      wortel: 3,
+      jagung: 2,
+      tomat: 3,
+      terong: 2,
+      jamur: 3,
+      brokoli: 0, // min is 0! max is 3. diff = 3 > 2 -> 0 pts
     };
     expect(evaluateBalanced(resUnbalanced, { maxDifference: 2, points: 12 })).toBe(0);
 
     const resBalanced: ResourceCounts = {
-      jahe: 2,
-      kunyit: 2,
-      kayu_manis: 3,
-      cengkeh: 1,
-      pala: 2,
-      lada: 2, // min is 1, max is 3. diff = 2 <= 2 -> 12 pts
+      wortel: 2,
+      jagung: 2,
+      tomat: 3,
+      terong: 1,
+      jamur: 2,
+      brokoli: 2, // min is 1, max is 3. diff = 2 <= 2 -> 12 pts
     };
     expect(evaluateBalanced(resBalanced, { maxDifference: 2, points: 12 })).toBe(12);
   });
@@ -265,12 +265,12 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
 describe('Registry & Player Score Evaluation', () => {
   it('correctly evaluates all 30 conditions registered from cards.json', () => {
     const player = makePlayer('p1', 'Player', {
-      jahe: 3,
-      kunyit: 3,
-      kayu_manis: 3,
-      cengkeh: 3,
-      pala: 3,
-      lada: 3,
+      wortel: 3,
+      jagung: 3,
+      tomat: 3,
+      terong: 3,
+      jamur: 3,
+      brokoli: 3,
     });
     const players = [player];
 
@@ -292,16 +292,16 @@ describe('Registry & Player Score Evaluation', () => {
       'p1',
       'TestPlayer',
       {
-        jahe: 4,
-        kunyit: 2,
-        kayu_manis: 3,
-        cengkeh: 0,
-        pala: 5,
-        lada: 1,
+        wortel: 4,
+        jagung: 2,
+        tomat: 3,
+        terong: 0,
+        jamur: 5,
+        brokoli: 1,
       },
       [
-        { id: 'c1', resource: 'jahe', scoringId: 'S01' },
-        { id: 'c2', resource: 'kunyit', scoringId: 'S07' },
+        { id: 'c1', resource: 'wortel', scoringId: 'S01' },
+        { id: 'c2', resource: 'jagung', scoringId: 'S07' },
       ]
     );
 

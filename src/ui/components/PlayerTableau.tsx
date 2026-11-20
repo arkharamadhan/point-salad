@@ -63,7 +63,7 @@ export const PlayerTableau: React.FC = () => {
                   )}
                 </div>
                 <span className="text-[11px] text-stone-400">
-                  {player.scoringCards.length} Kartu Skor • {pResourcesCount} Rempah
+                  {player.scoringCards.length} Kartu Skor • {pResourcesCount} Sayur
                 </span>
               </div>
 
@@ -80,11 +80,11 @@ export const PlayerTableau: React.FC = () => {
       </div>
 
       {/* 2. Active Player Detailed Tableau */}
-      <div className="bg-stone-900/95 border-2 border-amber-600/60 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-md">
+      <div className="bg-stone-900/95 border-2 border-emerald-600/60 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-md">
         {/* Tableau Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between pb-4 mb-4 border-b border-stone-800 gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/60 flex items-center justify-center text-amber-300 font-bold font-cinzel text-base">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/60 flex items-center justify-center text-emerald-300 font-bold font-cinzel text-base">
               {currentTurnPlayerIndex + 1}
             </div>
             <div>
@@ -92,12 +92,12 @@ export const PlayerTableau: React.FC = () => {
                 <h3 className="text-lg font-bold text-stone-100 font-cinzel">
                   Area Milik: {activePlayer.name}
                 </h3>
-                <span className="bg-amber-900/60 text-amber-300 border border-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                <span className="bg-emerald-900/60 text-emerald-300 border border-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
                   Aktif
                 </span>
               </div>
               <p className="text-xs text-stone-400">
-                Total Rempah: <strong className="text-emerald-400">{totalResourcesCount}</strong> • Kartu Skor: <strong className="text-amber-400">{activePlayer.scoringCards.length}</strong> (Dibalik: {activePlayer.flippedCards.length})
+                Total Sayur: <strong className="text-emerald-400">{totalResourcesCount}</strong> • Kartu Skor: <strong className="text-amber-400">{activePlayer.scoringCards.length}</strong> (Dibalik: {activePlayer.flippedCards.length})
               </p>
             </div>
           </div>
@@ -125,10 +125,10 @@ export const PlayerTableau: React.FC = () => {
           </div>
         </div>
 
-        {/* Rempah Collection Counters (Bar) */}
+        {/* Sayur Collection Counters (Bar) */}
         <div className="mb-6">
           <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 font-cinzel">
-            Koleksi Rempah ({totalResourcesCount} Total)
+            Koleksi Sayur ({totalResourcesCount} Total)
           </h4>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
             {ALL_RESOURCES.map((resource) => {
@@ -165,7 +165,7 @@ export const PlayerTableau: React.FC = () => {
               Kartu Skor Aktif ({activePlayer.scoringCards.length})
             </h4>
             <span className="text-[11px] text-stone-500 italic">
-              Klik 'Balik' untuk mengubah kartu skor menjadi rempah secara permanen.
+              Klik 'Balik' untuk mengubah kartu skor menjadi sayur secara permanen.
             </span>
           </div>
 

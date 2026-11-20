@@ -58,11 +58,11 @@ export const MarketBoard: React.FC = () => {
                 onClick={handleConfirmResources}
                 className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-lg transition-all transform hover:scale-105 flex items-center gap-1.5 cursor-pointer"
               >
-                <span>✓</span> Ambil {selectedResourceSlots.length} Rempah Terpilih
+                <span>✓</span> Ambil {selectedResourceSlots.length} Sayur Terpilih
               </button>
             ) : (
               <div className="text-xs sm:text-sm font-medium text-amber-200/80 bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-800/40">
-                Pilih <strong className="text-emerald-400">2 kartu Rempah</strong> ATAU <strong className="text-amber-400">1 kartu Skor</strong>
+                Pilih <strong className="text-emerald-400">2 kartu Sayur</strong> ATAU <strong className="text-amber-400">1 kartu Skor</strong>
               </div>
             )}
           </div>
@@ -141,7 +141,7 @@ export const MarketBoard: React.FC = () => {
               {/* Bottom Row: 2 Resource Slots */}
               <div className="mt-1 pt-2 border-t border-stone-800/80 flex flex-col gap-1">
                 <span className="text-[10px] text-stone-400 font-medium px-1">
-                  Slot Rempah Terbuka
+                  Slot Sayur Terbuka
                 </span>
                 <div className="grid grid-cols-2 gap-2 justify-items-center">
                   {/* Resource 1 */}
@@ -189,7 +189,7 @@ export const MarketBoard: React.FC = () => {
         <span className="flex items-center gap-1.5">
           <span>⌨️</span>
           <span>
-            Shortcut Keyboard: Tekan <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[1-3]</kbd> untuk Skor, <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[Q-Y]</kbd> untuk Rempah, <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[Spasi / Enter]</kbd> untuk Konfirmasi.
+            Shortcut Keyboard: Tekan <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[1-3]</kbd> untuk Skor, <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[Q-Y]</kbd> untuk Sayur, <kbd className="bg-stone-800 text-stone-300 px-1 py-0.5 rounded font-mono">[Spasi / Enter]</kbd> untuk Konfirmasi.
           </span>
         </span>
       </div>

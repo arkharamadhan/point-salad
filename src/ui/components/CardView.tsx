@@ -95,11 +95,11 @@ export const CardView: React.FC<CardViewProps> = ({
 
           {/* Central Logo Motif */}
           <div className="flex flex-col items-center z-10">
-            <div className="w-10 h-10 rounded-full bg-amber-900/50 border border-amber-500/40 flex items-center justify-center mb-1">
-              <span className="text-amber-400 font-bold text-sm font-cinzel">PR</span>
+            <div className="w-10 h-10 rounded-full bg-emerald-900/50 border border-emerald-500/40 flex items-center justify-center mb-1">
+              <span className="text-emerald-400 font-bold text-sm font-cinzel">PS</span>
             </div>
-            <span className="text-[11px] font-bold text-amber-200/90 font-cinzel tracking-wider text-center">
-              PASAR REMPAH
+            <span className="text-[11px] font-bold text-emerald-200/90 font-cinzel tracking-wider text-center">
+              PANEN SAYUR
             </span>
           </div>
 
@@ -245,7 +245,7 @@ export const CardView: React.FC<CardViewProps> = ({
 
       {/* Bottom Footer: Resource Flip Side Info + Flip Button */}
       <div className="pt-1.5 border-t border-stone-200 flex items-center justify-between">
-        <div className="flex items-center gap-1" title={`Sisi rempah: ${spiceInfo.nameId}`}>
+        <div className="flex items-center gap-1" title={`Sisi sayur: ${spiceInfo.nameId}`}>
           <SpiceIcon resource={card.resource} size={16} />
           <span className="text-[10px] font-semibold text-stone-600">
             {lang === 'id' ? spiceInfo.nameId : spiceInfo.nameEn}
@@ -255,8 +255,8 @@ export const CardView: React.FC<CardViewProps> = ({
         {canFlip && onFlip && (
           <button
             onClick={handleFlip}
-            className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow transition-colors flex items-center gap-0.5 cursor-pointer"
-            title="Balik kartu ini menjadi Rempah secara permanen"
+            className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow transition-colors flex items-center gap-0.5 cursor-pointer"
+            title="Balik kartu ini menjadi Sayur secara permanen"
           >
             <span>🔄</span> Balik
           </button>

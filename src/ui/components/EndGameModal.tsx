@@ -89,7 +89,7 @@ export const EndGameModal: React.FC = () => {
                         )}
                       </div>
                       <span className="text-xs text-stone-400">
-                        {scoreReport.totalResources} Rempah • {scoreReport.unflippedScoringCardsCount} Kartu Skor
+                        {scoreReport.totalResources} Sayur • {scoreReport.unflippedScoringCardsCount} Kartu Skor
                       </span>
                     </div>
                   </div>
@@ -139,7 +139,7 @@ export const EndGameModal: React.FC = () => {
                       </div>
                     ) : (
                       <p className="text-xs text-stone-500 italic">
-                        Tidak ada kartu skor tersisa (semua dibalik menjadi rempah).
+                        Tidak ada kartu skor tersisa (semua dibalik menjadi sayur).
                       </p>
                     )}
                   </div>
@@ -151,7 +151,7 @@ export const EndGameModal: React.FC = () => {
 
         {/* Tiebreaker Note */}
         <div className="text-center text-xs text-stone-400 mb-6 bg-stone-950/40 p-3 rounded-xl border border-stone-800">
-          Penentu Pemenang: 1. Skor Tertinggi ➔ 2. Total Kartu Rempah ➔ 3. Kartu Skor Belum Dibalik ➔ 4. Menang Bersama.
+          Penentu Pemenang: 1. Skor Tertinggi ➔ 2. Total Kartu Sayur ➔ 3. Kartu Skor Belum Dibalik ➔ 4. Menang Bersama.
         </div>
 
         {/* Play Again Button */}
