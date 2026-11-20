@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "simulate": "vite-node scripts/simulate.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
