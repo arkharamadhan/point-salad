@@ -59,14 +59,15 @@
 .cutting-board {
   background: #F4D7A7;
   background-image: 
-    radial-gradient(ellipse at 50% 25%, rgba(255, 255, 255, 0.45) 0%, transparent 60%),
-    linear-gradient(180deg, #F8DEB3 0%, #F1CE99 60%, #E8C188 100%);
-  border: 6px solid #C9A46E;
-  border-radius: 28px;
+    radial-gradient(ellipse at 75% 30%, rgba(255, 250, 240, 0.45) 0%, transparent 55%),
+    linear-gradient(180deg, #F9DEB5 0%, #F3CE98 45%, #E9BE82 100%);
+  border: 7px solid #C89D63;
+  border-radius: 30px;
   box-shadow: 
-    0 18px 45px -10px rgba(110, 65, 20, 0.22),
-    inset 0 3px 6px rgba(255, 255, 255, 0.7),
-    inset 0 -4px 10px rgba(190, 140, 75, 0.35);
+    0 20px 48px -8px rgba(95, 50, 15, 0.28),
+    0 6px 14px -3px rgba(95, 50, 15, 0.16),
+    inset 0 3px 6px rgba(255, 255, 255, 0.75),
+    inset 0 -4px 10px rgba(180, 125, 60, 0.35);
 }
 
 .veggie-table-bg {

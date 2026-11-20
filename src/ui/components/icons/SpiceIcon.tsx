@@ -113,7 +113,7 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
       );
 
     case 'bawang':
-      // Red/Purple Onion (matching reference image)
+      // Red/Purple Onion (matching reference cartoon style: tilted bulb, green sprout, layer stripes)
       return (
         <svg
           width={size}
@@ -124,42 +124,62 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Shadow */}
-          <ellipse cx="50" cy="85" rx="28" ry="6" fill="#000000" fillOpacity="0.2" />
-          {/* Onion Body Bulb */}
+          <ellipse cx="50" cy="88" rx="28" ry="6" fill="#000000" fillOpacity="0.2" />
+          
+          {/* Green Top Sprouts (drawn behind stem tip) */}
           <path
-            d="M50 18C30 35 24 55 24 66C24 80 36 86 50 86C64 86 76 80 76 66C76 55 70 35 50 18Z"
+            d="M50 20C48 9 38 6 32 5C40 12 45 16 48 22"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="3.5"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M50 20C53 10 62 7 68 5C60 12 55 16 52 22"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="3.5"
+            strokeLinejoin="round"
+          />
+
+          {/* Onion Body Bulb (tilted teardrop) */}
+          <path
+            d="M50 18C30 34 22 54 22 68C22 82 34 88 50 88C66 88 78 82 78 68C78 54 70 34 50 18Z"
             fill="#AD1457"
             stroke="#212121"
             strokeWidth="4"
           />
-          {/* Curved Onion Striations */}
+
+          {/* Curved Onion Peel Striations & Highlights */}
           <path
-            d="M50 20C40 38 35 52 35 68C35 78 42 84 50 85"
+            d="M50 20C38 38 32 54 32 70C32 80 40 86 50 87"
             stroke="#FFFFFF"
-            strokeWidth="3"
+            strokeWidth="3.5"
+            strokeOpacity="0.6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M50 20C43 40 40 56 40 72C40 81 44 86 50 87"
+            stroke="#FFFFFF"
+            strokeWidth="2.5"
             strokeOpacity="0.4"
             strokeLinecap="round"
           />
           <path
-            d="M50 20C60 38 65 52 65 68C65 78 58 84 50 85"
+            d="M50 20C60 38 66 54 66 70C66 80 58 86 50 87"
             stroke="#212121"
             strokeWidth="3"
-            strokeOpacity="0.3"
+            strokeOpacity="0.35"
             strokeLinecap="round"
           />
-          {/* Root tip & Top Sprout */}
-          <path d="M48 86L50 92L52 86" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
-          <path
-            d="M50 18C48 10 42 6 38 4M50 18C52 10 56 6 60 4"
-            stroke="#43A047"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
+
+          {/* Root hairs at base */}
+          <path d="M46 88L47 94M50 88L50 95M54 88L53 94" stroke="#212121" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
       );
 
     case 'kubis':
-      // Purple Cabbage (matching reference image)
+      // Purple Cabbage (matching reference: round violet cabbage with concentric ruffled leaf layers & lilac veins)
       return (
         <svg
           width={size}
@@ -170,40 +190,57 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Shadow */}
-          <ellipse cx="50" cy="84" rx="30" ry="6" fill="#000000" fillOpacity="0.2" />
-          {/* Cabbage Outer Ball */}
+          <ellipse cx="50" cy="86" rx="30" ry="6" fill="#000000" fillOpacity="0.2" />
+
+          {/* Outer Cabbage Ball */}
           <circle cx="50" cy="52" r="32" fill="#6A1B9A" stroke="#212121" strokeWidth="4" />
-          {/* Overlapping Leaf Layers */}
+
+          {/* Left Overlapping Leaf Layer */}
           <path
-            d="M24 45C30 32 45 30 55 36C46 44 40 56 42 70C30 68 24 58 24 45Z"
+            d="M24 44C28 30 46 28 58 35C48 44 42 58 44 74C30 72 24 60 24 44Z"
             fill="#7B1FA2"
             stroke="#212121"
             strokeWidth="3.5"
           />
+
+          {/* Right Overlapping Leaf Layer */}
           <path
-            d="M76 45C70 32 55 30 45 36C54 44 60 56 58 70C70 68 76 58 76 45Z"
+            d="M76 44C72 30 54 28 42 35C52 44 58 58 56 74C70 72 76 60 76 44Z"
             fill="#8E24AA"
             stroke="#212121"
             strokeWidth="3.5"
           />
-          {/* Light Veins */}
+
+          {/* Center Ruffled Leaf Layer */}
           <path
-            d="M48 40C44 50 44 64 48 76"
-            stroke="#E1BEE7"
+            d="M38 48C44 40 56 40 62 48C64 62 58 72 50 75C42 72 36 62 38 48Z"
+            fill="#9C27B0"
+            stroke="#212121"
             strokeWidth="3"
-            strokeLinecap="round"
           />
+
+          {/* Delicate Lilac/Lavender Leaf Veins */}
           <path
-            d="M45 52C38 54 34 52 30 50M46 64C40 66 36 65 32 62"
+            d="M50 48V74M50 56L43 51M50 63L44 59M50 56L57 51M50 63L56 59"
             stroke="#E1BEE7"
             strokeWidth="2.5"
             strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Specular White Highlight Arc on Upper Leaf */}
+          <path
+            d="M32 29C42 24 58 24 68 29"
+            stroke="#FFFFFF"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeOpacity="0.55"
           />
         </svg>
       );
 
     case 'wortel':
-      // Carrot with lush green foliage
+      // Carrot (matching reference: DIAGONAL ~45° tilt, bright orange body, 3 ridges, bushy green leaf top at top-right)
       return (
         <svg
           width={size}
@@ -213,43 +250,62 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Shadow */}
-          <ellipse cx="50" cy="88" rx="20" ry="5" fill="#000000" fillOpacity="0.2" />
-          {/* Carrot Body */}
+          {/* Drop Shadow */}
+          <ellipse cx="46" cy="86" rx="26" ry="6" fill="#000000" fillOpacity="0.2" />
+
+          {/* Lush Green Foliage at Top-Right */}
+          {/* Center leafy lobe */}
           <path
-            d="M34 32C34 26 66 26 66 32L53 84C52 87 48 87 47 84L34 32Z"
+            d="M66 32C72 18 84 14 90 10C86 22 80 28 72 36Z"
+            fill="#43A047"
+            stroke="#212121"
+            strokeWidth="3.5"
+            strokeLinejoin="round"
+          />
+          {/* Top leafy lobe */}
+          <path
+            d="M62 26C60 12 68 6 74 4C72 16 68 22 64 28Z"
+            fill="#4CAF50"
+            stroke="#212121"
+            strokeWidth="3.5"
+            strokeLinejoin="round"
+          />
+          {/* Right leafy lobe */}
+          <path
+            d="M72 36C82 32 92 36 96 42C86 44 78 40 70 38Z"
+            fill="#388E3C"
+            stroke="#212121"
+            strokeWidth="3.5"
+            strokeLinejoin="round"
+          />
+
+          {/* Carrot Body (Diagonal 45 degrees, tapering from top-right to bottom-left) */}
+          <path
+            d="M60 28C67 35 72 40 68 44L28 84C24 88 20 84 20 80L36 36C40 32 52 20 60 28Z"
             fill="#FB8C00"
             stroke="#212121"
             strokeWidth="4"
+            strokeLinejoin="round"
           />
-          {/* Carrot Ridges */}
-          <line x1="38" y1="42" x2="48" y2="42" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
-          <line x1="44" y1="56" x2="58" y2="56" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
-          <line x1="42" y1="70" x2="50" y2="70" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
-          {/* Green Carrot Leafy Tops */}
+
+          {/* Specular Shine Streak along Upper Ridge */}
           <path
-            d="M46 26C42 16 32 10 26 8C34 16 42 22 46 26Z"
-            fill="#43A047"
-            stroke="#212121"
-            strokeWidth="3"
+            d="M32 64L54 36"
+            stroke="#FFFFFF"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeOpacity="0.6"
           />
-          <path
-            d="M50 26C50 12 52 8 54 4C56 12 54 20 52 26Z"
-            fill="#43A047"
-            stroke="#212121"
-            strokeWidth="3"
-          />
-          <path
-            d="M54 26C58 16 68 10 74 8C66 16 58 22 54 26Z"
-            fill="#43A047"
-            stroke="#212121"
-            strokeWidth="3"
-          />
+
+          {/* 3 Transverse Ridges */}
+          <line x1="56" y1="36" x2="65" y2="44" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
+          <line x1="42" y1="50" x2="52" y2="58" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
+          <line x1="30" y1="64" x2="38" y2="72" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
         </svg>
       );
 
     case 'paprika':
-      // Yellow Bell Pepper
+      // Yellow Bell Pepper (matching reference: 3 plump rounded lobes, green stem on top)
       return (
         <svg
           width={size}
@@ -261,28 +317,54 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
         >
           {/* Shadow */}
           <ellipse cx="50" cy="86" rx="28" ry="6" fill="#000000" fillOpacity="0.2" />
+
+          {/* Green Stem with Dark Outline */}
+          <path
+            d="M48 34C46 20 52 14 58 12"
+            stroke="#212121"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
+          <path
+            d="M48 34C46 20 52 14 58 12"
+            stroke="#43A047"
+            strokeWidth="5"
+            strokeLinecap="round"
+          />
+
           {/* Pepper 3 Lobes */}
           <path
-            d="M26 40C26 30 40 30 40 35C40 30 60 30 60 35C60 30 74 30 74 40C74 58 72 80 64 82C58 84 54 78 50 78C46 78 42 84 36 82C28 80 26 58 26 40Z"
+            d="M26 42C26 31 39 31 41 36C44 31 56 31 59 36C61 31 74 31 74 42C74 58 72 78 64 82C58 84 53 79 50 79C47 79 42 84 36 82C28 78 26 58 26 42Z"
             fill="#FDD835"
             stroke="#212121"
             strokeWidth="4"
           />
+
           {/* Lobe dividing lines */}
           <path d="M42 36C40 50 40 68 44 76" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
           <path d="M58 36C60 50 60 68 56 76" stroke="#212121" strokeWidth="3" strokeLinecap="round" />
-          {/* Green Stem */}
+
+          {/* Specular White Highlight on Left Lobe */}
           <path
-            d="M48 30C46 18 52 14 56 12"
-            stroke="#43A047"
-            strokeWidth="5"
+            d="M32 44C30 52 32 62 34 68"
+            stroke="#FFFFFF"
+            strokeWidth="3.5"
             strokeLinecap="round"
+            strokeOpacity="0.65"
+          />
+
+          {/* Green Calyx Leaf Base */}
+          <path
+            d="M44 35C47 32 53 32 56 35"
+            fill="#2E7D32"
+            stroke="#212121"
+            strokeWidth="2.5"
           />
         </svg>
       );
 
     case 'selada':
-      // Crisp Green Lettuce
+      // Crisp Green Lettuce (matching reference: ruffled outer leaf petals, inner heart, veins)
       return (
         <svg
           width={size}
@@ -294,24 +376,36 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
         >
           {/* Shadow */}
           <ellipse cx="50" cy="85" rx="30" ry="6" fill="#000000" fillOpacity="0.2" />
-          {/* Lettuce Leaves cluster */}
+
+          {/* Lettuce Outer Cluster */}
           <path
-            d="M32 75C22 65 20 45 28 35C38 25 48 34 50 40C52 34 62 25 72 35C80 45 78 65 68 75C60 84 40 84 32 75Z"
+            d="M30 74C20 62 18 42 26 30C34 18 44 26 50 32C56 26 66 18 74 30C82 42 80 62 70 74C60 84 40 84 30 74Z"
             fill="#43A047"
             stroke="#212121"
             strokeWidth="4"
           />
+
+          {/* Inner Folded Leaf Heart */}
           <path
-            d="M36 50C42 42 58 42 64 50C62 65 58 74 50 78C42 74 38 65 36 50Z"
+            d="M34 50C40 40 60 40 66 50C64 68 58 76 50 78C42 76 36 68 34 50Z"
             fill="#66BB6A"
             stroke="#212121"
-            strokeWidth="3.5"
+            strokeWidth="3"
           />
+
           {/* Leaf Veins */}
           <path
-            d="M50 78V54M50 64L42 58M50 60L58 54"
+            d="M50 76V48M50 56L42 50M50 64L40 58M50 56L58 50M50 64L60 58"
             stroke="#C8E6C9"
-            strokeWidth="3"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+
+          {/* Scalloped Ruffled Top Highlights */}
+          <path
+            d="M28 34C32 26 38 28 42 34M58 34C62 28 68 26 72 34"
+            stroke="#A5D6A7"
+            strokeWidth="2.5"
             strokeLinecap="round"
           />
         </svg>

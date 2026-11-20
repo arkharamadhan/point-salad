@@ -92,29 +92,36 @@ export const PlateView: React.FC<PlateViewProps> = ({
       {showFlipArrow && (
         <div
           onClick={onFlip ? handleFlip : undefined}
-          className={`absolute -top-3.5 left-2 sm:left-4 z-20 flex items-center gap-0.5 ${
-            onFlip ? 'cursor-pointer group hover:scale-110 active:scale-95 transition-transform' : ''
+          className={`absolute -top-4 sm:-top-5 -left-1 sm:left-0 z-20 flex items-center gap-1 ${
+            onFlip ? 'cursor-pointer group hover:scale-115 active:scale-95 transition-transform' : ''
           }`}
           title={onFlip ? 'Klik untuk membalik resep ini menjadi sayur' : `Sisi balik: ${card.resource}`}
         >
-          {/* Flip Vegetable Icon */}
-          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white border border-stone-300 shadow-md flex items-center justify-center p-0.5">
-            <VeggieIcon resource={card.resource} size={15} />
+          {/* Flip Vegetable Icon (Prominent & Clear, matching reference) */}
+          <div className="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)] transition-transform group-hover:rotate-6">
+            <VeggieIcon resource={card.resource} size={size === 'shelf' ? 24 : 30} />
           </div>
 
-          {/* Curved Arrow pointing down/right into the plate */}
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="drop-shadow-sm text-stone-600">
+          {/* Arched Arrow curving into the plate */}
+          <svg
+            width={size === 'shelf' ? 20 : 26}
+            height={size === 'shelf' ? 18 : 22}
+            viewBox="0 0 32 26"
+            fill="none"
+            className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] -ml-0.5"
+          >
+            {/* White bold arrow path with dark stroke */}
             <path
-              d="M4 8C4 8 10 4 16 8C19 10 20 14 20 16M20 16L16 13M20 16L19 12"
-              stroke="#FFFFFF"
-              strokeWidth="3.5"
+              d="M3 14C5 6 15 4 24 10C27 12 28 17 28 20M28 20L22 16M28 20L27 15"
+              stroke="#212121"
+              strokeWidth="4.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
             <path
-              d="M4 8C4 8 10 4 16 8C19 10 20 14 20 16M20 16L16 13M20 16L19 12"
-              stroke="#444444"
-              strokeWidth="2"
+              d="M3 14C5 6 15 4 24 10C27 12 28 17 28 20M28 20L22 16M28 20L27 15"
+              stroke="#FFFFFF"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />

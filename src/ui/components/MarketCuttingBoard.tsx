@@ -50,20 +50,33 @@ export const MarketCuttingBoard: React.FC = () => {
     <div className="relative w-full max-w-xl md:max-w-2xl mx-auto cutting-board p-4 sm:p-6 md:p-7 select-none flex flex-col justify-between overflow-hidden">
       {/* Organic Wood Grain Lines & Curves Overlay (matching reference image) */}
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-40 overflow-hidden rounded-[26px]"
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-70 overflow-hidden rounded-[24px]"
         viewBox="0 0 600 400"
         preserveAspectRatio="none"
       >
-        {/* Wavy Horizontal Wood Grain Lines */}
-        <path d="M 20 40 Q 200 65 400 35 T 580 45" stroke="#C9A46E" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-        <path d="M 40 95 Q 240 120 440 85 T 570 100" stroke="#D8B57E" strokeWidth="1.5" fill="none" />
-        <path d="M 10 155 Q 180 185 380 145 T 590 160" stroke="#C9A46E" strokeWidth="2" fill="none" />
-        <path d="M 30 225 Q 220 255 420 215 T 580 230" stroke="#D8B57E" strokeWidth="1.5" fill="none" />
-        <path d="M 15 295 Q 250 330 460 280 T 590 300" stroke="#C9A46E" strokeWidth="2" fill="none" />
-        <path d="M 50 360 Q 260 380 470 345 T 570 360" stroke="#D8B57E" strokeWidth="1.5" fill="none" />
-        {/* Tree Ring Ellipses / Curves on the Right Side */}
-        <path d="M 470 20 C 530 70, 565 150, 525 230 C 495 290, 420 330, 360 350" stroke="#C9A46E" strokeWidth="2" fill="none" />
-        <path d="M 500 40 C 550 90, 580 160, 545 220 C 520 270, 460 310, 410 330" stroke="#D8B57E" strokeWidth="1.5" fill="none" />
+        {/* Inner subtle carved perimeter line */}
+        <rect x="8" y="8" width="584" height="384" rx="20" stroke="#DFB87F" strokeWidth="1.5" fill="none" strokeOpacity="0.7" />
+
+        {/* Natural Horizontal Wood Grain Waves */}
+        <path d="M 10 38 Q 160 55, 320 32 T 590 42" stroke="#C69658" strokeWidth="2" fill="none" strokeOpacity="0.8" />
+        <path d="M 15 65 Q 180 82, 340 58 T 585 70" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
+        <path d="M 10 115 Q 190 138, 360 108 T 590 120" stroke="#C69658" strokeWidth="2.2" fill="none" strokeOpacity="0.75" />
+        <path d="M 20 148 Q 210 172, 380 138 T 585 152" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.65" />
+        <path d="M 10 195 Q 170 220, 350 185 T 590 205" stroke="#C69658" strokeWidth="2" fill="none" strokeOpacity="0.8" />
+        <path d="M 15 240 Q 200 268, 380 230 T 585 250" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
+        <path d="M 10 288 Q 180 315, 360 278 T 590 298" stroke="#C69658" strokeWidth="2.2" fill="none" strokeOpacity="0.85" />
+        <path d="M 25 330 Q 220 355, 390 320 T 585 338" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.65" />
+        <path d="M 10 368 Q 190 388, 370 358 T 590 375" stroke="#C69658" strokeWidth="1.8" fill="none" strokeOpacity="0.7" />
+
+        {/* Prominent Tree Growth Rings / Curves on the Right Side (as in game reference) */}
+        <path d="M 440 10 C 515 50, 565 130, 535 220 C 505 295, 435 340, 360 370" stroke="#BD8947" strokeWidth="2.5" fill="none" strokeOpacity="0.85" />
+        <path d="M 465 10 C 535 60, 580 140, 550 225 C 525 290, 460 330, 395 355" stroke="#DBB278" strokeWidth="1.8" fill="none" strokeOpacity="0.75" />
+        <path d="M 490 10 C 555 70, 595 150, 565 230 C 545 285, 485 320, 430 340" stroke="#BD8947" strokeWidth="2" fill="none" strokeOpacity="0.8" />
+        <path d="M 520 15 C 575 80, 605 160, 580 235 C 565 275, 515 305, 465 325" stroke="#DBB278" strokeWidth="1.5" fill="none" strokeOpacity="0.6" />
+
+        {/* Small subtle wood whorl/knot on left */}
+        <ellipse cx="140" cy="125" rx="14" ry="7" stroke="#BD8947" strokeWidth="1.8" fill="none" strokeOpacity="0.7" transform="rotate(-8 140 125)" />
+        <ellipse cx="140" cy="125" rx="8" ry="4" stroke="#DBB278" strokeWidth="1.2" fill="none" strokeOpacity="0.6" transform="rotate(-8 140 125)" />
       </svg>
 
       {/* Top-Right Deck Count Badge (pepet di pojok kanan atas persis sesuai referensi) */}
