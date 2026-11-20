@@ -43,13 +43,19 @@ export const useKeyboardNav = () => {
         return;
       }
 
-      // 2. Resource card shortcuts: Q, W, E, R, T, Y for slots 0..5
+      // 2. Resource card shortcuts:
+      // Q, W, E for Top Veggie Row (cols 1, 2, 3 -> slots 0, 2, 4)
+      // A, S, D for Bottom Veggie Row (cols 1, 2, 3 -> slots 1, 3, 5)
       const resourceKeyMap: Record<string, number> = {
         q: 0,
-        w: 1,
-        e: 2,
-        r: 3,
-        t: 4,
+        w: 2,
+        e: 4,
+        a: 1,
+        s: 3,
+        d: 5,
+        // Legacy aliases
+        r: 1,
+        t: 3,
         y: 5,
       };
 

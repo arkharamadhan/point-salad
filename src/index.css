@@ -54,3 +54,32 @@
 .card-selected-glow {
   box-shadow: 0 0 0 3px #10B981, 0 10px 25px rgba(16, 185, 129, 0.4);
 }
+
+/* Tatakan Kayu / Wooden Cutting Board Mat */
+.tatakan-kayu {
+  background: 
+    radial-gradient(ellipse at 50% 25%, rgba(140, 85, 45, 0.25) 0%, rgba(45, 22, 11, 0.6) 100%),
+    linear-gradient(180deg, #4A2B15 0%, #3D2210 40%, #30190B 100%);
+  border: 6px solid #5C381E;
+  box-shadow: 
+    0 25px 60px -12px rgba(0, 0, 0, 0.85),
+    0 10px 25px -5px rgba(0, 0, 0, 0.65),
+    inset 0 3px 6px rgba(255, 220, 170, 0.22),
+    inset 0 -5px 12px rgba(0, 0, 0, 0.7);
+  border-radius: 1.75rem;
+}
+
+.tatakan-groove {
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 
+    inset 0 3px 6px rgba(0, 0, 0, 0.6),
+    0 1px 1px rgba(255, 235, 200, 0.12);
+  border-radius: 1.25rem;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 44px,
+    rgba(0, 0, 0, 0.07) 44px,
+    rgba(0, 0, 0, 0.07) 46px
+  );
+}
