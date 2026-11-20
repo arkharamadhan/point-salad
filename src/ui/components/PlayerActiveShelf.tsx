@@ -9,6 +9,8 @@ export const PlayerActiveShelf: React.FC = () => {
     selectedResourceSlots,
     confirmTakeResources,
     flipCard,
+    undoCurrentTurnAction,
+    turnSnapshot,
     lang,
     isBotThinking,
   } = useGameStore();
@@ -39,8 +41,8 @@ export const PlayerActiveShelf: React.FC = () => {
   } else if (hasTakenMainActionThisTurn) {
     instructionText =
       lang === 'id'
-        ? 'Aksi selesai! Klik "End Turn" di kanan atas'
-        : 'Action done! Click "End Turn" above';
+        ? 'Kartu berhasil diambil!'
+        : 'Cards drafted!';
   } else if (selectedResourceSlots.length === 1) {
     instructionText = lang === 'id' ? 'Pilih 1 Sayur lagi!' : 'Choose 1 more veggie!';
   } else if (selectedResourceSlots.length === neededResourcesCount) {
@@ -49,11 +51,12 @@ export const PlayerActiveShelf: React.FC = () => {
   }
 
   const canConfirm = !hasTakenMainActionThisTurn && selectedResourceSlots.length === neededResourcesCount;
+  const canUndo = (hasTakenMainActionThisTurn || !!turnSnapshot) && !isGameOver && !isBotThinking;
 
   return (
     <div className="w-full flex flex-col items-center select-none mt-2">
       {/* 1. Instruction Pill Banner (exactly like reference image) */}
-      <div className="z-20 -mb-4 px-4">
+      <div className="z-20 -mb-4 px-4 flex items-center gap-2">
         {canConfirm ? (
           <button
             onClick={() => confirmTakeResources()}
@@ -62,10 +65,23 @@ export const PlayerActiveShelf: React.FC = () => {
             <span>✓</span> {instructionText}
           </button>
         ) : (
-          <div className="bg-white border-[3px] border-[#2E7D32] rounded-full px-7 sm:px-10 py-1.5 sm:py-2 shadow-md">
+          <div className="bg-white border-[3px] border-[#2E7D32] rounded-full px-7 sm:px-10 py-1.5 sm:py-2 shadow-md flex items-center gap-3">
             <h3 className="text-sm sm:text-lg md:text-xl font-black text-[#1B5E20] font-fredoka tracking-wide">
               {instructionText}
             </h3>
+
+            {/* Quick Undo / Return card button if drafted this turn */}
+            {canUndo && (
+              <button
+                type="button"
+                onClick={() => undoCurrentTurnAction()}
+                className="bg-[#C88448] hover:bg-[#B57339] active:scale-95 text-white font-black text-xs sm:text-sm px-3 py-1 rounded-full shadow transition-all cursor-pointer flex items-center gap-1 font-fredoka"
+                title="Kembalikan kartu ke pasar dan pilih ulang"
+              >
+                <span>↺</span>
+                <span>{lang === 'id' ? 'Kembalikan' : 'Undo'}</span>
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -82,11 +98,13 @@ export const PlayerActiveShelf: React.FC = () => {
               </span>
             </span>
             <span className="text-[11px] text-lime-100 font-normal drop-shadow">
-              Klik ikon sayur di pojok kiri piring untuk membalik resep jadi sayur
+              {canUndo
+                ? 'Tarik piring ke atas atau klik "Kembalikan" untuk batal ambil'
+                : 'Klik ikon sayur di pojok piring untuk membalik resep jadi sayur'}
             </span>
           </div>
 
-          {/* Row of Plates owned by active player (exactly like reference image) */}
+          {/* Row of Plates owned by active player (drag up to return supported) */}
           <div className="flex items-center justify-center gap-4 sm:gap-6 overflow-x-auto py-2 px-1 min-h-[105px]">
             {activePlayer.scoringCards.length > 0 ? (
               activePlayer.scoringCards.map((card) => {
@@ -99,6 +117,7 @@ export const PlayerActiveShelf: React.FC = () => {
                     showFlipArrow={true}
                     liveScore={liveScore}
                     onFlip={() => flipCard(card.id)}
+                    onDragToMarket={canUndo ? () => undoCurrentTurnAction() : undefined}
                     className="flex-shrink-0"
                   />
                 );

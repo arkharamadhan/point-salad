@@ -73,12 +73,20 @@ export const App: React.FC = () => {
         <PlayerActiveShelf />
       </footer>
 
-      {/* Bottom-Left Floating Undo / Settings Button (exactly like reference image) */}
+      {/* Bottom-Left Floating Undo / Settings Button (matching reference image) */}
       <button
         type="button"
-        onClick={() => setSettingsOpen(true)}
+        onClick={() => {
+          const { hasTakenMainActionThisTurn } = gameState;
+          const { turnSnapshot, undoCurrentTurnAction } = useGameStore.getState();
+          if (hasTakenMainActionThisTurn || !!turnSnapshot) {
+            undoCurrentTurnAction();
+          } else {
+            setSettingsOpen(true);
+          }
+        }}
         className="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#23583A] hover:bg-[#1D4A30] active:scale-95 text-white flex items-center justify-center font-black text-lg shadow-lg border border-[#1A452D] transition-transform cursor-pointer"
-        title="Pengaturan & Mulai Ulang"
+        title="Batal ambil kartu / Pengaturan"
       >
         ↺
       </button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ResourceId } from '../../engine/types';
 import { VeggieIcon } from './icons/SpiceIcon';
 import { Sound } from '../sound/soundEffects';
@@ -7,9 +8,9 @@ import { useGameStore } from '../store/gameStore';
 interface VeggieCharacterProps {
   resource?: ResourceId | null;
   onClick?: () => void;
+  onDragToShelf?: () => void;
   isSelectable?: boolean;
   isSelected?: boolean;
-  keyboardBadge?: string;
   size?: number;
   className?: string;
 }
@@ -17,9 +18,9 @@ interface VeggieCharacterProps {
 export const VeggieCharacter: React.FC<VeggieCharacterProps> = ({
   resource,
   onClick,
+  onDragToShelf,
   isSelectable = false,
   isSelected = false,
-  keyboardBadge,
   size = 64,
   className = '',
 }) => {
@@ -43,26 +44,31 @@ export const VeggieCharacter: React.FC<VeggieCharacterProps> = ({
     }
   };
 
+  const handleDragEnd = (_e: any, info: any) => {
+    if (onDragToShelf && info.offset.y > 50) {
+      Sound.cardSelect(soundEnabled);
+      onDragToShelf();
+    }
+  };
+
   return (
-    <div
+    <motion.div
+      drag={isSelectable}
+      dragSnapToOrigin={true}
+      onDragEnd={handleDragEnd}
+      whileHover={isSelectable ? { scale: 1.15 } : {}}
+      whileTap={isSelectable ? { scale: 0.95 } : {}}
       onClick={handleClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       style={{ width: size + 16, height: size + 16 }}
-      className={`relative flex items-center justify-center select-none transition-all duration-200 ${
-        isSelectable ? 'cursor-pointer hover:scale-115 active:scale-95' : ''
+      className={`relative flex items-center justify-center select-none touch-none ${
+        isSelectable ? 'cursor-pointer' : ''
       } ${className}`}
     >
-      {/* Keyboard badge */}
-      {keyboardBadge && (
-        <span className="absolute -top-1 left-1/2 -translate-x-1/2 z-30 bg-black/75 border border-stone-600 text-yellow-300 text-[9px] font-mono font-black px-1.5 py-0.2 rounded shadow">
-          {keyboardBadge}
-        </span>
-      )}
-
       {/* Selected Indicator Ring & Checkmark */}
       {isSelected && (
-        <div className="absolute inset-0 rounded-full border-[3.5px] border-[#43A047] bg-[#43A047]/15 animate-pulse flex items-start justify-end p-0.5">
+        <div className="absolute inset-0 rounded-full border-[3.5px] border-[#43A047] bg-[#43A047]/15 animate-pulse flex items-start justify-end p-0.5 pointer-events-none">
           <span className="w-5 h-5 rounded-full bg-[#43A047] text-white flex items-center justify-center text-[10px] font-black shadow">
             ✓
           </span>
@@ -73,6 +79,6 @@ export const VeggieCharacter: React.FC<VeggieCharacterProps> = ({
       <div className={`transition-transform duration-200 ${isSelected ? 'scale-110 drop-shadow-md' : 'hover:drop-shadow-lg'}`}>
         <VeggieIcon resource={resource} size={size} />
       </div>
-    </div>
+    </motion.div>
   );
 };

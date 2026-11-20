@@ -16,6 +16,7 @@ interface GameStoreState {
   soundEnabled: boolean;
   isSettingsOpen: boolean;
   isBotThinking: boolean;
+  turnSnapshot: GameState | null;
 
   // Actions
   startNewGame: (options?: Partial<SetupOptions>) => void;
@@ -24,6 +25,7 @@ interface GameStoreState {
   takeScoringMarket: (slotIndex: number) => void;
   takeScoringPile: (pileIndex: number) => void;
   flipCard: (cardId: string) => void;
+  undoCurrentTurnAction: () => void;
   endTurn: () => void;
   executeBotTurnIfNeeded: () => void;
   setLang: (lang: 'id' | 'en') => void;
@@ -48,6 +50,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   soundEnabled: true,
   isSettingsOpen: false,
   isBotThinking: false,
+  turnSnapshot: null,
 
   startNewGame: (options) => {
     const players = options?.players ?? [
@@ -67,6 +70,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       errorMessage: null,
       isSettingsOpen: false,
       isBotThinking: false,
+      turnSnapshot: null,
     });
 
     // Check if initial starting player is a bot
@@ -113,7 +117,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   confirmTakeResources: () => {
-    const { gameState, selectedResourceSlots, lang, isBotThinking } = get();
+    const { gameState, selectedResourceSlots, lang, isBotThinking, turnSnapshot } = get();
     if (gameState.hasTakenMainActionThisTurn || isBotThinking) return;
 
     try {
@@ -121,9 +125,11 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         type: 'TAKE_RESOURCES',
         slotIndices: selectedResourceSlots as [number, number] | [number],
       };
+      const snapshot = turnSnapshot ?? gameState;
       const nextState = gameReducer(gameState, action, lang);
       set({
         gameState: nextState,
+        turnSnapshot: snapshot,
         selectedResourceSlots: [],
         errorMessage: null,
       });
@@ -133,7 +139,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   takeScoringMarket: (slotIndex) => {
-    const { gameState, lang, isBotThinking } = get();
+    const { gameState, lang, isBotThinking, turnSnapshot } = get();
     if (gameState.hasTakenMainActionThisTurn || isBotThinking) return;
 
     try {
@@ -141,9 +147,11 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         type: 'TAKE_SCORING_MARKET',
         slotIndex,
       };
+      const snapshot = turnSnapshot ?? gameState;
       const nextState = gameReducer(gameState, action, lang);
       set({
         gameState: nextState,
+        turnSnapshot: snapshot,
         selectedResourceSlots: [],
         errorMessage: null,
       });
@@ -153,7 +161,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   takeScoringPile: (pileIndex) => {
-    const { gameState, lang, isBotThinking } = get();
+    const { gameState, lang, isBotThinking, turnSnapshot } = get();
     if (gameState.hasTakenMainActionThisTurn || isBotThinking) return;
 
     try {
@@ -161,9 +169,11 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         type: 'TAKE_SCORING_PILE',
         pileIndex,
       };
+      const snapshot = turnSnapshot ?? gameState;
       const nextState = gameReducer(gameState, action, lang);
       set({
         gameState: nextState,
+        turnSnapshot: snapshot,
         selectedResourceSlots: [],
         errorMessage: null,
       });
@@ -173,7 +183,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
   },
 
   flipCard: (cardId) => {
-    const { gameState, lang, isBotThinking } = get();
+    const { gameState, lang, isBotThinking, turnSnapshot } = get();
     if (isBotThinking) return;
 
     try {
@@ -181,14 +191,28 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         type: 'FLIP_CARD',
         cardId,
       };
+      const snapshot = turnSnapshot ?? gameState;
       const nextState = gameReducer(gameState, action, lang);
       set({
         gameState: nextState,
+        turnSnapshot: snapshot,
         errorMessage: null,
       });
     } catch (err: any) {
       set({ errorMessage: err?.message ?? 'Gagal membalik kartu' });
     }
+  },
+
+  undoCurrentTurnAction: () => {
+    const { turnSnapshot, isBotThinking } = get();
+    if (isBotThinking || !turnSnapshot) return;
+
+    set({
+      gameState: turnSnapshot,
+      turnSnapshot: null,
+      selectedResourceSlots: [],
+      errorMessage: null,
+    });
   },
 
   endTurn: () => {
@@ -202,6 +226,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       const nextState = gameReducer(gameState, action, lang);
       set({
         gameState: nextState,
+        turnSnapshot: null,
         selectedResourceSlots: [],
         errorMessage: null,
       });
