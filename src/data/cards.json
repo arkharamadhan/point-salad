@@ -1807,44 +1807,44 @@
       "id": "S101",
       "type": "perMissingType",
       "params": {
-        "points": 5
+        "points": 3
       },
       "text": {
-        "id": "+5 poin untuk setiap jenis sayur yang tidak kamu punya (0).",
-        "en": "+5 points for each veggie type you have none of (0)."
+        "id": "+3 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
+        "en": "+3 points for each veggie type you have none of (0). Requires at least 1 veggie."
       }
     },
     {
       "id": "S102",
       "type": "perMissingType",
       "params": {
-        "points": 5
+        "points": 3
       },
       "text": {
-        "id": "+5 poin untuk setiap jenis sayur yang tidak kamu punya (0).",
-        "en": "+5 points for each veggie type you have none of (0)."
+        "id": "+3 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
+        "en": "+3 points for each veggie type you have none of (0). Requires at least 1 veggie."
       }
     },
     {
       "id": "S103",
       "type": "perMissingType",
       "params": {
-        "points": 3
+        "points": 2
       },
       "text": {
-        "id": "+3 poin untuk setiap jenis sayur yang tidak kamu punya (0).",
-        "en": "+3 points for each veggie type you have none of (0)."
+        "id": "+2 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
+        "en": "+2 points for each veggie type you have none of (0). Requires at least 1 veggie."
       }
     },
     {
       "id": "S104",
       "type": "perMissingType",
       "params": {
-        "points": 3
+        "points": 2
       },
       "text": {
-        "id": "+3 poin untuk setiap jenis sayur yang tidak kamu punya (0).",
-        "en": "+3 points for each veggie type you have none of (0)."
+        "id": "+2 poin untuk setiap jenis sayur yang tidak kamu punya (0). Minimal punya 1 sayur.",
+        "en": "+2 points for each veggie type you have none of (0). Requires at least 1 veggie."
       }
     },
     {

@@ -223,7 +223,10 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
     expect(score).toBe(12);
   });
 
-  it('7. evaluatePerMissingType scores points for each type with count 0', () => {
+  it('7. evaluatePerMissingType scores points for each type with count 0 (requires at least 1 veggie)', () => {
+    // 0 total veggies scores 0 (prevents instant free points)
+    expect(evaluatePerMissingType(createEmptyResourceCounts(), { points: 3 })).toBe(0);
+
     const res: ResourceCounts = {
       wortel: 3,
       paprika: 0,
@@ -232,9 +235,9 @@ describe('Pure Scoring Evaluators (RULES.md section 6)', () => {
       kubis: 0,
       selada: 2,
     };
-    // Missing types: kunyit, kayu_manis, pala -> 3 types * 6 pts = 18
-    const score = evaluatePerMissingType(res, { points: 6 });
-    expect(score).toBe(18);
+    // Missing types: paprika, tomat, kubis -> 3 types * 3 pts = 9
+    const score = evaluatePerMissingType(res, { points: 3 });
+    expect(score).toBe(9);
   });
 
   it('8. evaluatePerPairAny sums floor(count / 2) across all 6 types', () => {

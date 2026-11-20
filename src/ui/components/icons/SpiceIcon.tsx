@@ -88,7 +88,7 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           width={size}
           height={size}
           viewBox="0 0 100 100"
-          className={className}
+          className={`shrink-0 ${className}`.trim()}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -150,7 +150,7 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           width={size}
           height={size}
           viewBox="0 0 100 100"
-          className={className}
+          className={`shrink-0 ${className}`.trim()}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -222,7 +222,7 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           width={size}
           height={size}
           viewBox="0 0 100 100"
-          className={className}
+          className={`shrink-0 ${className}`.trim()}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -284,7 +284,7 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           width={size}
           height={size}
           viewBox="0 0 100 100"
-          className={className}
+          className={`shrink-0 ${className}`.trim()}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -334,7 +334,7 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           width={size}
           height={size}
           viewBox="0 0 100 100"
-          className={className}
+          className={`shrink-0 ${className}`.trim()}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -391,7 +391,7 @@ export const VeggieIcon: React.FC<VeggieIconProps> = ({ resource, className = ''
           width={size}
           height={size}
           viewBox="0 0 100 100"
-          className={className}
+          className={`shrink-0 ${className}`.trim()}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >

@@ -52,7 +52,7 @@ export const MarketCuttingBoard: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full max-w-[440px] sm:max-w-[540px] lg:max-w-[600px] xl:max-w-[650px] mx-auto cutting-board px-3.5 py-3.5 sm:px-6 sm:py-5 lg:px-7 lg:py-5 select-none flex flex-col justify-between overflow-hidden">
+    <div className="relative w-full max-w-[440px] sm:max-w-[540px] lg:max-w-[600px] xl:max-w-[650px] mx-auto cutting-board px-2.5 py-3 sm:px-6 sm:py-5 lg:px-7 lg:py-5 select-none flex flex-col justify-between overflow-hidden">
       {/* Organic Wood Grain Lines & Juice Groove Overlay */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none opacity-75 overflow-hidden rounded-[24px]"
@@ -133,7 +133,7 @@ export const MarketCuttingBoard: React.FC = () => {
       </button>
 
       {/* 1. TOP ROW: 3 WHITE CERAMIC PLATES */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 justify-items-center mb-2.5 sm:mb-3.5 pt-2 z-10">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-4 lg:gap-6 justify-items-center mb-2.5 sm:mb-3.5 pt-3.5 sm:pt-3 z-10">
         {[0, 1, 2].map((colIndex) => {
           const scoringCard = market.scoringSlots[colIndex];
           return (

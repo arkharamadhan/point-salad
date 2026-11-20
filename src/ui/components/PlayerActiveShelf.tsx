@@ -159,7 +159,7 @@ export const PlayerActiveShelf: React.FC = () => {
           </div>
 
           {/* Plates Row (horizontally scrollable on overflow so desktop stays 1-screen viewport-fit!) */}
-          <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-5 overflow-x-auto pt-4 pb-2 px-2 min-h-[104px] sm:min-h-[116px]">
+          <div className="flex items-center justify-start gap-3 sm:gap-5 overflow-x-auto pt-5 pb-2 px-3 min-h-[120px] sm:min-h-[128px]">
             {targetPlayer.scoringCards.length > 0 ? (
               targetPlayer.scoringCards.map((card) => {
                 const liveScore = cardScoresMap.get(card.id) ?? 0;

@@ -1,4 +1,4 @@
-import Peer, { DataConnection } from 'peerjs';
+import { createClient, RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import { GameAction, GameState } from '../engine/types';
 
 export interface LobbyPlayer {
@@ -22,10 +22,36 @@ export type PeerMessage =
   | { type: 'ERROR'; message: string }
   | { type: 'HOST_CLOSED' };
 
+interface BroadcastEnvelope {
+  from: string;
+  to?: string;
+  msg: PeerMessage;
+}
+
 const ROOM_PREFIX = 'sayur-heryana-room-';
 
-export function roomCodeToPeerId(roomCode: string): string {
-  return `${ROOM_PREFIX}${roomCode.trim().toUpperCase()}`;
+function createClientId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `client-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function getSupabaseClient(): SupabaseClient | null {
+  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+
+  if (!url || !anonKey) {
+    return null;
+  }
+
+  return createClient(url, anonKey, {
+    realtime: {
+      params: {
+        eventsPerSecond: 20,
+      },
+    },
+  });
 }
 
 interface HostCallbacks {
@@ -46,189 +72,251 @@ interface GuestCallbacks {
   onError: (message: string) => void;
 }
 
-class PeerManager {
-  private peer: Peer | null = null;
-  private guestConnections: Map<string, DataConnection> = new Map();
-  private hostConnection: DataConnection | null = null;
-  private myPeerId: string | null = null;
+class SupabaseRealtimeManager {
+  private supabase: SupabaseClient | null = null;
+  private channel: RealtimeChannel | null = null;
+  private myClientId: string | null = null;
+  private isHostMode: boolean = false;
+  private joinTimeoutId: number | null = null;
+
+  private ensureClient(): SupabaseClient | null {
+    if (!this.supabase) {
+      this.supabase = getSupabaseClient();
+    }
+    return this.supabase;
+  }
 
   getMyPeerId(): string | null {
-    return this.myPeerId;
+    return this.myClientId;
   }
 
   disconnect(): void {
-    if (this.hostConnection) {
-      try {
-        this.hostConnection.close();
-      } catch {
-        // ignore
-      }
-      this.hostConnection = null;
+    if (this.joinTimeoutId !== null) {
+      window.clearTimeout(this.joinTimeoutId);
+      this.joinTimeoutId = null;
     }
 
-    for (const conn of this.guestConnections.values()) {
-      try {
-        conn.send({ type: 'HOST_CLOSED' } satisfies PeerMessage);
-        conn.close();
-      } catch {
-        // ignore
+    if (this.channel) {
+      const ch = this.channel;
+      if (this.isHostMode && this.myClientId) {
+        try {
+          ch.send({
+            type: 'broadcast',
+            event: 'msg',
+            payload: {
+              from: this.myClientId,
+              msg: { type: 'HOST_CLOSED' },
+            } satisfies BroadcastEnvelope,
+          });
+        } catch {
+          // ignore
+        }
       }
-    }
-    this.guestConnections.clear();
 
-    if (this.peer) {
       try {
-        this.peer.destroy();
+        if (this.supabase) {
+          this.supabase.removeChannel(ch);
+        } else {
+          ch.unsubscribe();
+        }
       } catch {
         // ignore
       }
-      this.peer = null;
+      this.channel = null;
     }
-    this.myPeerId = null;
+
+    this.myClientId = null;
+    this.isHostMode = false;
   }
 
   hostRoom(roomCode: string, callbacks: HostCallbacks): void {
     this.disconnect();
-    const peerId = roomCodeToPeerId(roomCode);
+    const client = this.ensureClient();
+    if (!client) {
+      callbacks.onError(
+        'Supabase belum dikonfigurasi. Isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env / Vercel.'
+      );
+      return;
+    }
 
-    const peer = new Peer(peerId, {
-      debug: 1,
+    const clientId = createClientId();
+    this.myClientId = clientId;
+    this.isHostMode = true;
+
+    const channelName = `${ROOM_PREFIX}${roomCode.trim().toUpperCase()}`;
+    const channel = client.channel(channelName, {
+      config: {
+        broadcast: { self: false },
+        presence: { key: clientId },
+      },
     });
-    this.peer = peer;
+    this.channel = channel;
 
-    peer.on('open', (id) => {
-      this.myPeerId = id;
-      callbacks.onReady(id);
-    });
+    channel
+      .on('broadcast', { event: 'msg' }, ({ payload }) => {
+        const envelope = payload as BroadcastEnvelope | undefined;
+        if (!envelope || !envelope.msg) return;
+        if (envelope.to && envelope.to !== clientId) return;
 
-    peer.on('connection', (conn) => {
-      conn.on('data', (raw) => {
-        const msg = raw as PeerMessage;
-        if (!msg || typeof msg !== 'object') return;
-
+        const { from, msg } = envelope;
         if (msg.type === 'JOIN_REQUEST') {
-          this.guestConnections.set(conn.peer, conn);
-          callbacks.onGuestJoin(conn.peer, msg.name);
+          callbacks.onGuestJoin(from, msg.name);
         } else if (msg.type === 'PLAYER_ACTION') {
-          callbacks.onGuestAction(conn.peer, msg.action);
+          callbacks.onGuestAction(from, msg.action);
         } else if (msg.type === 'PLAYER_UNDO') {
-          callbacks.onGuestUndo(conn.peer);
+          callbacks.onGuestUndo(from);
+        }
+      })
+      .on('presence', { event: 'leave' }, ({ key }) => {
+        if (key && key !== clientId) {
+          callbacks.onGuestLeave(key);
+        }
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ role: 'host', clientId });
+          callbacks.onReady(clientId);
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          callbacks.onError('Gagal terhubung ke server Supabase Realtime. Cek koneksi internet.');
         }
       });
-
-      conn.on('close', () => {
-        if (this.guestConnections.has(conn.peer)) {
-          this.guestConnections.delete(conn.peer);
-          callbacks.onGuestLeave(conn.peer);
-        }
-      });
-
-      conn.on('error', () => {
-        if (this.guestConnections.has(conn.peer)) {
-          this.guestConnections.delete(conn.peer);
-          callbacks.onGuestLeave(conn.peer);
-        }
-      });
-    });
-
-    peer.on('error', (err: any) => {
-      if (err?.type === 'unavailable-id') {
-        callbacks.onError('Kode room sedang dipakai. Coba buat kode baru.');
-      } else {
-        callbacks.onError(err?.message || 'Gagal membuka room online.');
-      }
-    });
   }
 
   joinRoom(roomCode: string, guestName: string, callbacks: GuestCallbacks): void {
     this.disconnect();
-    const hostPeerId = roomCodeToPeerId(roomCode);
+    const client = this.ensureClient();
+    if (!client) {
+      callbacks.onError(
+        'Supabase belum dikonfigurasi. Isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env / Vercel.'
+      );
+      return;
+    }
 
-    const peer = new Peer({
-      debug: 1,
+    const clientId = createClientId();
+    this.myClientId = clientId;
+    this.isHostMode = false;
+
+    const channelName = `${ROOM_PREFIX}${roomCode.trim().toUpperCase()}`;
+    const channel = client.channel(channelName, {
+      config: {
+        broadcast: { self: false },
+        presence: { key: clientId },
+      },
     });
-    this.peer = peer;
+    this.channel = channel;
 
-    let connectedToHost = false;
-    const timeoutId = window.setTimeout(() => {
-      if (!connectedToHost) {
-        callbacks.onError('Room tidak ditemukan atau waktu koneksi habis. Pastikan kode benar.');
+    let confirmedByHost = false;
+
+    this.joinTimeoutId = window.setTimeout(() => {
+      if (!confirmedByHost) {
+        callbacks.onError(
+          'Room tidak ditemukan atau Host belum membuka room. Cek kembali kode room.'
+        );
         this.disconnect();
       }
-    }, 10000);
+    }, 7000);
 
-    peer.on('open', (id) => {
-      this.myPeerId = id;
-      const conn = peer.connect(hostPeerId, { reliable: true });
-      this.hostConnection = conn;
+    channel
+      .on('broadcast', { event: 'msg' }, ({ payload }) => {
+        const envelope = payload as BroadcastEnvelope | undefined;
+        if (!envelope || !envelope.msg) return;
+        if (envelope.to && envelope.to !== clientId) return;
 
-      conn.on('open', () => {
-        connectedToHost = true;
-        window.clearTimeout(timeoutId);
-        callbacks.onConnected(id);
-        conn.send({ type: 'JOIN_REQUEST', name: guestName } satisfies PeerMessage);
-      });
-
-      conn.on('data', (raw) => {
-        const msg = raw as PeerMessage;
-        if (!msg || typeof msg !== 'object') return;
-
+        const { msg } = envelope;
         if (msg.type === 'LOBBY_UPDATE') {
+          if (!confirmedByHost) {
+            confirmedByHost = true;
+            if (this.joinTimeoutId !== null) {
+              window.clearTimeout(this.joinTimeoutId);
+              this.joinTimeoutId = null;
+            }
+            callbacks.onConnected(clientId);
+          }
           callbacks.onLobbyUpdate(msg.roomCode, msg.players);
         } else if (msg.type === 'GAME_START') {
+          confirmedByHost = true;
+          if (this.joinTimeoutId !== null) {
+            window.clearTimeout(this.joinTimeoutId);
+            this.joinTimeoutId = null;
+          }
           callbacks.onGameStart(msg.gameState, msg.playerPeerIds);
         } else if (msg.type === 'STATE_SYNC') {
           callbacks.onStateSync(msg.gameState, msg.hasTurnSnapshot);
         } else if (msg.type === 'ERROR') {
+          if (this.joinTimeoutId !== null) {
+            window.clearTimeout(this.joinTimeoutId);
+            this.joinTimeoutId = null;
+          }
           callbacks.onError(msg.message);
         } else if (msg.type === 'HOST_CLOSED') {
           callbacks.onHostClosed();
         }
-      });
-
-      conn.on('close', () => {
-        window.clearTimeout(timeoutId);
-        if (connectedToHost) {
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        const hostLeft = Array.isArray(leftPresences)
+          ? leftPresences.some((p: any) => p?.role === 'host')
+          : false;
+        if (confirmedByHost && hostLeft) {
           callbacks.onHostClosed();
         }
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ role: 'guest', clientId });
+          channel.send({
+            type: 'broadcast',
+            event: 'msg',
+            payload: {
+              from: clientId,
+              msg: { type: 'JOIN_REQUEST', name: guestName },
+            } satisfies BroadcastEnvelope,
+          });
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          if (this.joinTimeoutId !== null) {
+            window.clearTimeout(this.joinTimeoutId);
+            this.joinTimeoutId = null;
+          }
+          callbacks.onError('Gagal terhubung ke server Supabase Realtime. Cek koneksi internet.');
+        }
       });
-
-      conn.on('error', () => {
-        window.clearTimeout(timeoutId);
-        callbacks.onError('Koneksi ke Host terputus.');
-      });
-    });
-
-    peer.on('error', (err: any) => {
-      window.clearTimeout(timeoutId);
-      if (err?.type === 'peer-unavailable') {
-        callbacks.onError('Room tidak ditemukan. Cek kembali kode room dari Host.');
-      } else {
-        callbacks.onError(err?.message || 'Gagal terhubung ke server multiplayer.');
-      }
-    });
   }
 
   sendToPeer(peerId: string, msg: PeerMessage): void {
-    const conn = this.guestConnections.get(peerId);
-    if (conn && conn.open) {
-      conn.send(msg);
-    }
+    if (!this.channel || !this.myClientId) return;
+    this.channel.send({
+      type: 'broadcast',
+      event: 'msg',
+      payload: {
+        from: this.myClientId,
+        to: peerId,
+        msg,
+      } satisfies BroadcastEnvelope,
+    });
   }
 
   broadcast(msg: PeerMessage): void {
-    for (const conn of this.guestConnections.values()) {
-      if (conn.open) {
-        conn.send(msg);
-      }
-    }
+    if (!this.channel || !this.myClientId) return;
+    this.channel.send({
+      type: 'broadcast',
+      event: 'msg',
+      payload: {
+        from: this.myClientId,
+        msg,
+      } satisfies BroadcastEnvelope,
+    });
   }
 
   sendToHost(msg: PeerMessage): void {
-    if (this.hostConnection && this.hostConnection.open) {
-      this.hostConnection.send(msg);
-    }
+    if (!this.channel || !this.myClientId) return;
+    this.channel.send({
+      type: 'broadcast',
+      event: 'msg',
+      payload: {
+        from: this.myClientId,
+        msg,
+      } satisfies BroadcastEnvelope,
+    });
   }
 }
 
-export const peerManager = new PeerManager();
+export const peerManager = new SupabaseRealtimeManager();

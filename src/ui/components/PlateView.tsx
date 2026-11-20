@@ -39,7 +39,9 @@ export const PlateView: React.FC<PlateViewProps> = ({
     return (
       <div
         className={`rounded-full border-2 border-dashed border-[#C9A46E]/60 bg-black/10 flex flex-col items-center justify-center text-xs text-[#9C6D38]/60 font-fredoka select-none ${
-          size === 'shelf' ? 'w-20 h-20 sm:w-24 sm:h-24' : 'w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32'
+          size === 'shelf'
+            ? 'w-[92px] h-[92px] sm:w-[96px] sm:h-[96px]'
+            : 'w-[98px] h-[98px] min-[390px]:w-[104px] min-[390px]:h-[104px] sm:w-[114px] sm:h-[114px] lg:w-[120px] lg:h-[120px]'
         } ${className}`}
       >
         <span>Kosong</span>
@@ -76,8 +78,8 @@ export const PlateView: React.FC<PlateViewProps> = ({
 
   const plateSizeClasses =
     size === 'shelf'
-      ? 'w-[74px] h-[74px] sm:w-[84px] sm:h-[84px]'
-      : 'w-[86px] h-[86px] sm:w-[104px] sm:h-[104px] lg:w-[116px] lg:h-[116px]';
+      ? 'w-[92px] h-[92px] sm:w-[96px] sm:h-[96px]'
+      : 'w-[98px] h-[98px] min-[390px]:w-[104px] min-[390px]:h-[104px] sm:w-[114px] sm:h-[114px] lg:w-[120px] lg:h-[120px]';
 
   return (
     <motion.div
@@ -93,21 +95,21 @@ export const PlateView: React.FC<PlateViewProps> = ({
         <div
           onClick={onFlip ? handleFlip : undefined}
           className={`absolute ${
-            size === 'shelf' ? '-top-3 sm:-top-3.5 -left-0.5' : '-top-4 sm:-top-5 -left-1 sm:left-0'
-          } z-20 flex items-center gap-0.5 sm:gap-1 ${
+            size === 'shelf' ? '-top-3 -left-0.5' : '-top-3.5 sm:-top-4.5 -left-0.5 sm:left-0'
+          } z-20 flex items-center gap-0.5 ${
             onFlip ? 'cursor-pointer group hover:scale-115 active:scale-95 transition-transform' : ''
           }`}
           title={onFlip ? 'Klik untuk membalik resep ini menjadi sayur' : `Sisi balik: ${card.resource}`}
         >
           {/* Flip Vegetable Icon (Prominent & Clear, matching reference) */}
           <div className="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)] transition-transform group-hover:rotate-6">
-            <VeggieIcon resource={card.resource} size={size === 'shelf' ? 22 : 30} />
+            <VeggieIcon resource={card.resource} size={size === 'shelf' ? 22 : 28} />
           </div>
 
           {/* Arched Arrow curving into the plate */}
           <svg
-            width={size === 'shelf' ? 18 : 26}
-            height={size === 'shelf' ? 16 : 22}
+            width={size === 'shelf' ? 18 : 24}
+            height={size === 'shelf' ? 16 : 20}
             viewBox="0 0 32 26"
             fill="none"
             className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] -ml-0.5"

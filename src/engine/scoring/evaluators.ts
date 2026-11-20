@@ -155,18 +155,23 @@ export function evaluatePerTypeAtLeast(
 
 /**
  * 7. perMissingType:
- * points for each of the 6 spice types that has count === 0.
+ * points for each of the 6 veggie types that has count === 0.
+ * Requires having at least 1 veggie card total (so 0 total veggies scores 0, preventing free instant points).
  */
 export function evaluatePerMissingType(
   resources: ResourceCounts,
   params: PerMissingTypeParams
 ): number {
+  let totalVeggies = 0;
   let missingTypes = 0;
   for (const res of ALL_RESOURCES) {
-    if ((resources[res] ?? 0) === 0) {
+    const count = resources[res] ?? 0;
+    totalVeggies += count;
+    if (count === 0) {
       missingTypes++;
     }
   }
+  if (totalVeggies === 0) return 0;
   return missingTypes * params.points;
 }
 
