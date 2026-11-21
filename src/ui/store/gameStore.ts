@@ -19,6 +19,7 @@ import {
   ReactionPayload,
   peerManager,
 } from '../../multiplayer/peerManager';
+import { createTabAwareStorage } from '../../multiplayer/sessionStorage';
 import { Sound } from '../sound/soundEffects';
 
 export interface ActionToastItem {
@@ -1327,7 +1328,7 @@ export const useGameStore = create<GameStoreState>()(
     },
     {
       name: 'point-salad-game-state',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createTabAwareStorage()),
       partialize: (state) => ({
         screen: state.mpRole !== 'none' ? state.screen : 'menu',
         roomCode: state.roomCode,

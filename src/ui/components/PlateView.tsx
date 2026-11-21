@@ -81,14 +81,19 @@ export const PlateView: React.FC<PlateViewProps> = ({
       ? 'w-[92px] h-[92px] sm:w-[96px] sm:h-[96px]'
       : 'w-[98px] h-[98px] min-[390px]:w-[104px] min-[390px]:h-[104px] sm:w-[114px] sm:h-[114px] lg:w-[120px] lg:h-[120px]';
 
+  const dragAxis = isSelectable ? true : onDragToMarket ? 'y' : false;
+  const touchActionClass =
+    size === 'shelf' ? 'touch-pan-x' : isSelectable ? 'touch-none' : 'touch-manipulation';
+
   return (
     <motion.div
-      drag={isSelectable || !!onDragToMarket}
+      drag={dragAxis}
+      dragDirectionLock={size === 'shelf'}
       dragSnapToOrigin={true}
       onDragEnd={handleDragEnd}
       whileHover={isSelectable ? { scale: 1.05 } : {}}
       whileTap={isSelectable ? { scale: 0.95 } : {}}
-      className={`relative flex flex-col items-center touch-none select-none ${className}`}
+      className={`relative flex flex-col items-center ${touchActionClass} select-none ${className}`}
     >
       {/* Top-Left: Flip-side vegetable indicator with curved arrow (matching reference image) */}
       {showFlipArrow && (

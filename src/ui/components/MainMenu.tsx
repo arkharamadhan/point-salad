@@ -194,7 +194,10 @@ export const MainMenu: React.FC = () => {
   };
 
   const isHostLobbyActive = view === 'open-room' && mpRole === 'host';
-  const isGuestLobbyActive = view === 'join-room' && mpRole === 'guest' && mpStatus === 'connected';
+  const isGuestLobbyActive =
+    view === 'join-room' &&
+    mpRole === 'guest' &&
+    (mpStatus === 'connected' || (mpStatus === 'connecting' && mpLobbyPlayers.length > 0));
 
   return (
     <div className="min-h-screen veggie-table-bg text-stone-900 flex flex-col justify-between relative overflow-hidden font-fredoka select-none">

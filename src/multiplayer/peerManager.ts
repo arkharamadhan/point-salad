@@ -1,5 +1,6 @@
 import { createClient, RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import { GameAction, GameState } from '../engine/types';
+import { getOrCreateClientId } from './sessionStorage';
 
 export interface LobbyPlayer {
   peerId: string;
@@ -45,36 +46,9 @@ interface BroadcastEnvelope {
 }
 
 const ROOM_PREFIX = 'sayur-heryana-room-';
-const CLIENT_ID_STORAGE_KEY = 'sayur-heryana-client-id';
 const HOST_RECONNECT_GRACE_MS = 15000;
-
-function getOrCreateClientId(): string {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const existing = window.localStorage.getItem(CLIENT_ID_STORAGE_KEY);
-      if (existing && existing.trim().length > 0) {
-        return existing;
-      }
-    }
-  } catch {
-    // ignore storage errors
-  }
-
-  const newId =
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `client-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(CLIENT_ID_STORAGE_KEY, newId);
-    }
-  } catch {
-    // ignore storage errors
-  }
-
-  return newId;
-}
+const JOIN_REQUEST_RETRY_MS = 1500;
+const JOIN_TIMEOUT_MS = 12000;
 
 function getSupabaseClient(): SupabaseClient | null {
   const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -128,6 +102,7 @@ class SupabaseRealtimeManager {
   private isHostMode: boolean = false;
   private activeRoomCode: string | null = null;
   private joinTimeoutId: number | null = null;
+  private joinRetryIntervalId: number | null = null;
   private hostDisconnectTimeoutId: number | null = null;
 
   private ensureClient(): SupabaseClient | null {
@@ -155,6 +130,10 @@ class SupabaseRealtimeManager {
     if (this.joinTimeoutId !== null) {
       window.clearTimeout(this.joinTimeoutId);
       this.joinTimeoutId = null;
+    }
+    if (this.joinRetryIntervalId !== null) {
+      window.clearInterval(this.joinRetryIntervalId);
+      this.joinRetryIntervalId = null;
     }
     if (this.hostDisconnectTimeoutId !== null) {
       window.clearTimeout(this.hostDisconnectTimeoutId);
@@ -290,6 +269,21 @@ class SupabaseRealtimeManager {
       }
     };
 
+    const markConfirmed = () => {
+      if (!confirmedByHost) {
+        confirmedByHost = true;
+        if (this.joinTimeoutId !== null) {
+          window.clearTimeout(this.joinTimeoutId);
+          this.joinTimeoutId = null;
+        }
+        if (this.joinRetryIntervalId !== null) {
+          window.clearInterval(this.joinRetryIntervalId);
+          this.joinRetryIntervalId = null;
+        }
+        callbacks.onConnected(clientId);
+      }
+    };
+
     const sendJoinRequest = () => {
       channel.send({
         type: 'broadcast',
@@ -308,7 +302,7 @@ class SupabaseRealtimeManager {
         );
         this.disconnect(false);
       }
-    }, 7000);
+    }, JOIN_TIMEOUT_MS);
 
     channel
       .on('broadcast', { event: 'msg' }, ({ payload }) => {
@@ -319,25 +313,11 @@ class SupabaseRealtimeManager {
         const { msg } = envelope;
         if (msg.type === 'LOBBY_UPDATE') {
           clearHostGraceTimer();
-          if (!confirmedByHost) {
-            confirmedByHost = true;
-            if (this.joinTimeoutId !== null) {
-              window.clearTimeout(this.joinTimeoutId);
-              this.joinTimeoutId = null;
-            }
-            callbacks.onConnected(clientId);
-          }
+          markConfirmed();
           callbacks.onLobbyUpdate(msg.roomCode, msg.players);
         } else if (msg.type === 'GAME_START') {
           clearHostGraceTimer();
-          if (!confirmedByHost) {
-            confirmedByHost = true;
-            if (this.joinTimeoutId !== null) {
-              window.clearTimeout(this.joinTimeoutId);
-              this.joinTimeoutId = null;
-            }
-            callbacks.onConnected(clientId);
-          }
+          markConfirmed();
           callbacks.onGameStart(
             msg.gameState,
             msg.playerPeerIds,
@@ -347,23 +327,13 @@ class SupabaseRealtimeManager {
           );
         } else if (msg.type === 'STATE_SYNC') {
           clearHostGraceTimer();
-          if (!confirmedByHost) {
-            confirmedByHost = true;
-            if (this.joinTimeoutId !== null) {
-              window.clearTimeout(this.joinTimeoutId);
-              this.joinTimeoutId = null;
-            }
-            callbacks.onConnected(clientId);
-          }
+          markConfirmed();
           callbacks.onStateSync(msg.gameState, msg.hasTurnSnapshot);
         } else if (msg.type === 'REACTION') {
           clearHostGraceTimer();
           callbacks.onReaction?.(msg.reaction);
         } else if (msg.type === 'ERROR') {
-          if (this.joinTimeoutId !== null) {
-            window.clearTimeout(this.joinTimeoutId);
-            this.joinTimeoutId = null;
-          }
+          this.clearTimers();
           callbacks.onError(msg.message);
         } else if (msg.type === 'HOST_CLOSED') {
           this.clearTimers();
@@ -376,10 +346,7 @@ class SupabaseRealtimeManager {
           : false;
         if (hostJoined) {
           clearHostGraceTimer();
-          if (confirmedByHost) {
-            // Host just returned (e.g. after refresh) — re-announce ourselves so host syncs us
-            sendJoinRequest();
-          }
+          sendJoinRequest();
         }
       })
       .on('presence', { event: 'leave' }, ({ leftPresences }) => {
@@ -398,11 +365,15 @@ class SupabaseRealtimeManager {
         if (status === 'SUBSCRIBED') {
           await channel.track({ role: 'guest', clientId });
           sendJoinRequest();
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          if (this.joinTimeoutId !== null) {
-            window.clearTimeout(this.joinTimeoutId);
-            this.joinTimeoutId = null;
+          if (this.joinRetryIntervalId === null) {
+            this.joinRetryIntervalId = window.setInterval(() => {
+              if (!confirmedByHost && this.channel === channel) {
+                sendJoinRequest();
+              }
+            }, JOIN_REQUEST_RETRY_MS);
           }
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          this.clearTimers();
           callbacks.onError('Gagal terhubung ke server Supabase Realtime. Cek koneksi internet.');
         }
       });
