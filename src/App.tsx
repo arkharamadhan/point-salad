@@ -19,7 +19,22 @@ export const App: React.FC = () => {
   // Activate keyboard navigation
   useKeyboardNav();
 
-  const { screen, gameState, setSettingsOpen, soundEnabled, musicEnabled } = useGameStore();
+  const {
+    screen,
+    gameState,
+    setSettingsOpen,
+    soundEnabled,
+    musicEnabled,
+    mpRole,
+    mpStatus,
+    mpHostDisconnected,
+    lang,
+  } = useGameStore();
+
+  // Auto-reconnect to active multiplayer room after refresh / tab reopen
+  useEffect(() => {
+    useGameStore.getState().reconnectOnlineRoom();
+  }, []);
 
   // Sync background music with sound & music settings
   useEffect(() => {
@@ -87,6 +102,22 @@ export const App: React.FC = () => {
       <div className="relative z-20 flex-shrink-0">
         <GameTopBar />
       </div>
+
+      {/* Reconnecting / Host Grace-Period Banner */}
+      {mpRole !== 'none' && (mpStatus === 'connecting' || mpHostDisconnected) && (
+        <div className="fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-amber-500 text-white font-bold text-xs sm:text-sm shadow-lg border-2 border-amber-700 flex items-center gap-2 animate-pulse">
+          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+          <span>
+            {mpHostDisconnected
+              ? lang === 'id'
+                ? 'Koneksi Host terputus, menunggu Host kembali...'
+                : 'Host disconnected, waiting for Host to return...'
+              : lang === 'id'
+                ? 'Menyambungkan kembali ke room...'
+                : 'Reconnecting to room...'}
+          </span>
+        </div>
+      )}
 
       {/* 2. MAIN CENTER ARENA: LEFT PLAYERS | BIG WOODEN CUTTING BOARD | RIGHT PLAYERS */}
       <main className="relative z-10 flex-1 min-h-0 flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-5 xl:gap-7 w-full max-w-[1380px] mx-auto px-2.5 sm:px-4 py-1">

@@ -31,6 +31,8 @@ export type PeerMessage =
       gameState: GameState;
       playerPeerIds: (string | null)[];
       seriesWins?: Record<string, number>;
+      hasTurnSnapshot?: boolean;
+      isRejoin?: boolean;
     }
   | { type: 'STATE_SYNC'; gameState: GameState; hasTurnSnapshot: boolean }
   | { type: 'ERROR'; message: string }
@@ -43,12 +45,35 @@ interface BroadcastEnvelope {
 }
 
 const ROOM_PREFIX = 'sayur-heryana-room-';
+const CLIENT_ID_STORAGE_KEY = 'sayur-heryana-client-id';
+const HOST_RECONNECT_GRACE_MS = 15000;
 
-function createClientId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
+function getOrCreateClientId(): string {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const existing = window.localStorage.getItem(CLIENT_ID_STORAGE_KEY);
+      if (existing && existing.trim().length > 0) {
+        return existing;
+      }
+    }
+  } catch {
+    // ignore storage errors
   }
-  return `client-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  const newId =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `client-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(CLIENT_ID_STORAGE_KEY, newId);
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  return newId;
 }
 
 function getSupabaseClient(): SupabaseClient | null {
@@ -84,10 +109,14 @@ interface GuestCallbacks {
   onGameStart: (
     gameState: GameState,
     playerPeerIds: (string | null)[],
-    seriesWins?: Record<string, number>
+    seriesWins?: Record<string, number>,
+    hasTurnSnapshot?: boolean,
+    isRejoin?: boolean
   ) => void;
   onStateSync: (gameState: GameState, hasTurnSnapshot: boolean) => void;
   onReaction?: (reaction: ReactionPayload) => void;
+  onHostTemporarilyLost?: () => void;
+  onHostRestored?: () => void;
   onHostClosed: () => void;
   onError: (message: string) => void;
 }
@@ -97,7 +126,9 @@ class SupabaseRealtimeManager {
   private channel: RealtimeChannel | null = null;
   private myClientId: string | null = null;
   private isHostMode: boolean = false;
+  private activeRoomCode: string | null = null;
   private joinTimeoutId: number | null = null;
+  private hostDisconnectTimeoutId: number | null = null;
 
   private ensureClient(): SupabaseClient | null {
     if (!this.supabase) {
@@ -106,19 +137,37 @@ class SupabaseRealtimeManager {
     return this.supabase;
   }
 
-  getMyPeerId(): string | null {
+  getMyPeerId(): string {
+    if (!this.myClientId) {
+      this.myClientId = getOrCreateClientId();
+    }
     return this.myClientId;
   }
 
-  disconnect(): void {
+  isActiveFor(roomCode: string, role: MultiplayerRole): boolean {
+    if (!this.channel || !this.activeRoomCode) return false;
+    const normalized = roomCode.trim().toUpperCase();
+    const expectedHost = role === 'host';
+    return this.activeRoomCode === normalized && this.isHostMode === expectedHost;
+  }
+
+  private clearTimers(): void {
     if (this.joinTimeoutId !== null) {
       window.clearTimeout(this.joinTimeoutId);
       this.joinTimeoutId = null;
     }
+    if (this.hostDisconnectTimeoutId !== null) {
+      window.clearTimeout(this.hostDisconnectTimeoutId);
+      this.hostDisconnectTimeoutId = null;
+    }
+  }
+
+  disconnect(notifyHostClosed: boolean = true): void {
+    this.clearTimers();
 
     if (this.channel) {
       const ch = this.channel;
-      if (this.isHostMode && this.myClientId) {
+      if (notifyHostClosed && this.isHostMode && this.myClientId) {
         try {
           ch.send({
             type: 'broadcast',
@@ -145,12 +194,12 @@ class SupabaseRealtimeManager {
       this.channel = null;
     }
 
-    this.myClientId = null;
+    this.activeRoomCode = null;
     this.isHostMode = false;
   }
 
   hostRoom(roomCode: string, callbacks: HostCallbacks): void {
-    this.disconnect();
+    this.disconnect(false);
     const client = this.ensureClient();
     if (!client) {
       callbacks.onError(
@@ -159,11 +208,13 @@ class SupabaseRealtimeManager {
       return;
     }
 
-    const clientId = createClientId();
+    const normalizedCode = roomCode.trim().toUpperCase();
+    const clientId = getOrCreateClientId();
     this.myClientId = clientId;
     this.isHostMode = true;
+    this.activeRoomCode = normalizedCode;
 
-    const channelName = `${ROOM_PREFIX}${roomCode.trim().toUpperCase()}`;
+    const channelName = `${ROOM_PREFIX}${normalizedCode}`;
     const channel = client.channel(channelName, {
       config: {
         broadcast: { self: false },
@@ -205,7 +256,7 @@ class SupabaseRealtimeManager {
   }
 
   joinRoom(roomCode: string, guestName: string, callbacks: GuestCallbacks): void {
-    this.disconnect();
+    this.disconnect(false);
     const client = this.ensureClient();
     if (!client) {
       callbacks.onError(
@@ -214,11 +265,13 @@ class SupabaseRealtimeManager {
       return;
     }
 
-    const clientId = createClientId();
+    const normalizedCode = roomCode.trim().toUpperCase();
+    const clientId = getOrCreateClientId();
     this.myClientId = clientId;
     this.isHostMode = false;
+    this.activeRoomCode = normalizedCode;
 
-    const channelName = `${ROOM_PREFIX}${roomCode.trim().toUpperCase()}`;
+    const channelName = `${ROOM_PREFIX}${normalizedCode}`;
     const channel = client.channel(channelName, {
       config: {
         broadcast: { self: false },
@@ -229,12 +282,31 @@ class SupabaseRealtimeManager {
 
     let confirmedByHost = false;
 
+    const clearHostGraceTimer = () => {
+      if (this.hostDisconnectTimeoutId !== null) {
+        window.clearTimeout(this.hostDisconnectTimeoutId);
+        this.hostDisconnectTimeoutId = null;
+        callbacks.onHostRestored?.();
+      }
+    };
+
+    const sendJoinRequest = () => {
+      channel.send({
+        type: 'broadcast',
+        event: 'msg',
+        payload: {
+          from: clientId,
+          msg: { type: 'JOIN_REQUEST', name: guestName },
+        } satisfies BroadcastEnvelope,
+      });
+    };
+
     this.joinTimeoutId = window.setTimeout(() => {
       if (!confirmedByHost) {
         callbacks.onError(
           'Room tidak ditemukan atau Host belum membuka room. Cek kembali kode room.'
         );
-        this.disconnect();
+        this.disconnect(false);
       }
     }, 7000);
 
@@ -246,6 +318,7 @@ class SupabaseRealtimeManager {
 
         const { msg } = envelope;
         if (msg.type === 'LOBBY_UPDATE') {
+          clearHostGraceTimer();
           if (!confirmedByHost) {
             confirmedByHost = true;
             if (this.joinTimeoutId !== null) {
@@ -256,15 +329,35 @@ class SupabaseRealtimeManager {
           }
           callbacks.onLobbyUpdate(msg.roomCode, msg.players);
         } else if (msg.type === 'GAME_START') {
-          confirmedByHost = true;
-          if (this.joinTimeoutId !== null) {
-            window.clearTimeout(this.joinTimeoutId);
-            this.joinTimeoutId = null;
+          clearHostGraceTimer();
+          if (!confirmedByHost) {
+            confirmedByHost = true;
+            if (this.joinTimeoutId !== null) {
+              window.clearTimeout(this.joinTimeoutId);
+              this.joinTimeoutId = null;
+            }
+            callbacks.onConnected(clientId);
           }
-          callbacks.onGameStart(msg.gameState, msg.playerPeerIds, msg.seriesWins);
+          callbacks.onGameStart(
+            msg.gameState,
+            msg.playerPeerIds,
+            msg.seriesWins,
+            msg.hasTurnSnapshot,
+            msg.isRejoin
+          );
         } else if (msg.type === 'STATE_SYNC') {
+          clearHostGraceTimer();
+          if (!confirmedByHost) {
+            confirmedByHost = true;
+            if (this.joinTimeoutId !== null) {
+              window.clearTimeout(this.joinTimeoutId);
+              this.joinTimeoutId = null;
+            }
+            callbacks.onConnected(clientId);
+          }
           callbacks.onStateSync(msg.gameState, msg.hasTurnSnapshot);
         } else if (msg.type === 'REACTION') {
+          clearHostGraceTimer();
           callbacks.onReaction?.(msg.reaction);
         } else if (msg.type === 'ERROR') {
           if (this.joinTimeoutId !== null) {
@@ -273,28 +366,38 @@ class SupabaseRealtimeManager {
           }
           callbacks.onError(msg.message);
         } else if (msg.type === 'HOST_CLOSED') {
+          this.clearTimers();
           callbacks.onHostClosed();
+        }
+      })
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        const hostJoined = Array.isArray(newPresences)
+          ? newPresences.some((p: any) => p?.role === 'host')
+          : false;
+        if (hostJoined) {
+          clearHostGraceTimer();
+          if (confirmedByHost) {
+            // Host just returned (e.g. after refresh) — re-announce ourselves so host syncs us
+            sendJoinRequest();
+          }
         }
       })
       .on('presence', { event: 'leave' }, ({ leftPresences }) => {
         const hostLeft = Array.isArray(leftPresences)
           ? leftPresences.some((p: any) => p?.role === 'host')
           : false;
-        if (confirmedByHost && hostLeft) {
-          callbacks.onHostClosed();
+        if (confirmedByHost && hostLeft && this.hostDisconnectTimeoutId === null) {
+          callbacks.onHostTemporarilyLost?.();
+          this.hostDisconnectTimeoutId = window.setTimeout(() => {
+            this.hostDisconnectTimeoutId = null;
+            callbacks.onHostClosed();
+          }, HOST_RECONNECT_GRACE_MS);
         }
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await channel.track({ role: 'guest', clientId });
-          channel.send({
-            type: 'broadcast',
-            event: 'msg',
-            payload: {
-              from: clientId,
-              msg: { type: 'JOIN_REQUEST', name: guestName },
-            } satisfies BroadcastEnvelope,
-          });
+          sendJoinRequest();
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           if (this.joinTimeoutId !== null) {
             window.clearTimeout(this.joinTimeoutId);

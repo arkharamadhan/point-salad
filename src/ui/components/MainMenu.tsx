@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot,
@@ -71,6 +71,8 @@ export const MainMenu: React.FC = () => {
     mpStatus,
     mpError,
     mpLobbyPlayers,
+    mpPlayerName,
+    mpHostDisconnected,
     openOnlineRoom,
     joinOnlineRoom,
     addLobbyBot,
@@ -80,8 +82,12 @@ export const MainMenu: React.FC = () => {
     clearMpError,
   } = useGameStore();
 
-  const [view, setView] = useState<MenuView>('home');
-  const [playerName, setPlayerName] = useState<string>('Pemain 1');
+  const [view, setView] = useState<MenuView>(() => {
+    if (mpRole === 'host') return 'open-room';
+    if (mpRole === 'guest') return 'join-room';
+    return 'home';
+  });
+  const [playerName, setPlayerName] = useState<string>(() => mpPlayerName || 'Pemain 1');
 
   // Bot setup state
   const [botCount, setBotCount] = useState<number>(1);
@@ -93,8 +99,20 @@ export const MainMenu: React.FC = () => {
   const [copied, setCopied] = useState<boolean>(false);
 
   // Join Room state
-  const [inputCode, setInputCode] = useState<string>('');
+  const [inputCode, setInputCode] = useState<string>(() =>
+    mpRole === 'guest' && roomCode ? roomCode : ''
+  );
   const [localJoinError, setLocalJoinError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mpRole === 'host' && view === 'home') {
+      setView('open-room');
+    } else if (mpRole === 'guest' && view === 'home') {
+      setView('join-room');
+    } else if (mpRole === 'none' && mpError && (view === 'open-room' || view === 'join-room')) {
+      setView('home');
+    }
+  }, [mpRole, mpError, view]);
 
   const isId = lang === 'id';
 
@@ -937,9 +955,13 @@ export const MainMenu: React.FC = () => {
                     <div className="py-3 px-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 font-bold text-xs flex items-center justify-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
                       <span>
-                        {isId
-                          ? 'Menunggu Host memulai permainan...'
-                          : 'Waiting for Host to start the game...'}
+                        {mpHostDisconnected
+                          ? isId
+                            ? 'Koneksi Host terputus, menunggu Host kembali...'
+                            : 'Host disconnected, waiting for Host to return...'
+                          : isId
+                            ? 'Menunggu Host memulai permainan...'
+                            : 'Waiting for Host to start the game...'}
                       </span>
                     </div>
                   </div>

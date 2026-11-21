@@ -174,6 +174,9 @@ interface GameStoreState {
   mpMyPlayerIndex: number | null;
   mpPlayerPeerIds: (string | null)[];
   mpRemoteHasSnapshot: boolean;
+  mpPlayerName: string;
+  mpSessionUpdatedAt: number | null;
+  mpHostDisconnected: boolean;
 
   // Social & Session state
   seriesWins: Record<string, number>;
@@ -191,6 +194,7 @@ interface GameStoreState {
   // Multiplayer Actions
   openOnlineRoom: (hostName: string) => void;
   joinOnlineRoom: (roomCode: string, guestName: string) => void;
+  reconnectOnlineRoom: () => void;
   addLobbyBot: () => void;
   removeLobbyPlayer: (peerId: string) => void;
   startOnlineGame: (deckSize?: DeckSizeOption, gameMode?: GameMode) => void;
@@ -230,6 +234,8 @@ interface GameStoreState {
   setShelfViewingPlayerIndex: (index: number | null) => void;
   clearError: () => void;
 }
+
+const MP_SESSION_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 const defaultSetup: SetupOptions = {
   players: [
@@ -303,6 +309,7 @@ export const useGameStore = create<GameStoreState>()(
           shelfViewingPlayerIndex: isEndTurn ? null : get().shelfViewingPlayerIndex,
           seriesWins: nextSeriesWins,
           errorMessage: null,
+          ...(mpRole !== 'none' ? { mpSessionUpdatedAt: Date.now() } : {}),
         });
 
         showToast(toast);
@@ -345,6 +352,265 @@ export const useGameStore = create<GameStoreState>()(
         }
       };
 
+      const createHostCallbacks = (code: string, cleanName: string, isReconnect: boolean) => ({
+        onReady: (hostPeerId: string) => {
+          const { mpLobbyPlayers, screen, gameState, turnSnapshot } = get();
+          if (isReconnect) {
+            const hasHost = mpLobbyPlayers.some((p) => p.isHost);
+            const updatedPlayers: LobbyPlayer[] = hasHost
+              ? mpLobbyPlayers.map((p) => (p.isHost ? { ...p, peerId: hostPeerId, name: cleanName } : p))
+              : [{ peerId: hostPeerId, name: cleanName, isHost: true }, ...mpLobbyPlayers];
+            set({
+              mpStatus: 'connected',
+              mpLobbyPlayers: updatedPlayers,
+              mpError: null,
+              mpHostDisconnected: false,
+              mpSessionUpdatedAt: Date.now(),
+            });
+            if (screen === 'menu') {
+              peerManager.broadcast({
+                type: 'LOBBY_UPDATE',
+                roomCode: code,
+                players: updatedPlayers,
+              });
+            } else {
+              peerManager.broadcast({
+                type: 'STATE_SYNC',
+                gameState,
+                hasTurnSnapshot: !!turnSnapshot,
+              });
+              const activePlayer = gameState.players[gameState.currentTurnPlayerIndex];
+              if (activePlayer?.isBot && gameState.phase !== 'game_over') {
+                setTimeout(() => {
+                  get().executeBotTurnIfNeeded();
+                }, 600);
+              }
+            }
+            return;
+          }
+
+          const initialPlayers: LobbyPlayer[] = [
+            { peerId: hostPeerId, name: cleanName, isHost: true },
+          ];
+          set({
+            mpStatus: 'connected',
+            mpLobbyPlayers: initialPlayers,
+            mpError: null,
+            mpHostDisconnected: false,
+            mpSessionUpdatedAt: Date.now(),
+          });
+        },
+        onGuestJoin: (peerId: string, guestName: string) => {
+          const {
+            mpLobbyPlayers,
+            roomCode: activeCode,
+            screen,
+            gameState,
+            mpPlayerPeerIds,
+            seriesWins,
+            turnSnapshot,
+          } = get();
+
+          if (screen === 'game') {
+            const existingIdx = mpPlayerPeerIds.indexOf(peerId);
+            if (existingIdx >= 0) {
+              peerManager.sendToPeer(peerId, {
+                type: 'GAME_START',
+                gameState,
+                playerPeerIds: mpPlayerPeerIds,
+                seriesWins,
+                hasTurnSnapshot: !!turnSnapshot,
+                isRejoin: true,
+              });
+              set({ errorMessage: null, mpSessionUpdatedAt: Date.now() });
+              return;
+            }
+            peerManager.sendToPeer(peerId, {
+              type: 'ERROR',
+              message: 'Permainan di room ini sudah dimulai.',
+            });
+            return;
+          }
+
+          const exists = mpLobbyPlayers.some((p) => p.peerId === peerId);
+          if (!exists && mpLobbyPlayers.length >= 4) {
+            peerManager.sendToPeer(peerId, {
+              type: 'ERROR',
+              message: 'Room sudah penuh (maksimal 4 pemain).',
+            });
+            return;
+          }
+
+          const cleanGuestName = guestName.trim() || `Pemain ${mpLobbyPlayers.length + 1}`;
+          const updated = exists
+            ? mpLobbyPlayers.map((p) => (p.peerId === peerId ? { ...p, name: cleanGuestName } : p))
+            : [...mpLobbyPlayers, { peerId, name: cleanGuestName, isHost: false }];
+          set({ mpLobbyPlayers: updated, mpSessionUpdatedAt: Date.now() });
+          peerManager.broadcast({
+            type: 'LOBBY_UPDATE',
+            roomCode: activeCode ?? code,
+            players: updated,
+          });
+        },
+        onGuestLeave: (peerId: string) => {
+          const { mpLobbyPlayers, roomCode: activeCode, screen } = get();
+          if (screen === 'menu') {
+            const updated = mpLobbyPlayers.filter((p) => p.peerId !== peerId);
+            set({ mpLobbyPlayers: updated });
+            peerManager.broadcast({
+              type: 'LOBBY_UPDATE',
+              roomCode: activeCode ?? code,
+              players: updated,
+            });
+          } else {
+            set({
+              errorMessage: 'Salah satu pemain terputus dari room (menunggu masuk kembali...).',
+            });
+          }
+        },
+        onGuestAction: (peerId: string, action: GameAction) => {
+          const { gameState, mpPlayerPeerIds } = get();
+          const activePeerId = mpPlayerPeerIds[gameState.currentTurnPlayerIndex];
+          if (activePeerId !== peerId) return;
+          try {
+            applyAuthoritativeAction(action);
+          } catch (err: any) {
+            peerManager.sendToPeer(peerId, {
+              type: 'ERROR',
+              message: err?.message ?? 'Aksi tidak valid.',
+            });
+          }
+        },
+        onGuestUndo: (peerId: string) => {
+          const { gameState, mpPlayerPeerIds } = get();
+          const activePeerId = mpPlayerPeerIds[gameState.currentTurnPlayerIndex];
+          if (activePeerId !== peerId) return;
+          applyAuthoritativeUndo();
+        },
+        onReaction: (reaction: ReactionPayload) => {
+          pushReaction(reaction);
+        },
+        onError: (message: string) => {
+          set({ mpStatus: 'error', mpError: message });
+        },
+      });
+
+      const createGuestCallbacks = (isReconnect: boolean) => ({
+        onConnected: () => {
+          set({
+            mpStatus: 'connected',
+            mpError: null,
+            mpHostDisconnected: false,
+            mpSessionUpdatedAt: Date.now(),
+          });
+        },
+        onLobbyUpdate: (code: string, players: LobbyPlayer[]) => {
+          set({
+            roomCode: code,
+            mpLobbyPlayers: players,
+            mpStatus: 'connected',
+            mpHostDisconnected: false,
+            mpSessionUpdatedAt: Date.now(),
+            screen: 'menu',
+          });
+        },
+        onGameStart: (
+          gameState: GameState,
+          playerPeerIds: (string | null)[],
+          incomingSeriesWins?: Record<string, number>,
+          hasTurnSnapshot?: boolean,
+          isRejoin?: boolean
+        ) => {
+          const myPeerId = peerManager.getMyPeerId();
+          const myIdx = myPeerId ? playerPeerIds.indexOf(myPeerId) : -1;
+          set({
+            gameState,
+            mpPlayerPeerIds: playerPeerIds,
+            mpMyPlayerIndex: myIdx >= 0 ? myIdx : null,
+            mpRemoteHasSnapshot: !!hasTurnSnapshot,
+            mpStatus: 'connected',
+            mpHostDisconnected: false,
+            mpSessionUpdatedAt: Date.now(),
+            selectedResourceSlots: [],
+            turnSnapshot: null,
+            inspectedPlayerIndex: null,
+            shelfViewingPlayerIndex: null,
+            seriesWins: incomingSeriesWins ?? get().seriesWins,
+            lastGameMode: gameState.gameMode ?? 'classic',
+            showPowerUpRoll: !isRejoin && gameState.gameMode === 'special',
+            actionToast: null,
+            errorMessage: null,
+            screen: 'game',
+          });
+        },
+        onStateSync: (nextState: GameState, hasTurnSnapshot: boolean) => {
+          const { gameState: prevState, lang, mpRole, mpMyPlayerIndex, seriesWins } = get();
+          const nextSeriesWins = applySeriesWinIfFinished(prevState, nextState, seriesWins);
+          const toast = buildOpponentActionToast(prevState, nextState, lang, mpRole, mpMyPlayerIndex);
+
+          set({
+            gameState: nextState,
+            mpRemoteHasSnapshot: hasTurnSnapshot,
+            mpStatus: 'connected',
+            mpHostDisconnected: false,
+            mpSessionUpdatedAt: Date.now(),
+            selectedResourceSlots: [],
+            seriesWins: nextSeriesWins,
+            errorMessage: null,
+          });
+
+          showToast(toast);
+        },
+        onReaction: (reaction: ReactionPayload) => {
+          pushReaction(reaction);
+        },
+        onHostTemporarilyLost: () => {
+          set({ mpHostDisconnected: true });
+        },
+        onHostRestored: () => {
+          set({ mpHostDisconnected: false, errorMessage: null });
+        },
+        onHostClosed: () => {
+          peerManager.disconnect(false);
+          set({
+            mpRole: 'none',
+            mpStatus: 'idle',
+            mpError: 'Host menutup room atau koneksi terputus.',
+            mpLobbyPlayers: [],
+            mpMyPlayerIndex: null,
+            mpPlayerPeerIds: [],
+            mpRemoteHasSnapshot: false,
+            mpSessionUpdatedAt: null,
+            mpHostDisconnected: false,
+            roomCode: null,
+            seriesWins: {},
+            activeReactions: [],
+            actionToast: null,
+            screen: 'menu',
+          });
+        },
+        onError: (message: string) => {
+          if (isReconnect) {
+            peerManager.disconnect(false);
+            set({
+              mpRole: 'none',
+              mpStatus: 'idle',
+              mpError: message,
+              mpLobbyPlayers: [],
+              mpMyPlayerIndex: null,
+              mpPlayerPeerIds: [],
+              mpRemoteHasSnapshot: false,
+              mpSessionUpdatedAt: null,
+              mpHostDisconnected: false,
+              roomCode: null,
+              screen: 'menu',
+            });
+            return;
+          }
+          set({ mpStatus: 'error', mpError: message });
+        },
+      });
+
       return {
         screen: 'menu',
         roomCode: null,
@@ -368,6 +634,9 @@ export const useGameStore = create<GameStoreState>()(
         mpMyPlayerIndex: null,
         mpPlayerPeerIds: [],
         mpRemoteHasSnapshot: false,
+        mpPlayerName: 'Pemain 1',
+        mpSessionUpdatedAt: null,
+        mpHostDisconnected: false,
 
         // Social & session state
         seriesWins: {},
@@ -454,6 +723,8 @@ export const useGameStore = create<GameStoreState>()(
             mpMyPlayerIndex: null,
             mpPlayerPeerIds: [],
             mpRemoteHasSnapshot: false,
+            mpSessionUpdatedAt: null,
+            mpHostDisconnected: false,
             lastDeckSize: deckSize,
             lastGameMode: gameMode,
             showPowerUpRoll: gameMode === 'special',
@@ -482,94 +753,15 @@ export const useGameStore = create<GameStoreState>()(
             mpMyPlayerIndex: 0,
             mpPlayerPeerIds: [],
             mpRemoteHasSnapshot: false,
+            mpPlayerName: cleanName,
+            mpSessionUpdatedAt: Date.now(),
+            mpHostDisconnected: false,
             seriesWins: {},
             activeReactions: [],
             actionToast: null,
           });
 
-          peerManager.hostRoom(code, {
-            onReady: (hostPeerId) => {
-              const initialPlayers: LobbyPlayer[] = [
-                { peerId: hostPeerId, name: cleanName, isHost: true },
-              ];
-              set({
-                mpStatus: 'connected',
-                mpLobbyPlayers: initialPlayers,
-                mpError: null,
-              });
-            },
-            onGuestJoin: (peerId, guestName) => {
-              const { mpLobbyPlayers, roomCode: activeCode, screen } = get();
-              if (screen === 'game') {
-                peerManager.sendToPeer(peerId, {
-                  type: 'ERROR',
-                  message: 'Permainan di room ini sudah dimulai.',
-                });
-                return;
-              }
-              if (mpLobbyPlayers.length >= 4) {
-                peerManager.sendToPeer(peerId, {
-                  type: 'ERROR',
-                  message: 'Room sudah penuh (maksimal 4 pemain).',
-                });
-                return;
-              }
-              const exists = mpLobbyPlayers.some((p) => p.peerId === peerId);
-              const updated = exists
-                ? mpLobbyPlayers
-                : [
-                    ...mpLobbyPlayers,
-                    { peerId, name: guestName.trim() || `Pemain ${mpLobbyPlayers.length + 1}`, isHost: false },
-                  ];
-              set({ mpLobbyPlayers: updated });
-              peerManager.broadcast({
-                type: 'LOBBY_UPDATE',
-                roomCode: activeCode ?? code,
-                players: updated,
-              });
-            },
-            onGuestLeave: (peerId) => {
-              const { mpLobbyPlayers, roomCode: activeCode, screen } = get();
-              if (screen === 'menu') {
-                const updated = mpLobbyPlayers.filter((p) => p.peerId !== peerId);
-                set({ mpLobbyPlayers: updated });
-                peerManager.broadcast({
-                  type: 'LOBBY_UPDATE',
-                  roomCode: activeCode ?? code,
-                  players: updated,
-                });
-              } else {
-                set({
-                  errorMessage: 'Salah satu pemain terputus dari room.',
-                });
-              }
-            },
-            onGuestAction: (peerId, action) => {
-              const { gameState, mpPlayerPeerIds } = get();
-              const activePeerId = mpPlayerPeerIds[gameState.currentTurnPlayerIndex];
-              if (activePeerId !== peerId) return;
-              try {
-                applyAuthoritativeAction(action);
-              } catch (err: any) {
-                peerManager.sendToPeer(peerId, {
-                  type: 'ERROR',
-                  message: err?.message ?? 'Aksi tidak valid.',
-                });
-              }
-            },
-            onGuestUndo: (peerId) => {
-              const { gameState, mpPlayerPeerIds } = get();
-              const activePeerId = mpPlayerPeerIds[gameState.currentTurnPlayerIndex];
-              if (activePeerId !== peerId) return;
-              applyAuthoritativeUndo();
-            },
-            onReaction: (reaction) => {
-              pushReaction(reaction);
-            },
-            onError: (message) => {
-              set({ mpStatus: 'error', mpError: message });
-            },
-          });
+          peerManager.hostRoom(code, createHostCallbacks(code, cleanName, false));
         },
 
         joinOnlineRoom: (roomCode, guestName) => {
@@ -585,81 +777,56 @@ export const useGameStore = create<GameStoreState>()(
             mpMyPlayerIndex: null,
             mpPlayerPeerIds: [],
             mpRemoteHasSnapshot: false,
+            mpPlayerName: cleanName,
+            mpSessionUpdatedAt: Date.now(),
+            mpHostDisconnected: false,
             seriesWins: {},
             activeReactions: [],
             actionToast: null,
           });
 
-          peerManager.joinRoom(cleanCode, cleanName, {
-            onConnected: () => {
-              set({ mpStatus: 'connected', mpError: null });
-            },
-            onLobbyUpdate: (code, players) => {
-              set({
-                roomCode: code,
-                mpLobbyPlayers: players,
-                mpStatus: 'connected',
-              });
-            },
-            onGameStart: (gameState, playerPeerIds, incomingSeriesWins) => {
-              const myPeerId = peerManager.getMyPeerId();
-              const myIdx = myPeerId ? playerPeerIds.indexOf(myPeerId) : -1;
-              set({
-                gameState,
-                mpPlayerPeerIds: playerPeerIds,
-                mpMyPlayerIndex: myIdx >= 0 ? myIdx : null,
-                mpRemoteHasSnapshot: false,
-                selectedResourceSlots: [],
-                turnSnapshot: null,
-                inspectedPlayerIndex: null,
-                shelfViewingPlayerIndex: null,
-                seriesWins: incomingSeriesWins ?? get().seriesWins,
-                lastGameMode: gameState.gameMode ?? 'classic',
-                showPowerUpRoll: gameState.gameMode === 'special',
-                actionToast: null,
-                errorMessage: null,
-                screen: 'game',
-              });
-            },
-            onStateSync: (nextState, hasTurnSnapshot) => {
-              const { gameState: prevState, lang, mpRole, mpMyPlayerIndex, seriesWins } = get();
-              const nextSeriesWins = applySeriesWinIfFinished(prevState, nextState, seriesWins);
-              const toast = buildOpponentActionToast(prevState, nextState, lang, mpRole, mpMyPlayerIndex);
+          peerManager.joinRoom(cleanCode, cleanName, createGuestCallbacks(false));
+        },
 
-              set({
-                gameState: nextState,
-                mpRemoteHasSnapshot: hasTurnSnapshot,
-                selectedResourceSlots: [],
-                seriesWins: nextSeriesWins,
-                errorMessage: null,
-              });
+        reconnectOnlineRoom: () => {
+          const { mpRole, roomCode, mpPlayerName, mpSessionUpdatedAt } = get();
+          if (mpRole === 'none' || !roomCode) return;
 
-              showToast(toast);
-            },
-            onReaction: (reaction) => {
-              pushReaction(reaction);
-            },
-            onHostClosed: () => {
-              peerManager.disconnect();
-              set({
-                mpRole: 'none',
-                mpStatus: 'idle',
-                mpError: 'Host menutup room atau koneksi terputus.',
-                mpLobbyPlayers: [],
-                mpMyPlayerIndex: null,
-                mpPlayerPeerIds: [],
-                mpRemoteHasSnapshot: false,
-                roomCode: null,
-                seriesWins: {},
-                activeReactions: [],
-                actionToast: null,
-                screen: 'menu',
-              });
-            },
-            onError: (message) => {
-              set({ mpStatus: 'error', mpError: message });
-            },
+          // Expire stale multiplayer sessions
+          if (mpSessionUpdatedAt && Date.now() - mpSessionUpdatedAt > MP_SESSION_TTL_MS) {
+            set({
+              screen: 'menu',
+              roomCode: null,
+              mpRole: 'none',
+              mpStatus: 'idle',
+              mpError: null,
+              mpLobbyPlayers: [],
+              mpMyPlayerIndex: null,
+              mpPlayerPeerIds: [],
+              mpRemoteHasSnapshot: false,
+              mpSessionUpdatedAt: null,
+              mpHostDisconnected: false,
+            });
+            return;
+          }
+
+          if (peerManager.isActiveFor(roomCode, mpRole)) {
+            return;
+          }
+
+          set({
+            mpStatus: 'connecting',
+            mpError: null,
+            mpHostDisconnected: false,
           });
+
+          if (mpRole === 'host') {
+            const cleanName = mpPlayerName.trim() || 'Host';
+            peerManager.hostRoom(roomCode, createHostCallbacks(roomCode, cleanName, true));
+          } else {
+            const cleanName = mpPlayerName.trim() || 'Pemain 2';
+            peerManager.joinRoom(roomCode, cleanName, createGuestCallbacks(true));
+          }
         },
 
         addLobbyBot: () => {
@@ -794,7 +961,7 @@ export const useGameStore = create<GameStoreState>()(
         },
 
         leaveOnlineRoom: () => {
-          peerManager.disconnect();
+          peerManager.disconnect(true);
           set({
             screen: 'menu',
             roomCode: null,
@@ -805,6 +972,8 @@ export const useGameStore = create<GameStoreState>()(
             mpMyPlayerIndex: null,
             mpPlayerPeerIds: [],
             mpRemoteHasSnapshot: false,
+            mpSessionUpdatedAt: null,
+            mpHostDisconnected: false,
             selectedResourceSlots: [],
             turnSnapshot: null,
             seriesWins: {},
@@ -1160,12 +1329,23 @@ export const useGameStore = create<GameStoreState>()(
       name: 'point-salad-game-state',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        screen: state.mpRole !== 'none' ? state.screen : 'menu',
+        roomCode: state.roomCode,
         gameState: state.gameState,
         selectedResourceSlots: state.selectedResourceSlots,
         lang: state.lang,
         soundEnabled: state.soundEnabled,
         musicEnabled: state.musicEnabled,
         turnSnapshot: state.turnSnapshot,
+        mpRole: state.mpRole,
+        mpPlayerName: state.mpPlayerName,
+        mpLobbyPlayers: state.mpLobbyPlayers,
+        mpMyPlayerIndex: state.mpMyPlayerIndex,
+        mpPlayerPeerIds: state.mpPlayerPeerIds,
+        mpSessionUpdatedAt: state.mpSessionUpdatedAt,
+        seriesWins: state.seriesWins,
+        lastDeckSize: state.lastDeckSize,
+        lastGameMode: state.lastGameMode,
       }),
     }
   )
